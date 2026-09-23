@@ -1,0 +1,101 @@
+jevcompat 0.1.0 · spec 0.1 · http://127.0.0.1:8000
+model sent 'jev-latest', server reports 'gliformer-large-v1' · 69 requests · 11.3s · typesafe-sdk 0.7.1
+
+§1 Transport
+  ✓ MUST   http.endpoint              POST /v1/systemone answers valid requests with 200
+  ✓ MUST   http.json                  200 bodies are JSON
+  ✓ SHOULD http.content-type          responses declare a JSON media type
+  ✓ SHOULD http.models                GET /v1/models lists models
+
+§2 Authentication
+  – MUST   auth.ignored-when-off      without auth, an Authorization header is accepted  (not exercised: the server never produced the situation it covers)
+  ✓ MUST   auth.bearer                the key is read from Authorization: Bearer
+  ✗ SHOULD auth.missing               a missing key gets 401/403 with authentication_error
+      auth: body is not {"detail": {"error_type", "message"}}: {"error":{"type":"authentication_error","message":"Missing bearer token"}}
+        → POST /v1/systemone {"questions": {"refund": {"type": "noul", "instructions": "Is the customer asking for money back?"}}, "model": "jev-latest", "state": "Hi, I was charged twice for my March invoice (order #4471) a…"}
+        ← 401 {"error":{"type":"authentication_error","message":"Missing bearer token"}}
+  ✗ SHOULD auth.invalid               a wrong key gets 401 with authentication_error
+      auth: body is not {"detail": {"error_type", "message"}}: {"error":{"type":"authentication_error","message":"Invalid API key"}}
+        → POST /v1/systemone {"questions": {"refund": {"type": "noul", "instructions": "Is the customer asking for money back?"}}, "model": "jev-latest", "state": "Hi, I was charged twice for my March invoice (order #4471) a…"}
+        ← 401 {"error":{"type":"authentication_error","message":"Invalid API key"}}
+
+§3.1 Request
+  ✓ MUST   request.state              state may be a string, object or array
+  ✓ MUST   request.model-alias        model "jev-latest" is accepted
+  ✓ MUST   request.multi              several questions of mixed types in one request
+  ✓ MUST   request.question-ids       any non-empty string is a question id
+  ✓ MUST   request.unicode            non-ASCII text is accepted and option names round-trip
+  ✓ SHOULD request.unknown-fields     unknown top-level fields are ignored
+  ✓ MUST   request.structured-text    instructions and descriptions may be objects or arrays
+
+§3.2 Noul
+  ✓ MUST   noul.criteria              noul criteria may be absent, null, two- or one-sided
+  ✓ SHOULD noul.no-instructions       a noul without instructions is accepted
+
+§3.3 Choice
+  ✓ MUST   choice.null-description    an option description may be null
+  ✗ MUST   choice.options             2 to 255 options are accepted
+      choice-options:128: valid request got 422: {"detail":[{"loc":["body","questions","queue","criteria"],"msg":"At most 64 options/levels","type":"too_long","input":null}]}
+        → POST /v1/systemone {"questions": {"queue": {"type": "choice", "instructions": "Which queue should this ticket go to?", "criteria": {"Billing": "Payments, invoices, refunds", "Queue 001": "Tickets routed to queue 1", "Queue 002": "Tickets routed to queue 2", "Queue 003": "Tickets… (5734 chars)
+        ← 422 {"detail":[{"loc":["body","questions","queue","criteria"],"msg":"At most 64 options/levels","type":"too_long","input":null}]}
+
+§3.4 Score
+  ✓ MUST   score.levels               2 to 10 levels are accepted
+  ✓ SHOULD score.map-rejected         map-form score criteria are rejected with 4xx
+
+§4.1 Response envelope
+  ✓ MUST   response.envelope          model, answers and usage are present
+  ✓ MUST   response.usage             token counts are non-negative integers
+  ✓ MUST   response.answer-ids        one answer per question id, none extra
+  ✓ MUST   response.answer-type       each answer's type matches its question
+  ✓ MUST   response.finite            no NaN or Infinity
+  ✓ SHOULD response.extensions        extra fields are prefixed x_
+
+§4.2 Noul answer
+  ✓ MUST   noul.answer                noul is a probability in [0, 1]
+
+§4.3 Choice answer
+  ✓ MUST   choice.answer              choice, probabilities and confidence are present
+  ✓ MUST   choice.probability-keys    probability keys are exactly the option names
+  ✓ MUST   choice.distribution        probabilities are in [0, 1] and sum to 1
+  ✓ MUST   choice.argmax              choice is the most probable option
+
+§4.4 Score answer
+  ✓ MUST   score.answer               score, legend, probabilities and confidence are present
+  ✓ MUST   score.legend               legend maps "0".."n-1" to the level descriptions
+  ✓ MUST   score.probability-keys     probability keys are "0".."n-1"
+  ✓ MUST   score.distribution         probabilities are in [0, 1] and sum to 1
+  ✗ MUST   score.expectation          score is the expectation of the probabilities
+      score-levels:2 answers['anger']: score is 0.9973; the probabilities give Σ i·p = 0.8640
+        → POST /v1/systemone {"questions": {"anger": {"type": "score", "instructions": "How frustrated is the customer?", "criteria": ["Calm", "Very angry"]}}, "model": "jev-latest", "state": "Hi, I was charged twice for my March invoice (order #4471) a…"}
+        ← 200 {"model":"gliformer-large-v1","answers":{"anger":{"type":"score","score":0.9973,"confidence":0.7279,"legend":{"0":"Calm","1":"Very angry"},"probabilities":{"0":0.136,"1":0.864}}},"usage":{"input_tokens":70,"output_tokens":6}}
+      score-levels:3 answers['anger']: score is 1.0124; the probabilities give Σ i·p = 1.0784
+        → POST /v1/systemone {"questions": {"anger": {"type": "score", "instructions": "How frustrated is the customer?", "criteria": ["Calm", "Frustrated", "Very angry"]}}, "model": "jev-latest", "state": "Hi, I was charged twice for my March invoice (order #4471) a…"}
+        ← 200 {"model":"gliformer-large-v1","answers":{"anger":{"type":"score","score":1.0124,"confidence":0.5479,"legend":{"0":"Calm","1":"Frustrated","2":"Very angry"},"probabilities":{"0":0.1116,"1":0.6986,"2":0.1899}}},"usage":{"input_tokens":72,"output_tokens":6}}
+      … 6 more
+
+§4.5 Confidence
+  ✓ MUST   confidence.range           confidence is in [0, 1]
+  ✓ SHOULD confidence.formula         confidence follows the reference formula
+
+§6 Errors
+  ✓ SHOULD errors.json                error bodies are JSON
+  ✓ MUST   errors.no-5xx              bad requests never get a 5xx
+  ✓ SHOULD errors.reject-invalid      invalid requests get a 4xx, not an answer
+  ✓ SHOULD errors.validation-shape    validation errors are 422 with detail[]
+  – SHOULD errors.shape               other errors carry detail.error_type and detail.message  (not exercised: the server never produced the situation it covers)
+
+§7 Semantics
+  ✓ MUST   semantics.question-id      renaming a question id does not change its answer
+  ✓ SHOULD semantics.batching         other questions in the request do not change an answer
+  ✗ SHOULD semantics.question-order   question order does not change answers
+      semantics-question-order: reversing the question order moved 'team' option 'Billing' by 0.417 on average (limit 0.050); seen in two independent rounds of 3 sends each
+        → POST /v1/systemone {"questions": {"anger": {"type": "score", "instructions": "How frustrated is the customer?", "criteria": ["Calm", "Frustrated", "Very angry"]}, "team": {"type": "choice", "instructions": "Which team should handle this ticket?", "criteria": {"Billing": "Payment… (614 chars)
+        ← 200 {"model":"gliformer-large-v1","answers":{"anger":{"type":"score","score":1.0033,"confidence":0.5805,"legend":{"0":"Calm","1":"Frustrated","2":"Very angry"},"probabilities":{"0":0.1259,"1":0.7203,"2":0.1537}},"team":{"type":"choice","choice":"Technical","confid… (431 chars)
+
+§8 Drop-in
+  ✓ MUST   dropin.sdk-python          the official Python SDK parses every answer type
+
+not conformant to spec 0.1: MUST 30/32, SHOULD 11/14
+  wrote ./results/jeff/report.json
+  wrote ./results/jeff/report.md

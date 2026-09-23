@@ -16,7 +16,47 @@
 uvx jevcompat test http://localhost:8000
 ```
 
-<!-- RESULTS -->
+<p align="center"><img src="docs/cover.png" width="720" alt="jevcompat results: of the eight most-starred Jev-compatible servers, kev and decider pass every MUST; six do not"></p>
+
+## Results: the eight most-starred open servers
+
+Measured on 2026-09-24 on an M1 Pro (16 GB), jevcompat `6a8a543`, each server at a pinned commit
+with pinned weights. Stars as of that day. Full reports, exact commands and weights:
+[`results/`](results/).
+
+| server | ★ | MUST | SHOULD | verdict | what breaks for a Jev client |
+|---|---:|---:|---:|---|---|
+| [jaredpalmer/kev](results/kev/report.md) (0.8B) | 5.8k | 32/32 | 10/12 | **conformant** | — |
+| [Mapika/decider](results/decider/report.md) (0.8B) | 338 | 32/32 | 6/12 | **conformant** | — |
+| [wfzyx/von](results/von/report.md) | 571 | 31/32 | 8/12 | not conformant | object or array `instructions` are rejected |
+| [Rizzo-AI-Academy/rizzo-flow](results/rizzo-flow/report.md) (1.7B) | 389 | 31/32 | 9/12 | not conformant | more than 26 choice options are rejected |
+| [Zefan-Cai/Open-Jev](results/open-jev/report.md) (2B) | 284 | 31/32 | 9/12 | not conformant | one-sided noul criteria are rejected |
+| [NandhaKishorM/laya](results/laya/report.md) | 20.1k | 30/32 | 6/12 | not conformant | 128 choice options are rejected; a `null` legend value the SDK cannot parse |
+| [logan-markewich/jeff](results/jeff/report.md) | 230 | 30/32 | 11/14 | not conformant | more than 64 options are rejected; `score` is not Σ i·p of its own probabilities |
+| [featherless-ai/simple-jev](results/simple-jev/report.md) (0.8B) | 499 | 29/32 | 7/12 | not conformant | `"model": "jev-latest"` is rejected; more than 50 options are rejected; `null` legend value |
+
+Across the eight:
+
+- **Two are conformant.** Every other one breaks a client written against TypeSafe's docs in
+  one to three ways.
+- **Four cannot take the documented 255 options** (they stop at 26, 50, 64, or between 64
+  and 128).
+- **`confidence` means five different things.** Five of the eight servers differ from the
+  formula TypeSafe documents:
+  - 1 − normalised entropy (laya);
+  - the top probability (decider, simple-jev);
+  - the top-two margin (von);
+  - the score spread divided by L − 1 (kev).
+
+  A 0.8 threshold tuned on one of them means something else on the next.
+- **In one server, reordering questions moves an answer:** `team` goes from Billing 0.768 to
+  0.351. Its questions share one encoder pass.
+
+Every failure was checked by hand against the recorded exchange for a jevcompat false positive
+([results/REVIEW.md](results/REVIEW.md)). Doing that on earlier builds found five bugs in
+jevcompat itself, all fixed before these runs. The SHOULD column includes jevcompat's own
+conventions (`x_` prefixes, the confidence formula); the MUST column does not.
+
 
 ## Why
 
@@ -84,10 +124,12 @@ requirement, the case, and the exchange:
 ```
 §4.4 Score answer
   ✗ MUST   score.expectation          score is the expectation of the probabilities
-      score-levels:3 answers['anger']: score is 2.000; the probabilities give Σ i·p = 1.412
-        → POST /v1/systemone {"model": "jev-latest", "state": "Hi, I was charged twice…
-        ← 200 {"model":"…","answers":{"anger":{"type":"score","score":2.0,…
+      score-levels:2 answers['anger']: score is 0.9973; the probabilities give Σ i·p = 0.8640
+        → POST /v1/systemone {"questions": {"anger": {"type": "score", "instructions": "How frustrated is the customer?", "criteria": ["Calm", "Very angry"]}}, "model": "jev-latest", …}
+        ← 200 {"model":"gliformer-large-v1","answers":{"anger":{"type":"score","score":0.9973,"confidence":0.7279,"legend":{"0":"Calm","1":"Very angry"},"probabilities":{"0":0.136,"1":0.864}}},…}
 ```
+
+(from [the jeff report](results/jeff/report.md): `score` was computed before the probabilities were tempered)
 
 ### Put a proxy in front of a server
 

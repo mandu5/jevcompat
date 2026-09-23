@@ -1,0 +1,115 @@
+jevcompat 0.1.0 · spec 0.1 · http://127.0.0.1:8000
+model sent 'jev-latest', server reports 'decider-0.8b-v1' · 62 requests · 22.0s · typesafe-sdk 0.7.1
+
+§1 Transport
+  ✓ MUST   http.endpoint              POST /v1/systemone answers valid requests with 200
+  ✓ MUST   http.json                  200 bodies are JSON
+  ✓ SHOULD http.content-type          responses declare a JSON media type
+  ✓ SHOULD http.models                GET /v1/models lists models
+
+§2 Authentication
+  ✓ MUST   auth.ignored-when-off      without auth, an Authorization header is accepted
+  – MUST   auth.bearer                the key is read from Authorization: Bearer  (no --key given (auth is off, or untested))
+  – SHOULD auth.missing               a missing key gets 401/403 with authentication_error  (no --key given (auth is off, or untested))
+  – SHOULD auth.invalid               a wrong key gets 401 with authentication_error  (no --key given (auth is off, or untested))
+
+§3.1 Request
+  ✓ MUST   request.state              state may be a string, object or array
+  ✓ MUST   request.model-alias        model "jev-latest" is accepted
+  ✓ MUST   request.multi              several questions of mixed types in one request
+  ✓ MUST   request.question-ids       any non-empty string is a question id
+  ✓ MUST   request.unicode            non-ASCII text is accepted and option names round-trip
+  ✓ SHOULD request.unknown-fields     unknown top-level fields are ignored
+  ✓ MUST   request.structured-text    instructions and descriptions may be objects or arrays
+
+§3.2 Noul
+  ✓ MUST   noul.criteria              noul criteria may be absent, null, two- or one-sided
+  ✗ SHOULD noul.no-instructions       a noul without instructions is accepted
+      noul-no-instructions: valid request got 422: {"detail":"question without instructions"}
+        → POST /v1/systemone {"questions": {"threat": {"type": "noul", "criteria": {"true": "The customer threatens a chargeback", "false": "No threat"}}}, "model": "jev-latest", "state": "Hi, I was charged twice for my March invoice (order #4471) a…"}
+        ← 422 {"detail":"question without instructions"}
+
+§3.3 Choice
+  ✓ MUST   choice.null-description    an option description may be null
+  ✓ MUST   choice.options             2 to 255 options are accepted
+
+§3.4 Score
+  ✓ MUST   score.levels               2 to 10 levels are accepted
+  ✗ SHOULD score.map-rejected         map-form score criteria are rejected with 4xx
+      invalid:score-map: invalid request was answered with 200
+        → POST /v1/systemone {"questions": {"anger": {"type": "score", "instructions": "How frustrated?", "criteria": {"0": "Calm", "1": "Frustrated", "2": "Very angry"}}}, "model": "jev-latest", "state": "Hi, I was charged twice for my March invoice (order #4471) a…"}
+        ← 200 {"model":"decider-0.8b-v1","answers":{"anger":{"type":"score","score":1.4,"confidence":0.602,"certainty":0.3809,"legend":{"0":"Calm","1":"Frustrated","2":"Very angry"},"probabilities":{"0":0.0012,"1":0.602,"2":0.3969},"level_fit":{"0":0.0011,"1":0.5697,"2":0.3… (332 chars)
+
+§4.1 Response envelope
+  ✓ MUST   response.envelope          model, answers and usage are present
+  ✓ MUST   response.usage             token counts are non-negative integers
+  ✓ MUST   response.answer-ids        one answer per question id, none extra
+  ✓ MUST   response.answer-type       each answer's type matches its question
+  ✓ MUST   response.finite            no NaN or Infinity
+  ✗ SHOULD response.extensions        extra fields are prefixed x_
+      choice-basic answers['team']: unprefixed field(s) certainty
+        → POST /v1/systemone {"questions": {"team": {"type": "choice", "instructions": "Which team should handle this ticket?", "criteria": {"Billing": "Payments, invoices, refunds", "Technical": "Bugs, outages, integrations", "Sales": "Pricing questions, upgrades, new contracts"}}}, "mod… (352 chars)
+        ← 200 {"model":"decider-0.8b-v1","answers":{"team":{"type":"choice","choice":"Billing","confidence":0.9998,"certainty":0.9979,"probabilities":{"Billing":0.9998,"Technical":0.0001,"Sales":0.0001}}},"usage":{"input_tokens":105,"output_tokens":0}}
+      choice-null-description answers['team']: unprefixed field(s) certainty
+        → POST /v1/systemone {"questions": {"team": {"type": "choice", "instructions": "Which team should handle this ticket?", "criteria": {"Billing": null, "Technical": null, "Sales": null}}}, "model": "jev-latest", "state": "Hi, I was charged twice for my March invoice (order #4471) a…… (262 chars)
+        ← 200 {"model":"decider-0.8b-v1","answers":{"team":{"type":"choice","choice":"Billing","confidence":0.9996,"certainty":0.9963,"probabilities":{"Billing":0.9996,"Technical":0.0003,"Sales":0.0001}}},"usage":{"input_tokens":83,"output_tokens":0}}
+      … 17 more
+
+§4.2 Noul answer
+  ✓ MUST   noul.answer                noul is a probability in [0, 1]
+
+§4.3 Choice answer
+  ✓ MUST   choice.answer              choice, probabilities and confidence are present
+  ✓ MUST   choice.probability-keys    probability keys are exactly the option names
+  ✓ MUST   choice.distribution        probabilities are in [0, 1] and sum to 1
+  ✓ MUST   choice.argmax              choice is the most probable option
+
+§4.4 Score answer
+  ✓ MUST   score.answer               score, legend, probabilities and confidence are present
+  ✓ MUST   score.legend               legend maps "0".."n-1" to the level descriptions
+  ✓ MUST   score.probability-keys     probability keys are "0".."n-1"
+  ✓ MUST   score.distribution         probabilities are in [0, 1] and sum to 1
+  ✓ MUST   score.expectation          score is the expectation of the probabilities
+
+§4.5 Confidence
+  ✓ MUST   confidence.range           confidence is in [0, 1]
+  ✗ SHOULD confidence.formula         confidence follows the reference formula
+      score-levels:3 answers['anger']: confidence is 0.576; the reference formulas give 0.364 (distance) or 0.364 (top probability)
+        → POST /v1/systemone {"questions": {"anger": {"type": "score", "instructions": "How frustrated is the customer?", "criteria": ["Calm", "Frustrated", "Very angry"]}}, "model": "jev-latest", "state": "Hi, I was charged twice for my March invoice (order #4471) a…"}
+        ← 200 {"model":"decider-0.8b-v1","answers":{"anger":{"type":"score","score":1.42,"confidence":0.5758,"certainty":0.3732,"legend":{"0":"Calm","1":"Frustrated","2":"Very angry"},"probabilities":{"0":0.001,"1":0.5758,"2":0.4232},"level_fit":{"0":0.001,"1":0.5604,"2":0.… (333 chars)
+      score-levels:5 answers['anger']: confidence is 0.273; the reference formulas give 0.216 (distance) or 0.092 (top probability)
+        → POST /v1/systemone {"questions": {"anger": {"type": "score", "instructions": "How frustrated is the customer?", "criteria": ["Level 0: calm", "Level 1: angrier", "Level 2: angrier", "Level 3: angrier", "Level 4: angrier"]}}, "model": "jev-latest", "state": "Hi, I was charged twi… (302 chars)
+        ← 200 {"model":"decider-0.8b-v1","answers":{"anger":{"type":"score","score":2.45,"confidence":0.2734,"certainty":0.1399,"legend":{"0":"Level 0: calm","1":"Level 1: angrier","2":"Level 2: angrier","3":"Level 3: angrier","4":"Level 4: angrier"},"probabilities":{"0":0.… (446 chars)
+      … 6 more
+
+§6 Errors
+  ✓ SHOULD errors.json                error bodies are JSON
+  ✓ MUST   errors.no-5xx              bad requests never get a 5xx
+  ✗ SHOULD errors.reject-invalid      invalid requests get a 4xx, not an answer
+      invalid:empty-questions: invalid request was answered with 200
+        → POST /v1/systemone {"questions": {}, "model": "jev-latest", "state": "Hi, I was charged twice for my March invoice (order #4471) a…"}
+        ← 200 {"model":"decider-0.8b-v1","answers":{},"usage":{"input_tokens":0,"output_tokens":0}}
+      invalid:score-map: invalid request was answered with 200
+        → POST /v1/systemone {"questions": {"anger": {"type": "score", "instructions": "How frustrated?", "criteria": {"0": "Calm", "1": "Frustrated", "2": "Very angry"}}}, "model": "jev-latest", "state": "Hi, I was charged twice for my March invoice (order #4471) a…"}
+        ← 200 {"model":"decider-0.8b-v1","answers":{"anger":{"type":"score","score":1.4,"confidence":0.602,"certainty":0.3809,"legend":{"0":"Calm","1":"Frustrated","2":"Very angry"},"probabilities":{"0":0.0012,"1":0.602,"2":0.3969},"level_fit":{"0":0.0011,"1":0.5697,"2":0.3… (332 chars)
+  ✗ SHOULD errors.validation-shape    validation errors are 422 with detail[]
+      invalid:missing-type: body is not {"detail": [{"loc": ["body", …], "msg", "type"}]}: {"detail":"choice criteria: a map of 2..255 options"}
+        → POST /v1/systemone {"questions": {"refund": {"instructions": "Refund?"}}, "model": "jev-latest", "state": "Hi, I was charged twice for my March invoice (order #4471) a…"}
+        ← 422 {"detail":"choice criteria: a map of 2..255 options"}
+      invalid:type-boolean: body is not {"detail": [{"loc": ["body", …], "msg", "type"}]}: {"detail":"unknown question type 'boolean'"}
+        → POST /v1/systemone {"questions": {"refund": {"type": "boolean", "instructions": "Refund?"}}, "model": "jev-latest", "state": "Hi, I was charged twice for my March invoice (order #4471) a…"}
+        ← 422 {"detail":"unknown question type 'boolean'"}
+      … 5 more
+  – SHOULD errors.shape               other errors carry detail.error_type and detail.message  (not exercised: the server never produced the situation it covers)
+
+§7 Semantics
+  ✓ MUST   semantics.question-id      renaming a question id does not change its answer
+  ✓ SHOULD semantics.batching         other questions in the request do not change an answer
+  ✓ SHOULD semantics.question-order   question order does not change answers
+
+§8 Drop-in
+  ✓ MUST   dropin.sdk-python          the official Python SDK parses every answer type
+
+conformant to spec 0.1: MUST 32/32, SHOULD 6/12
+  wrote ./results/decider/report.json
+  wrote ./results/decider/report.md

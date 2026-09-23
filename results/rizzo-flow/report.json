@@ -1,0 +1,3009 @@
+{
+  "url": "http://127.0.0.1:8017",
+  "model": "jev-latest",
+  "spec_version": "0.1",
+  "tool_version": "0.1.0",
+  "started": "2026-09-23T23:20:46+00:00",
+  "seconds": 11.3,
+  "results": [
+    {
+      "id": "http.endpoint",
+      "level": "MUST",
+      "section": "1",
+      "title": "POST /v1/systemone answers valid requests with 200",
+      "status": "pass",
+      "findings": [],
+      "cases": [
+        "choice-ambiguous",
+        "choice-basic",
+        "choice-null-description",
+        "choice-options:2",
+        "choice-options:26",
+        "multi-question",
+        "noul-basic",
+        "noul-criteria:both",
+        "noul-criteria:false-only",
+        "noul-criteria:null",
+        "noul-criteria:true-only",
+        "question-ids:q.2",
+        "question-ids:ticket-1",
+        "question-ids:with space",
+        "question-ids:질문",
+        "question-ids:🎯",
+        "score-levels:10",
+        "score-levels:2",
+        "score-levels:3",
+        "score-levels:5",
+        "state-types:array",
+        "state-types:object",
+        "state-types:string",
+        "structured-text:choice",
+        "structured-text:noul",
+        "structured-text:score",
+        "unicode"
+      ],
+      "reason": ""
+    },
+    {
+      "id": "http.json",
+      "level": "MUST",
+      "section": "1",
+      "title": "200 bodies are JSON",
+      "status": "pass",
+      "findings": [],
+      "cases": [
+        "choice-ambiguous",
+        "choice-basic",
+        "choice-null-description",
+        "choice-options:2",
+        "choice-options:26",
+        "multi-question",
+        "noul-basic",
+        "noul-criteria:both",
+        "noul-criteria:false-only",
+        "noul-criteria:null",
+        "noul-criteria:true-only",
+        "question-ids:q.2",
+        "question-ids:ticket-1",
+        "question-ids:with space",
+        "question-ids:질문",
+        "question-ids:🎯",
+        "score-levels:10",
+        "score-levels:2",
+        "score-levels:3",
+        "score-levels:5",
+        "state-types:array",
+        "state-types:object",
+        "state-types:string",
+        "structured-text:choice",
+        "structured-text:noul",
+        "structured-text:score",
+        "unicode"
+      ],
+      "reason": ""
+    },
+    {
+      "id": "http.content-type",
+      "level": "SHOULD",
+      "section": "1",
+      "title": "responses declare a JSON media type",
+      "status": "pass",
+      "findings": [],
+      "cases": [
+        "choice-ambiguous",
+        "choice-basic",
+        "choice-null-description",
+        "choice-options:2",
+        "choice-options:26",
+        "invalid:choice-no-options",
+        "invalid:empty-questions",
+        "invalid:missing-questions",
+        "invalid:missing-state",
+        "invalid:missing-type",
+        "invalid:not-json",
+        "invalid:score-map",
+        "invalid:type-boolean",
+        "multi-question",
+        "noul-basic",
+        "noul-criteria:both",
+        "noul-criteria:false-only",
+        "noul-criteria:null",
+        "noul-criteria:true-only",
+        "out-of-range:choice-1",
+        "out-of-range:choice-256",
+        "out-of-range:score-1",
+        "out-of-range:score-11",
+        "out-of-range:score-null-level",
+        "out-of-range:state-null",
+        "question-ids:q.2",
+        "question-ids:ticket-1",
+        "question-ids:with space",
+        "question-ids:질문",
+        "question-ids:🎯",
+        "score-levels:10",
+        "score-levels:2",
+        "score-levels:3",
+        "score-levels:5",
+        "state-types:array",
+        "state-types:object",
+        "state-types:string",
+        "structured-text:choice",
+        "structured-text:noul",
+        "structured-text:score",
+        "unicode",
+        "unknown-model"
+      ],
+      "reason": ""
+    },
+    {
+      "id": "http.models",
+      "level": "SHOULD",
+      "section": "1",
+      "title": "GET /v1/models lists models",
+      "status": "pass",
+      "findings": [],
+      "cases": [
+        "models-endpoint"
+      ],
+      "reason": ""
+    },
+    {
+      "id": "auth.ignored-when-off",
+      "level": "MUST",
+      "section": "2",
+      "title": "without auth, an Authorization header is accepted",
+      "status": "pass",
+      "findings": [],
+      "cases": [
+        "preflight"
+      ],
+      "reason": ""
+    },
+    {
+      "id": "auth.bearer",
+      "level": "MUST",
+      "section": "2",
+      "title": "the key is read from Authorization: Bearer",
+      "status": "skip",
+      "findings": [],
+      "cases": [],
+      "reason": "no --key given (auth is off, or untested)"
+    },
+    {
+      "id": "auth.missing",
+      "level": "SHOULD",
+      "section": "2",
+      "title": "a missing key gets 401/403 with authentication_error",
+      "status": "skip",
+      "findings": [],
+      "cases": [],
+      "reason": "no --key given (auth is off, or untested)"
+    },
+    {
+      "id": "auth.invalid",
+      "level": "SHOULD",
+      "section": "2",
+      "title": "a wrong key gets 401 with authentication_error",
+      "status": "skip",
+      "findings": [],
+      "cases": [],
+      "reason": "no --key given (auth is off, or untested)"
+    },
+    {
+      "id": "request.state",
+      "level": "MUST",
+      "section": "3.1",
+      "title": "state may be a string, object or array",
+      "status": "pass",
+      "findings": [],
+      "cases": [
+        "state-types:array",
+        "state-types:object",
+        "state-types:string"
+      ],
+      "reason": ""
+    },
+    {
+      "id": "request.model-alias",
+      "level": "MUST",
+      "section": "3.1",
+      "title": "model \"jev-latest\" is accepted",
+      "status": "pass",
+      "findings": [],
+      "cases": [
+        "model-alias"
+      ],
+      "reason": ""
+    },
+    {
+      "id": "request.multi",
+      "level": "MUST",
+      "section": "3.1",
+      "title": "several questions of mixed types in one request",
+      "status": "pass",
+      "findings": [],
+      "cases": [
+        "multi-question"
+      ],
+      "reason": ""
+    },
+    {
+      "id": "request.question-ids",
+      "level": "MUST",
+      "section": "3.1",
+      "title": "any non-empty string is a question id",
+      "status": "pass",
+      "findings": [],
+      "cases": [
+        "question-ids:q.2",
+        "question-ids:ticket-1",
+        "question-ids:with space",
+        "question-ids:질문",
+        "question-ids:🎯"
+      ],
+      "reason": ""
+    },
+    {
+      "id": "request.unicode",
+      "level": "MUST",
+      "section": "3.1",
+      "title": "non-ASCII text is accepted and option names round-trip",
+      "status": "pass",
+      "findings": [],
+      "cases": [
+        "unicode"
+      ],
+      "reason": ""
+    },
+    {
+      "id": "request.unknown-fields",
+      "level": "SHOULD",
+      "section": "3.1",
+      "title": "unknown top-level fields are ignored",
+      "status": "fail",
+      "findings": [
+        {
+          "req": "request.unknown-fields",
+          "message": "valid request got 422: {\"detail\":[{\"type\":\"extra_forbidden\",\"loc\":[\"body\",\"x_trace_id\"],\"msg\":\"Extra inputs are not permitted\",\"input\":\"jevcompat\"},{\"type\":\"extra_forbidden\",\"loc\":[\"body\",\"seed\"],\"msg\":\"Extra inputs are not… (224 bytes)",
+          "where": "",
+          "case": "unknown-fields",
+          "exchange": 31,
+          "tag": ""
+        }
+      ],
+      "cases": [
+        "unknown-fields"
+      ],
+      "reason": ""
+    },
+    {
+      "id": "request.structured-text",
+      "level": "MUST",
+      "section": "3.1",
+      "title": "instructions and descriptions may be objects or arrays",
+      "status": "pass",
+      "findings": [],
+      "cases": [
+        "structured-text:choice",
+        "structured-text:noul",
+        "structured-text:score"
+      ],
+      "reason": ""
+    },
+    {
+      "id": "noul.criteria",
+      "level": "MUST",
+      "section": "3.2",
+      "title": "noul criteria may be absent, null, two- or one-sided",
+      "status": "pass",
+      "findings": [],
+      "cases": [
+        "noul-criteria:both",
+        "noul-criteria:false-only",
+        "noul-criteria:null",
+        "noul-criteria:true-only"
+      ],
+      "reason": ""
+    },
+    {
+      "id": "noul.no-instructions",
+      "level": "SHOULD",
+      "section": "3.2",
+      "title": "a noul without instructions is accepted",
+      "status": "fail",
+      "findings": [
+        {
+          "req": "noul.no-instructions",
+          "message": "valid request got 422: {\"detail\":[{\"type\":\"missing\",\"loc\":[\"body\",\"questions\",\"threat\",\"noul\",\"instructions\"],\"msg\":\"Field required\",\"input\":{\"type\":\"noul\",\"criteria\":{\"true\":\"The customer threatens a chargeback\",\"false\":\"N… (214 bytes)",
+          "where": "",
+          "case": "noul-no-instructions",
+          "exchange": 7,
+          "tag": ""
+        }
+      ],
+      "cases": [
+        "noul-no-instructions"
+      ],
+      "reason": ""
+    },
+    {
+      "id": "choice.null-description",
+      "level": "MUST",
+      "section": "3.3",
+      "title": "an option description may be null",
+      "status": "pass",
+      "findings": [],
+      "cases": [
+        "choice-null-description"
+      ],
+      "reason": ""
+    },
+    {
+      "id": "choice.options",
+      "level": "MUST",
+      "section": "3.3",
+      "title": "2 to 255 options are accepted",
+      "status": "fail",
+      "findings": [
+        {
+          "req": "choice.options",
+          "message": "valid request got 422: {\"detail\":[{\"type\":\"too_long\",\"loc\":[\"body\",\"questions\",\"queue\",\"choice\",\"criteria\"],\"msg\":\"Dictionary should have at most 26 items after validation, not 64\",\"input\":{\"Billing\":\"Payments, invoices, re… (2853 bytes)",
+          "where": "",
+          "case": "choice-options:64",
+          "exchange": 12,
+          "tag": ""
+        }
+      ],
+      "cases": [
+        "choice-basic",
+        "choice-options:2",
+        "choice-options:26",
+        "choice-options:64"
+      ],
+      "reason": ""
+    },
+    {
+      "id": "score.levels",
+      "level": "MUST",
+      "section": "3.4",
+      "title": "2 to 10 levels are accepted",
+      "status": "pass",
+      "findings": [],
+      "cases": [
+        "score-levels:10",
+        "score-levels:2",
+        "score-levels:3",
+        "score-levels:5"
+      ],
+      "reason": ""
+    },
+    {
+      "id": "score.map-rejected",
+      "level": "SHOULD",
+      "section": "3.4",
+      "title": "map-form score criteria are rejected with 4xx",
+      "status": "pass",
+      "findings": [],
+      "cases": [
+        "invalid:score-map"
+      ],
+      "reason": ""
+    },
+    {
+      "id": "response.envelope",
+      "level": "MUST",
+      "section": "4.1",
+      "title": "model, answers and usage are present",
+      "status": "pass",
+      "findings": [],
+      "cases": [
+        "choice-ambiguous",
+        "choice-basic",
+        "choice-null-description",
+        "choice-options:2",
+        "choice-options:26",
+        "multi-question",
+        "noul-basic",
+        "noul-criteria:both",
+        "noul-criteria:false-only",
+        "noul-criteria:null",
+        "noul-criteria:true-only",
+        "question-ids:q.2",
+        "question-ids:ticket-1",
+        "question-ids:with space",
+        "question-ids:질문",
+        "question-ids:🎯",
+        "score-levels:10",
+        "score-levels:2",
+        "score-levels:3",
+        "score-levels:5",
+        "state-types:array",
+        "state-types:object",
+        "state-types:string",
+        "structured-text:choice",
+        "structured-text:noul",
+        "structured-text:score",
+        "unicode"
+      ],
+      "reason": ""
+    },
+    {
+      "id": "response.usage",
+      "level": "MUST",
+      "section": "4.1",
+      "title": "token counts are non-negative integers",
+      "status": "pass",
+      "findings": [],
+      "cases": [
+        "choice-ambiguous",
+        "choice-basic",
+        "choice-null-description",
+        "choice-options:2",
+        "choice-options:26",
+        "multi-question",
+        "noul-basic",
+        "noul-criteria:both",
+        "noul-criteria:false-only",
+        "noul-criteria:null",
+        "noul-criteria:true-only",
+        "question-ids:q.2",
+        "question-ids:ticket-1",
+        "question-ids:with space",
+        "question-ids:질문",
+        "question-ids:🎯",
+        "score-levels:10",
+        "score-levels:2",
+        "score-levels:3",
+        "score-levels:5",
+        "state-types:array",
+        "state-types:object",
+        "state-types:string",
+        "structured-text:choice",
+        "structured-text:noul",
+        "structured-text:score",
+        "unicode"
+      ],
+      "reason": ""
+    },
+    {
+      "id": "response.answer-ids",
+      "level": "MUST",
+      "section": "4.1",
+      "title": "one answer per question id, none extra",
+      "status": "pass",
+      "findings": [],
+      "cases": [
+        "choice-ambiguous",
+        "choice-basic",
+        "choice-null-description",
+        "choice-options:2",
+        "choice-options:26",
+        "multi-question",
+        "noul-basic",
+        "noul-criteria:both",
+        "noul-criteria:false-only",
+        "noul-criteria:null",
+        "noul-criteria:true-only",
+        "question-ids:q.2",
+        "question-ids:ticket-1",
+        "question-ids:with space",
+        "question-ids:질문",
+        "question-ids:🎯",
+        "score-levels:10",
+        "score-levels:2",
+        "score-levels:3",
+        "score-levels:5",
+        "state-types:array",
+        "state-types:object",
+        "state-types:string",
+        "structured-text:choice",
+        "structured-text:noul",
+        "structured-text:score",
+        "unicode"
+      ],
+      "reason": ""
+    },
+    {
+      "id": "response.answer-type",
+      "level": "MUST",
+      "section": "4.1",
+      "title": "each answer's type matches its question",
+      "status": "pass",
+      "findings": [],
+      "cases": [
+        "choice-ambiguous",
+        "choice-basic",
+        "choice-null-description",
+        "choice-options:2",
+        "choice-options:26",
+        "multi-question",
+        "noul-basic",
+        "noul-criteria:both",
+        "noul-criteria:false-only",
+        "noul-criteria:null",
+        "noul-criteria:true-only",
+        "question-ids:q.2",
+        "question-ids:ticket-1",
+        "question-ids:with space",
+        "question-ids:질문",
+        "question-ids:🎯",
+        "score-levels:10",
+        "score-levels:2",
+        "score-levels:3",
+        "score-levels:5",
+        "state-types:array",
+        "state-types:object",
+        "state-types:string",
+        "structured-text:choice",
+        "structured-text:noul",
+        "structured-text:score",
+        "unicode"
+      ],
+      "reason": ""
+    },
+    {
+      "id": "response.finite",
+      "level": "MUST",
+      "section": "4.1",
+      "title": "no NaN or Infinity",
+      "status": "pass",
+      "findings": [],
+      "cases": [
+        "choice-ambiguous",
+        "choice-basic",
+        "choice-null-description",
+        "choice-options:2",
+        "choice-options:26",
+        "multi-question",
+        "noul-basic",
+        "noul-criteria:both",
+        "noul-criteria:false-only",
+        "noul-criteria:null",
+        "noul-criteria:true-only",
+        "question-ids:q.2",
+        "question-ids:ticket-1",
+        "question-ids:with space",
+        "question-ids:질문",
+        "question-ids:🎯",
+        "score-levels:10",
+        "score-levels:2",
+        "score-levels:3",
+        "score-levels:5",
+        "state-types:array",
+        "state-types:object",
+        "state-types:string",
+        "structured-text:choice",
+        "structured-text:noul",
+        "structured-text:score",
+        "unicode"
+      ],
+      "reason": ""
+    },
+    {
+      "id": "response.extensions",
+      "level": "SHOULD",
+      "section": "4.1",
+      "title": "extra fields are prefixed x_",
+      "status": "pass",
+      "findings": [],
+      "cases": [
+        "choice-ambiguous",
+        "choice-basic",
+        "choice-null-description",
+        "choice-options:2",
+        "choice-options:26",
+        "multi-question",
+        "noul-basic",
+        "noul-criteria:both",
+        "noul-criteria:false-only",
+        "noul-criteria:null",
+        "noul-criteria:true-only",
+        "question-ids:q.2",
+        "question-ids:ticket-1",
+        "question-ids:with space",
+        "question-ids:질문",
+        "question-ids:🎯",
+        "score-levels:10",
+        "score-levels:2",
+        "score-levels:3",
+        "score-levels:5",
+        "state-types:array",
+        "state-types:object",
+        "state-types:string",
+        "structured-text:choice",
+        "structured-text:noul",
+        "structured-text:score",
+        "unicode"
+      ],
+      "reason": ""
+    },
+    {
+      "id": "noul.answer",
+      "level": "MUST",
+      "section": "4.2",
+      "title": "noul is a probability in [0, 1]",
+      "status": "pass",
+      "findings": [],
+      "cases": [
+        "multi-question",
+        "noul-basic",
+        "noul-criteria:both",
+        "noul-criteria:false-only",
+        "noul-criteria:null",
+        "noul-criteria:true-only",
+        "question-ids:q.2",
+        "question-ids:ticket-1",
+        "question-ids:with space",
+        "question-ids:질문",
+        "question-ids:🎯",
+        "state-types:array",
+        "state-types:object",
+        "state-types:string",
+        "structured-text:noul"
+      ],
+      "reason": ""
+    },
+    {
+      "id": "choice.answer",
+      "level": "MUST",
+      "section": "4.3",
+      "title": "choice, probabilities and confidence are present",
+      "status": "pass",
+      "findings": [],
+      "cases": [
+        "choice-ambiguous",
+        "choice-basic",
+        "choice-null-description",
+        "choice-options:2",
+        "choice-options:26",
+        "multi-question",
+        "structured-text:choice",
+        "unicode"
+      ],
+      "reason": ""
+    },
+    {
+      "id": "choice.probability-keys",
+      "level": "MUST",
+      "section": "4.3",
+      "title": "probability keys are exactly the option names",
+      "status": "pass",
+      "findings": [],
+      "cases": [
+        "choice-ambiguous",
+        "choice-basic",
+        "choice-null-description",
+        "choice-options:2",
+        "choice-options:26",
+        "multi-question",
+        "structured-text:choice",
+        "unicode"
+      ],
+      "reason": ""
+    },
+    {
+      "id": "choice.distribution",
+      "level": "MUST",
+      "section": "4.3",
+      "title": "probabilities are in [0, 1] and sum to 1",
+      "status": "pass",
+      "findings": [],
+      "cases": [
+        "choice-ambiguous",
+        "choice-basic",
+        "choice-null-description",
+        "choice-options:2",
+        "choice-options:26",
+        "multi-question",
+        "structured-text:choice",
+        "unicode"
+      ],
+      "reason": ""
+    },
+    {
+      "id": "choice.argmax",
+      "level": "MUST",
+      "section": "4.3",
+      "title": "choice is the most probable option",
+      "status": "pass",
+      "findings": [],
+      "cases": [
+        "choice-ambiguous",
+        "choice-basic",
+        "choice-null-description",
+        "choice-options:2",
+        "choice-options:26",
+        "multi-question",
+        "structured-text:choice",
+        "unicode"
+      ],
+      "reason": ""
+    },
+    {
+      "id": "score.answer",
+      "level": "MUST",
+      "section": "4.4",
+      "title": "score, legend, probabilities and confidence are present",
+      "status": "pass",
+      "findings": [],
+      "cases": [
+        "choice-ambiguous",
+        "multi-question",
+        "score-levels:10",
+        "score-levels:2",
+        "score-levels:3",
+        "score-levels:5",
+        "structured-text:score"
+      ],
+      "reason": ""
+    },
+    {
+      "id": "score.legend",
+      "level": "MUST",
+      "section": "4.4",
+      "title": "legend maps \"0\"..\"n-1\" to the level descriptions",
+      "status": "pass",
+      "findings": [],
+      "cases": [
+        "choice-ambiguous",
+        "multi-question",
+        "score-levels:10",
+        "score-levels:2",
+        "score-levels:3",
+        "score-levels:5",
+        "structured-text:score"
+      ],
+      "reason": ""
+    },
+    {
+      "id": "score.probability-keys",
+      "level": "MUST",
+      "section": "4.4",
+      "title": "probability keys are \"0\"..\"n-1\"",
+      "status": "pass",
+      "findings": [],
+      "cases": [
+        "choice-ambiguous",
+        "multi-question",
+        "score-levels:10",
+        "score-levels:2",
+        "score-levels:3",
+        "score-levels:5",
+        "structured-text:score"
+      ],
+      "reason": ""
+    },
+    {
+      "id": "score.distribution",
+      "level": "MUST",
+      "section": "4.4",
+      "title": "probabilities are in [0, 1] and sum to 1",
+      "status": "pass",
+      "findings": [],
+      "cases": [
+        "choice-ambiguous",
+        "multi-question",
+        "score-levels:10",
+        "score-levels:2",
+        "score-levels:3",
+        "score-levels:5",
+        "structured-text:score"
+      ],
+      "reason": ""
+    },
+    {
+      "id": "score.expectation",
+      "level": "MUST",
+      "section": "4.4",
+      "title": "score is the expectation of the probabilities",
+      "status": "pass",
+      "findings": [],
+      "cases": [
+        "choice-ambiguous",
+        "multi-question",
+        "score-levels:10",
+        "score-levels:2",
+        "score-levels:3",
+        "score-levels:5",
+        "structured-text:score"
+      ],
+      "reason": ""
+    },
+    {
+      "id": "confidence.range",
+      "level": "MUST",
+      "section": "4.5",
+      "title": "confidence is in [0, 1]",
+      "status": "pass",
+      "findings": [],
+      "cases": [
+        "choice-ambiguous",
+        "choice-basic",
+        "choice-null-description",
+        "choice-options:2",
+        "choice-options:26",
+        "multi-question",
+        "score-levels:10",
+        "score-levels:2",
+        "score-levels:3",
+        "score-levels:5",
+        "structured-text:choice",
+        "structured-text:score",
+        "unicode"
+      ],
+      "reason": ""
+    },
+    {
+      "id": "confidence.formula",
+      "level": "SHOULD",
+      "section": "4.5",
+      "title": "confidence follows the reference formula",
+      "status": "pass",
+      "findings": [],
+      "cases": [
+        "choice-ambiguous",
+        "choice-basic",
+        "choice-null-description",
+        "choice-options:2",
+        "choice-options:26",
+        "multi-question",
+        "score-levels:10",
+        "score-levels:2",
+        "score-levels:3",
+        "score-levels:5",
+        "structured-text:choice",
+        "structured-text:score",
+        "unicode"
+      ],
+      "reason": ""
+    },
+    {
+      "id": "errors.json",
+      "level": "SHOULD",
+      "section": "6",
+      "title": "error bodies are JSON",
+      "status": "pass",
+      "findings": [],
+      "cases": [
+        "invalid:choice-no-options",
+        "invalid:empty-questions",
+        "invalid:missing-questions",
+        "invalid:missing-state",
+        "invalid:missing-type",
+        "invalid:not-json",
+        "invalid:score-map",
+        "invalid:type-boolean",
+        "out-of-range:choice-1",
+        "out-of-range:choice-256",
+        "out-of-range:score-1",
+        "out-of-range:score-11",
+        "out-of-range:score-null-level",
+        "out-of-range:state-null",
+        "unknown-model"
+      ],
+      "reason": ""
+    },
+    {
+      "id": "errors.no-5xx",
+      "level": "MUST",
+      "section": "6",
+      "title": "bad requests never get a 5xx",
+      "status": "pass",
+      "findings": [],
+      "cases": [
+        "invalid:choice-no-options",
+        "invalid:empty-questions",
+        "invalid:missing-questions",
+        "invalid:missing-state",
+        "invalid:missing-type",
+        "invalid:not-json",
+        "invalid:score-map",
+        "invalid:type-boolean",
+        "out-of-range:choice-1",
+        "out-of-range:choice-256",
+        "out-of-range:score-1",
+        "out-of-range:score-11",
+        "out-of-range:score-null-level",
+        "out-of-range:state-null",
+        "unknown-model"
+      ],
+      "reason": ""
+    },
+    {
+      "id": "errors.reject-invalid",
+      "level": "SHOULD",
+      "section": "6",
+      "title": "invalid requests get a 4xx, not an answer",
+      "status": "pass",
+      "findings": [],
+      "cases": [
+        "invalid:choice-no-options",
+        "invalid:empty-questions",
+        "invalid:missing-questions",
+        "invalid:missing-state",
+        "invalid:missing-type",
+        "invalid:not-json",
+        "invalid:score-map",
+        "invalid:type-boolean"
+      ],
+      "reason": ""
+    },
+    {
+      "id": "errors.validation-shape",
+      "level": "SHOULD",
+      "section": "6",
+      "title": "validation errors are 422 with detail[]",
+      "status": "fail",
+      "findings": [
+        {
+          "req": "errors.validation-shape",
+          "message": "body is not {\"detail\": [{\"loc\": [\"body\", …], \"msg\", \"type\"}]}: {\"detail\":\"Unknown model 'jevcompat-no-such-model'. Use 'rizzo-latest', 'rizzo-spark-x2.5-1.7b-q8_0' or a jev-* alias.\"}",
+          "where": "",
+          "case": "unknown-model",
+          "exchange": 46,
+          "tag": ""
+        }
+      ],
+      "cases": [
+        "invalid:choice-no-options",
+        "invalid:empty-questions",
+        "invalid:missing-questions",
+        "invalid:missing-state",
+        "invalid:missing-type",
+        "invalid:not-json",
+        "invalid:score-map",
+        "invalid:type-boolean",
+        "out-of-range:choice-1",
+        "out-of-range:choice-256",
+        "out-of-range:score-1",
+        "out-of-range:score-11",
+        "out-of-range:score-null-level",
+        "out-of-range:state-null",
+        "unknown-model"
+      ],
+      "reason": ""
+    },
+    {
+      "id": "errors.shape",
+      "level": "SHOULD",
+      "section": "6",
+      "title": "other errors carry detail.error_type and detail.message",
+      "status": "skip",
+      "findings": [],
+      "cases": [],
+      "reason": "not exercised: the server never produced the situation it covers"
+    },
+    {
+      "id": "semantics.question-id",
+      "level": "MUST",
+      "section": "7",
+      "title": "renaming a question id does not change its answer",
+      "status": "pass",
+      "findings": [],
+      "cases": [
+        "semantics-question-id"
+      ],
+      "reason": ""
+    },
+    {
+      "id": "semantics.batching",
+      "level": "SHOULD",
+      "section": "7",
+      "title": "other questions in the request do not change an answer",
+      "status": "pass",
+      "findings": [],
+      "cases": [
+        "semantics-batching"
+      ],
+      "reason": ""
+    },
+    {
+      "id": "semantics.question-order",
+      "level": "SHOULD",
+      "section": "7",
+      "title": "question order does not change answers",
+      "status": "pass",
+      "findings": [],
+      "cases": [
+        "semantics-question-order"
+      ],
+      "reason": ""
+    },
+    {
+      "id": "dropin.sdk-python",
+      "level": "MUST",
+      "section": "8",
+      "title": "the official Python SDK parses every answer type",
+      "status": "pass",
+      "findings": [],
+      "cases": [
+        "sdk-python"
+      ],
+      "reason": ""
+    }
+  ],
+  "exchanges": [
+    {
+      "case": "preflight",
+      "method": "POST",
+      "path": "/v1/systemone",
+      "request": {
+        "model": "jev-latest",
+        "state": "Hi, I was charged twice for my March invoice (order #4471) and the refund I was promised last week still hasn't arrived. I've emailed three times. Please fix this today or I will dispute the charge with my bank.",
+        "questions": {
+          "q": {
+            "type": "noul",
+            "instructions": "Is the customer asking for money back?"
+          }
+        }
+      },
+      "status": 200,
+      "response": "{\"model\":\"rizzo-spark-x2.5-1.7b-q8_0\",\"answers\":{\"q\":{\"type\":\"noul\",\"noul\":0.9964249999068141}},\"usage\":{\"input_tokens\":230,\"output_tokens\":0},\"x_rizzo\":{\"timing\":{\"inference_seconds\":0.2221829160116613,\"prefill_seconds\":0.0,\"shared_prefix_tokens\":0,\"evaluated_tokens_including_padding\":230,\"logical_input_tokens\":230,\"batches\":1,\"generated_tokens\":0,\"peak_device_bytes\":2476851200,\"queue_seconds\":9.589712135493755e-07,\"compile_seconds\":0.003807041037362069,\"total_seconds\":0.2261970840045251},\"probability_status\":[\"uncalibrated_conditional_option_scores\"],\"fingerprint\":\"253f98cb629ee7d9f1ab115c84846e674edba61aa4d1acb894a7b79c4d96f73d\"}}",
+      "ms": 231.1,
+      "via": "http"
+    },
+    {
+      "case": "models-endpoint",
+      "method": "GET",
+      "path": "/v1/models",
+      "request": null,
+      "status": 200,
+      "response": "{\"models\":[{\"name\":\"rizzo-latest\",\"description\":\"Local XHToken/Spark-X2.5-1.7B scored with typed option logits.\",\"release_date\":\"2026-09-21\"},{\"name\":\"rizzo-spark-x2.5-1.7b-q8_0\",\"description\":\"Local XHToken/Spark-X2.5-1.7B scored with typed option logits.\",\"release_date\":\"2026-09-21\"},{\"name\":\"jev-latest\",\"description\":\"Compatibility alias: answered by rizzo-spark-x2.5-1.7b-q8_0, not by TypeSafe Jev.\",\"release_date\":\"2026-09-21\"}]}",
+      "ms": 1.4,
+      "via": "http"
+    },
+    {
+      "case": "noul-basic",
+      "method": "POST",
+      "path": "/v1/systemone",
+      "request": {
+        "model": "jev-latest",
+        "state": "Hi, I was charged twice for my March invoice (order #4471) and the refund I was promised last week still hasn't arrived. I've emailed three times. Please fix this today or I will dispute the charge with my bank.",
+        "questions": {
+          "refund": {
+            "type": "noul",
+            "instructions": "Is the customer asking for money back?"
+          }
+        }
+      },
+      "status": 200,
+      "response": "{\"model\":\"rizzo-spark-x2.5-1.7b-q8_0\",\"answers\":{\"refund\":{\"type\":\"noul\",\"noul\":0.9964249999068141}},\"usage\":{\"input_tokens\":230,\"output_tokens\":0},\"x_rizzo\":{\"timing\":{\"inference_seconds\":0.20126737502869219,\"prefill_seconds\":0.0,\"shared_prefix_tokens\":0,\"evaluated_tokens_including_padding\":230,\"logical_input_tokens\":230,\"batches\":1,\"generated_tokens\":0,\"peak_device_bytes\":2476851200,\"queue_seconds\":5.00003807246685e-07,\"compile_seconds\":0.0035881249932572246,\"total_seconds\":0.20496287499554455},\"probability_status\":[\"uncalibrated_conditional_option_scores\"],\"fingerprint\":\"253f98cb629ee7d9f1ab115c84846e674edba61aa4d1acb894a7b79c4d96f73d\"}}",
+      "ms": 206.3,
+      "via": "http"
+    },
+    {
+      "case": "noul-criteria:both",
+      "method": "POST",
+      "path": "/v1/systemone",
+      "request": {
+        "model": "jev-latest",
+        "state": "Hi, I was charged twice for my March invoice (order #4471) and the refund I was promised last week still hasn't arrived. I've emailed three times. Please fix this today or I will dispute the charge with my bank.",
+        "questions": {
+          "refund": {
+            "type": "noul",
+            "instructions": "Is the customer asking for money back?",
+            "criteria": {
+              "true": "They want a refund or chargeback",
+              "false": "They want anything else"
+            }
+          }
+        }
+      },
+      "status": 200,
+      "response": "{\"model\":\"rizzo-spark-x2.5-1.7b-q8_0\",\"answers\":{\"refund\":{\"type\":\"noul\",\"noul\":0.9999968380585816}},\"usage\":{\"input_tokens\":220,\"output_tokens\":0},\"x_rizzo\":{\"timing\":{\"inference_seconds\":0.18174916703719646,\"prefill_seconds\":0.0,\"shared_prefix_tokens\":0,\"evaluated_tokens_including_padding\":220,\"logical_input_tokens\":220,\"batches\":1,\"generated_tokens\":0,\"peak_device_bytes\":2476851200,\"queue_seconds\":4.5803608372807503e-07,\"compile_seconds\":0.0033716249745339155,\"total_seconds\":0.1852151250350289},\"probability_status\":[\"uncalibrated_conditional_option_scores\"],\"fingerprint\":\"253f98cb629ee7d9f1ab115c84846e674edba61aa4d1acb894a7b79c4d96f73d\"}}",
+      "ms": 186.7,
+      "via": "http"
+    },
+    {
+      "case": "noul-criteria:true-only",
+      "method": "POST",
+      "path": "/v1/systemone",
+      "request": {
+        "model": "jev-latest",
+        "state": "Hi, I was charged twice for my March invoice (order #4471) and the refund I was promised last week still hasn't arrived. I've emailed three times. Please fix this today or I will dispute the charge with my bank.",
+        "questions": {
+          "refund": {
+            "type": "noul",
+            "instructions": "Is the customer asking for money back?",
+            "criteria": {
+              "true": "They want a refund or chargeback"
+            }
+          }
+        }
+      },
+      "status": 200,
+      "response": "{\"model\":\"rizzo-spark-x2.5-1.7b-q8_0\",\"answers\":{\"refund\":{\"type\":\"noul\",\"noul\":0.999866930946441}},\"usage\":{\"input_tokens\":226,\"output_tokens\":0},\"x_rizzo\":{\"timing\":{\"inference_seconds\":0.20479929097928107,\"prefill_seconds\":0.0,\"shared_prefix_tokens\":0,\"evaluated_tokens_including_padding\":226,\"logical_input_tokens\":226,\"batches\":1,\"generated_tokens\":0,\"peak_device_bytes\":2476851200,\"queue_seconds\":3.750319592654705e-07,\"compile_seconds\":0.003403124981559813,\"total_seconds\":0.20831250003539026},\"probability_status\":[\"uncalibrated_conditional_option_scores\"],\"fingerprint\":\"253f98cb629ee7d9f1ab115c84846e674edba61aa4d1acb894a7b79c4d96f73d\"}}",
+      "ms": 210.0,
+      "via": "http"
+    },
+    {
+      "case": "noul-criteria:false-only",
+      "method": "POST",
+      "path": "/v1/systemone",
+      "request": {
+        "model": "jev-latest",
+        "state": "Hi, I was charged twice for my March invoice (order #4471) and the refund I was promised last week still hasn't arrived. I've emailed three times. Please fix this today or I will dispute the charge with my bank.",
+        "questions": {
+          "refund": {
+            "type": "noul",
+            "instructions": "Is the customer asking for money back?",
+            "criteria": {
+              "false": "They are only asking a question"
+            }
+          }
+        }
+      },
+      "status": 200,
+      "response": "{\"model\":\"rizzo-spark-x2.5-1.7b-q8_0\",\"answers\":{\"refund\":{\"type\":\"noul\",\"noul\":0.999998441765072}},\"usage\":{\"input_tokens\":226,\"output_tokens\":0},\"x_rizzo\":{\"timing\":{\"inference_seconds\":0.20350299996789545,\"prefill_seconds\":0.0,\"shared_prefix_tokens\":0,\"evaluated_tokens_including_padding\":226,\"logical_input_tokens\":226,\"batches\":1,\"generated_tokens\":0,\"peak_device_bytes\":2476851200,\"queue_seconds\":4.169996827840805e-07,\"compile_seconds\":0.0047651660279370844,\"total_seconds\":0.20835370803251863},\"probability_status\":[\"uncalibrated_conditional_option_scores\"],\"fingerprint\":\"253f98cb629ee7d9f1ab115c84846e674edba61aa4d1acb894a7b79c4d96f73d\"}}",
+      "ms": 210.0,
+      "via": "http"
+    },
+    {
+      "case": "noul-criteria:null",
+      "method": "POST",
+      "path": "/v1/systemone",
+      "request": {
+        "model": "jev-latest",
+        "state": "Hi, I was charged twice for my March invoice (order #4471) and the refund I was promised last week still hasn't arrived. I've emailed three times. Please fix this today or I will dispute the charge with my bank.",
+        "questions": {
+          "refund": {
+            "type": "noul",
+            "instructions": "Is the customer asking for money back?",
+            "criteria": null
+          }
+        }
+      },
+      "status": 200,
+      "response": "{\"model\":\"rizzo-spark-x2.5-1.7b-q8_0\",\"answers\":{\"refund\":{\"type\":\"noul\",\"noul\":0.9964249999068141}},\"usage\":{\"input_tokens\":230,\"output_tokens\":0},\"x_rizzo\":{\"timing\":{\"inference_seconds\":0.20413974998518825,\"prefill_seconds\":0.0,\"shared_prefix_tokens\":0,\"evaluated_tokens_including_padding\":230,\"logical_input_tokens\":230,\"batches\":1,\"generated_tokens\":0,\"peak_device_bytes\":2476851200,\"queue_seconds\":3.7497375160455704e-07,\"compile_seconds\":0.0037432500394061208,\"total_seconds\":0.20798470795853063},\"probability_status\":[\"uncalibrated_conditional_option_scores\"],\"fingerprint\":\"253f98cb629ee7d9f1ab115c84846e674edba61aa4d1acb894a7b79c4d96f73d\"}}",
+      "ms": 209.5,
+      "via": "http"
+    },
+    {
+      "case": "noul-no-instructions",
+      "method": "POST",
+      "path": "/v1/systemone",
+      "request": {
+        "model": "jev-latest",
+        "state": "Hi, I was charged twice for my March invoice (order #4471) and the refund I was promised last week still hasn't arrived. I've emailed three times. Please fix this today or I will dispute the charge with my bank.",
+        "questions": {
+          "threat": {
+            "type": "noul",
+            "criteria": {
+              "true": "The customer threatens a chargeback",
+              "false": "No threat"
+            }
+          }
+        }
+      },
+      "status": 422,
+      "response": "{\"detail\":[{\"type\":\"missing\",\"loc\":[\"body\",\"questions\",\"threat\",\"noul\",\"instructions\"],\"msg\":\"Field required\",\"input\":{\"type\":\"noul\",\"criteria\":{\"true\":\"The customer threatens a chargeback\",\"false\":\"No threat\"}}}]}",
+      "ms": 1.1,
+      "via": "http"
+    },
+    {
+      "case": "choice-basic",
+      "method": "POST",
+      "path": "/v1/systemone",
+      "request": {
+        "model": "jev-latest",
+        "state": "Hi, I was charged twice for my March invoice (order #4471) and the refund I was promised last week still hasn't arrived. I've emailed three times. Please fix this today or I will dispute the charge with my bank.",
+        "questions": {
+          "team": {
+            "type": "choice",
+            "instructions": "Which team should handle this ticket?",
+            "criteria": {
+              "Billing": "Payments, invoices, refunds",
+              "Technical": "Bugs, outages, integrations",
+              "Sales": "Pricing questions, upgrades, new contracts"
+            }
+          }
+        }
+      },
+      "status": 200,
+      "response": "{\"model\":\"rizzo-spark-x2.5-1.7b-q8_0\",\"answers\":{\"team\":{\"type\":\"choice\",\"choice\":\"Billing\",\"probabilities\":{\"Billing\":0.9997635126555025,\"Technical\":0.00023472153984768128,\"Sales\":1.7658046498018636e-06},\"confidence\":0.9996452689832536}},\"usage\":{\"input_tokens\":238,\"output_tokens\":0},\"x_rizzo\":{\"timing\":{\"inference_seconds\":0.20648912497563288,\"prefill_seconds\":0.0,\"shared_prefix_tokens\":0,\"evaluated_tokens_including_padding\":238,\"logical_input_tokens\":238,\"batches\":1,\"generated_tokens\":0,\"peak_device_bytes\":2476851200,\"queue_seconds\":4.169996827840805e-07,\"compile_seconds\":0.004308749979827553,\"total_seconds\":0.21089374995790422},\"probability_status\":[\"uncalibrated_conditional_option_scores\"],\"fingerprint\":\"253f98cb629ee7d9f1ab115c84846e674edba61aa4d1acb894a7b79c4d96f73d\"}}",
+      "ms": 213.4,
+      "via": "http"
+    },
+    {
+      "case": "choice-null-description",
+      "method": "POST",
+      "path": "/v1/systemone",
+      "request": {
+        "model": "jev-latest",
+        "state": "Hi, I was charged twice for my March invoice (order #4471) and the refund I was promised last week still hasn't arrived. I've emailed three times. Please fix this today or I will dispute the charge with my bank.",
+        "questions": {
+          "team": {
+            "type": "choice",
+            "instructions": "Which team should handle this ticket?",
+            "criteria": {
+              "Billing": null,
+              "Technical": null,
+              "Sales": null
+            }
+          }
+        }
+      },
+      "status": 200,
+      "response": "{\"model\":\"rizzo-spark-x2.5-1.7b-q8_0\",\"answers\":{\"team\":{\"type\":\"choice\",\"choice\":\"Billing\",\"probabilities\":{\"Billing\":0.9816044534181192,\"Technical\":0.018365522987730195,\"Sales\":3.002359415059232e-05},\"confidence\":0.9724066801271789}},\"usage\":{\"input_tokens\":211,\"output_tokens\":0},\"x_rizzo\":{\"timing\":{\"inference_seconds\":0.17978791700443253,\"prefill_seconds\":0.0,\"shared_prefix_tokens\":0,\"evaluated_tokens_including_padding\":211,\"logical_input_tokens\":211,\"batches\":1,\"generated_tokens\":0,\"peak_device_bytes\":2476851200,\"queue_seconds\":5.420297384262085e-07,\"compile_seconds\":0.004095416981726885,\"total_seconds\":0.18400466704042628},\"probability_status\":[\"uncalibrated_conditional_option_scores\"],\"fingerprint\":\"253f98cb629ee7d9f1ab115c84846e674edba61aa4d1acb894a7b79c4d96f73d\"}}",
+      "ms": 185.9,
+      "via": "http"
+    },
+    {
+      "case": "choice-options:2",
+      "method": "POST",
+      "path": "/v1/systemone",
+      "request": {
+        "model": "jev-latest",
+        "state": "Hi, I was charged twice for my March invoice (order #4471) and the refund I was promised last week still hasn't arrived. I've emailed three times. Please fix this today or I will dispute the charge with my bank.",
+        "questions": {
+          "queue": {
+            "type": "choice",
+            "instructions": "Which queue should this ticket go to?",
+            "criteria": {
+              "Billing": "Payments, invoices, refunds",
+              "Technical": "Bugs and outages"
+            }
+          }
+        }
+      },
+      "status": 200,
+      "response": "{\"model\":\"rizzo-spark-x2.5-1.7b-q8_0\",\"answers\":{\"queue\":{\"type\":\"choice\",\"choice\":\"Billing\",\"probabilities\":{\"Billing\":0.9996715824651604,\"Technical\":0.0003284175348395504},\"confidence\":0.9993431649303208}},\"usage\":{\"input_tokens\":223,\"output_tokens\":0},\"x_rizzo\":{\"timing\":{\"inference_seconds\":0.1850073749665171,\"prefill_seconds\":0.0,\"shared_prefix_tokens\":0,\"evaluated_tokens_including_padding\":223,\"logical_input_tokens\":223,\"batches\":1,\"generated_tokens\":0,\"peak_device_bytes\":2476851200,\"queue_seconds\":8.33999365568161e-07,\"compile_seconds\":0.006468957988545299,\"total_seconds\":0.19161620899103582},\"probability_status\":[\"uncalibrated_conditional_option_scores\"],\"fingerprint\":\"253f98cb629ee7d9f1ab115c84846e674edba61aa4d1acb894a7b79c4d96f73d\"}}",
+      "ms": 193.8,
+      "via": "http"
+    },
+    {
+      "case": "choice-options:26",
+      "method": "POST",
+      "path": "/v1/systemone",
+      "request": {
+        "model": "jev-latest",
+        "state": "Hi, I was charged twice for my March invoice (order #4471) and the refund I was promised last week still hasn't arrived. I've emailed three times. Please fix this today or I will dispute the charge with my bank.",
+        "questions": {
+          "queue": {
+            "type": "choice",
+            "instructions": "Which queue should this ticket go to?",
+            "criteria": {
+              "Billing": "Payments, invoices, refunds",
+              "Queue 001": "Tickets routed to queue 1",
+              "Queue 002": "Tickets routed to queue 2",
+              "Queue 003": "Tickets routed to queue 3",
+              "Queue 004": "Tickets routed to queue 4",
+              "Queue 005": "Tickets routed to queue 5",
+              "Queue 006": "Tickets routed to queue 6",
+              "Queue 007": "Tickets routed to queue 7",
+              "Queue 008": "Tickets routed to queue 8",
+              "Queue 009": "Tickets routed to queue 9",
+              "Queue 010": "Tickets routed to queue 10",
+              "Queue 011": "Tickets routed to queue 11",
+              "Queue 012": "Tickets routed to queue 12",
+              "Queue 013": "Tickets routed to queue 13",
+              "Queue 014": "Tickets routed to queue 14",
+              "Queue 015": "Tickets routed to queue 15",
+              "Queue 016": "Tickets routed to queue 16",
+              "Queue 017": "Tickets routed to queue 17",
+              "Queue 018": "Tickets routed to queue 18",
+              "Queue 019": "Tickets routed to queue 19",
+              "Queue 020": "Tickets routed to queue 20",
+              "Queue 021": "Tickets routed to queue 21",
+              "Queue 022": "Tickets routed to queue 22",
+              "Queue 023": "Tickets routed to queue 23",
+              "Queue 024": "Tickets routed to queue 24",
+              "Queue 025": "Tickets routed to queue 25"
+            }
+          }
+        }
+      },
+      "status": 200,
+      "response": "{\"model\":\"rizzo-spark-x2.5-1.7b-q8_0\",\"answers\":{\"queue\":{\"type\":\"choice\",\"choice\":\"Billing\",\"probabilities\":{\"Billing\":0.9998432281981895,\"Queue 001\":0.0001456184661543602,\"Queue 002\":6.135787324557505e-07,\"Queue 003\":2.0116313098810203e-07,\"Queue 004\":2.1986408443556082e-08,\"Queue 005\":4.348433884564175e-06,\"Queue 006\":2.8682246607497113e-08,\"Queue 007\":4.148141113922954e-08,\"Queue 008\":7.176660862535502e-08,\"Queue 009\":1.3764327544210538e-07,\"Queue 010\":4.121229521049454e-06,\"Queue 011\":3.203578558054805e-07,\"Queue 012\":5.035866759717104e-09,\"Queue 013\":1.6021971419507573e-08,\"Queue 014\":1.6527789019878758e-08,\"Queue 015\":2.5605088534340986e-08,\"Queue 016\":3.000391921461633e-08,\"Queue 017\":3.165497914288725e-07,\"Queue 018\":4.91389425896847e-07,\"Queue 019\":1.580580639396974e-07,\"Queue 020\":3.0449030165956463e-09,\"Queue 021\":6.933961997656229e-08,\"Queue 022\":1.7801876248346285e-08,\"Queue 023\":4.908126366927419e-08,\"Queue 024\":1.0121809214498966e-08,\"Queue 025\":3.843119275705328e-08},\"confidence\":0.9998369573261171}},\"usage\":{\"input_tokens\":629,\"output_tokens\":0},\"x_rizzo\":{\"timing\":{\"inference_seconds\":0.5059422500198707,\"prefill_seconds\":0.0,\"shared_prefix_tokens\":0,\"evaluated_tokens_including_padding\":629,\"logical_input_tokens\":629,\"batches\":1,\"generated_tokens\":0,\"peak_device_bytes\":2476851200,\"queue_seconds\":5.41971530765295e-07,\"compile_seconds\":0.05408450000686571,\"total_seconds\":0.5601795839611441},\"probability_status\":[\"uncalibrated_conditional_option_scores\"],\"fingerprint\":\"253f98cb629ee7d9f1ab115c84846e674edba61aa4d1acb894a7b79c4d96f73d\"}}",
+      "ms": 562.1,
+      "via": "http"
+    },
+    {
+      "case": "choice-options:64",
+      "method": "POST",
+      "path": "/v1/systemone",
+      "request": {
+        "model": "jev-latest",
+        "state": "Hi, I was charged twice for my March invoice (order #4471) and the refund I was promised last week still hasn't arrived. I've emailed three times. Please fix this today or I will dispute the charge with my bank.",
+        "questions": {
+          "queue": {
+            "type": "choice",
+            "instructions": "Which queue should this ticket go to?",
+            "criteria": {
+              "Billing": "Payments, invoices, refunds",
+              "Queue 001": "Tickets routed to queue 1",
+              "Queue 002": "Tickets routed to queue 2",
+              "Queue 003": "Tickets routed to queue 3",
+              "Queue 004": "Tickets routed to queue 4",
+              "Queue 005": "Tickets routed to queue 5",
+              "Queue 006": "Tickets routed to queue 6",
+              "Queue 007": "Tickets routed to queue 7",
+              "Queue 008": "Tickets routed to queue 8",
+              "Queue 009": "Tickets routed to queue 9",
+              "Queue 010": "Tickets routed to queue 10",
+              "Queue 011": "Tickets routed to queue 11",
+              "Queue 012": "Tickets routed to queue 12",
+              "Queue 013": "Tickets routed to queue 13",
+              "Queue 014": "Tickets routed to queue 14",
+              "Queue 015": "Tickets routed to queue 15",
+              "Queue 016": "Tickets routed to queue 16",
+              "Queue 017": "Tickets routed to queue 17",
+              "Queue 018": "Tickets routed to queue 18",
+              "Queue 019": "Tickets routed to queue 19",
+              "Queue 020": "Tickets routed to queue 20",
+              "Queue 021": "Tickets routed to queue 21",
+              "Queue 022": "Tickets routed to queue 22",
+              "Queue 023": "Tickets routed to queue 23",
+              "Queue 024": "Tickets routed to queue 24",
+              "Queue 025": "Tickets routed to queue 25",
+              "Queue 026": "Tickets routed to queue 26",
+              "Queue 027": "Tickets routed to queue 27",
+              "Queue 028": "Tickets routed to queue 28",
+              "Queue 029": "Tickets routed to queue 29",
+              "Queue 030": "Tickets routed to queue 30",
+              "Queue 031": "Tickets routed to queue 31",
+              "Queue 032": "Tickets routed to queue 32",
+              "Queue 033": "Tickets routed to queue 33",
+              "Queue 034": "Tickets routed to queue 34",
+              "Queue 035": "Tickets routed to queue 35",
+              "Queue 036": "Tickets routed to queue 36",
+              "Queue 037": "Tickets routed to queue 37",
+              "Queue 038": "Tickets routed to queue 38",
+              "Queue 039": "Tickets routed to queue 39",
+              "Queue 040": "Tickets routed to queue 40",
+              "Queue 041": "Tickets routed to queue 41",
+              "Queue 042": "Tickets routed to queue 42",
+              "Queue 043": "Tickets routed to queue 43",
+              "Queue 044": "Tickets routed to queue 44",
+              "Queue 045": "Tickets routed to queue 45",
+              "Queue 046": "Tickets routed to queue 46",
+              "Queue 047": "Tickets routed to queue 47",
+              "Queue 048": "Tickets routed to queue 48",
+              "Queue 049": "Tickets routed to queue 49",
+              "Queue 050": "Tickets routed to queue 50",
+              "Queue 051": "Tickets routed to queue 51",
+              "Queue 052": "Tickets routed to queue 52",
+              "Queue 053": "Tickets routed to queue 53",
+              "Queue 054": "Tickets routed to queue 54",
+              "Queue 055": "Tickets routed to queue 55",
+              "Queue 056": "Tickets routed to queue 56",
+              "Queue 057": "Tickets routed to queue 57",
+              "Queue 058": "Tickets routed to queue 58",
+              "Queue 059": "Tickets routed to queue 59",
+              "Queue 060": "Tickets routed to queue 60",
+              "Queue 061": "Tickets routed to queue 61",
+              "Queue 062": "Tickets routed to queue 62",
+              "Queue 063": "Tickets routed to queue 63"
+            }
+          }
+        }
+      },
+      "status": 422,
+      "response": "{\"detail\":[{\"type\":\"too_long\",\"loc\":[\"body\",\"questions\",\"queue\",\"choice\",\"criteria\"],\"msg\":\"Dictionary should have at most 26 items after validation, not 64\",\"input\":{\"Billing\":\"Payments, invoices, refunds\",\"Queue 001\":\"Tickets routed to queue 1\",\"Queue 002\":\"Tickets routed to queue 2\",\"Queue 003\":\"Tickets routed to queue 3\",\"Queue 004\":\"Tickets routed to queue 4\",\"Queue 005\":\"Tickets routed to queue 5\",\"Queue 006\":\"Tickets routed to queue 6\",\"Queue 007\":\"Tickets routed to queue 7\",\"Queue 008\":\"Tickets routed to queue 8\",\"Queue 009\":\"Tickets routed to queue 9\",\"Queue 010\":\"Tickets routed to queue 10\",\"Queue 011\":\"Tickets routed to queue 11\",\"Queue 012\":\"Tickets routed to queue 12\",\"Queue 013\":\"Tickets routed to queue 13\",\"Queue 014\":\"Tickets routed to queue 14\",\"Queue 015\":\"Tickets routed to queue 15\",\"Queue 016\":\"Tickets routed to queue 16\",\"Queue 017\":\"Tickets routed to queue 17\",\"Queue 018\":\"Tickets routed to queue 18\",\"Queue 019\":\"Tickets routed to queue 19\",\"Queue 020\":\"Tickets routed to queue 20\",\"Queue 021\":\"Tickets routed to queue 21\",\"Queue 022\":\"Tickets routed to queue 22\",\"Queue 023\":\"Tickets routed to queue 23\",\"Queue 024\":\"Tickets routed to queue 24\",\"Queue 025\":\"Tickets routed to queue 25\",\"Queue 026\":\"Tickets routed to queue 26\",\"Queue 027\":\"Tickets routed to queue 27\",\"Queue 028\":\"Tickets routed to queue 28\",\"Queue 029\":\"Tickets routed to queue 29\",\"Queue 030\":\"Tickets routed to queue 30\",\"Queue 031\":\"Tickets routed to queue 31\",\"Queue 032\":\"Tickets routed to queue 32\",\"Queue 033\":\"Tickets routed to queue 33\",\"Queue 034\":\"Tickets routed to queue 34\",\"Queue 035\":\"Tickets routed to queue 35\",\"Queue 036\":\"Tickets routed to queue 36\",\"Queue 037\":\"Tickets routed to queue 37\",\"Queue 038\":\"Tickets routed to queue 38\",\"Queue 039\":\"Tickets routed to queue 39\",\"Queue 040\":\"Tickets routed to queue 40\",\"Queue 041\":\"Tickets routed to queue 41\",\"Queue 042\":\"Tickets routed to queue 42\",\"Queue 043\":\"Tickets routed to queue 43\",\"Queue 044\":\"Tickets routed to queue 44\",\"Queue 045\":\"Tickets routed to queue 45\",\"Queue 046\":\"Tickets routed to queue 46\",\"Queue 047\":\"Tickets routed to queue 47\",\"Queue 048\":\"Tickets routed to queue 48\",\"Queue 049\":\"Tickets routed to queue 49\",\"Queue 050\":\"Tickets routed to queue 50\",\"Queue 051\":\"Tickets routed to queue 51\",\"Queue 052\":\"Tickets routed to queue 52\",\"Queue 053\":\"Tickets routed to queue 53\",\"Queue 054\":\"Tickets routed to queue 54\",\"Queue 055\":\"Tickets routed to queue 55\",\"Queue 056\":\"Tickets routed to queue 56\",\"Queue 057\":\"Tickets routed to queue 57\",\"Queue 058\":\"Tickets routed to queue 58\",\"Queue 059\":\"Tickets routed to queue 59\",\"Queue 060\":\"Tickets routed to queue 60\",\"Queue 061\":\"Tickets routed to queue 61\",\"Queue 062\":\"Tickets routed to queue 62\",\"Queue 063\":\"Tickets routed to queue 63\"},\"ctx\":{\"field_type\":\"Dictionary\",\"max_length\":26,\"actual_length\":64}}]}",
+      "ms": 1.5,
+      "via": "http"
+    },
+    {
+      "case": "score-levels:2",
+      "method": "POST",
+      "path": "/v1/systemone",
+      "request": {
+        "model": "jev-latest",
+        "state": "Hi, I was charged twice for my March invoice (order #4471) and the refund I was promised last week still hasn't arrived. I've emailed three times. Please fix this today or I will dispute the charge with my bank.",
+        "questions": {
+          "anger": {
+            "type": "score",
+            "instructions": "How frustrated is the customer?",
+            "criteria": [
+              "Calm",
+              "Very angry"
+            ]
+          }
+        }
+      },
+      "status": 200,
+      "response": "{\"model\":\"rizzo-spark-x2.5-1.7b-q8_0\",\"answers\":{\"anger\":{\"type\":\"score\",\"score\":0.9999930893443965,\"legend\":{\"0\":\"Calm\",\"1\":\"Very angry\"},\"probabilities\":{\"0\":6.910655603529642e-06,\"1\":0.9999930893443963},\"confidence\":0.9999861786887927}},\"usage\":{\"input_tokens\":207,\"output_tokens\":0},\"x_rizzo\":{\"timing\":{\"inference_seconds\":0.18195204198127612,\"prefill_seconds\":0.0,\"shared_prefix_tokens\":0,\"evaluated_tokens_including_padding\":207,\"logical_input_tokens\":207,\"batches\":1,\"generated_tokens\":0,\"peak_device_bytes\":2476851200,\"queue_seconds\":1.00000761449337e-06,\"compile_seconds\":0.00472962501225993,\"total_seconds\":0.18689499999163672},\"probability_status\":[\"uncalibrated_conditional_option_scores\"],\"fingerprint\":\"253f98cb629ee7d9f1ab115c84846e674edba61aa4d1acb894a7b79c4d96f73d\"}}",
+      "ms": 188.5,
+      "via": "http"
+    },
+    {
+      "case": "score-levels:3",
+      "method": "POST",
+      "path": "/v1/systemone",
+      "request": {
+        "model": "jev-latest",
+        "state": "Hi, I was charged twice for my March invoice (order #4471) and the refund I was promised last week still hasn't arrived. I've emailed three times. Please fix this today or I will dispute the charge with my bank.",
+        "questions": {
+          "anger": {
+            "type": "score",
+            "instructions": "How frustrated is the customer?",
+            "criteria": [
+              "Calm",
+              "Frustrated",
+              "Very angry"
+            ]
+          }
+        }
+      },
+      "status": 200,
+      "response": "{\"model\":\"rizzo-spark-x2.5-1.7b-q8_0\",\"answers\":{\"anger\":{\"type\":\"score\",\"score\":1.0001129309152192,\"legend\":{\"0\":\"Calm\",\"1\":\"Frustrated\",\"2\":\"Very angry\"},\"probabilities\":{\"0\":1.4759017251758952e-06,\"1\":0.9998841172813304,\"2\":0.00011440681694439412},\"confidence\":0.9998261759219957}},\"usage\":{\"input_tokens\":213,\"output_tokens\":0},\"x_rizzo\":{\"timing\":{\"inference_seconds\":0.18180170800769702,\"prefill_seconds\":0.0,\"shared_prefix_tokens\":0,\"evaluated_tokens_including_padding\":213,\"logical_input_tokens\":213,\"batches\":1,\"generated_tokens\":0,\"peak_device_bytes\":2476851200,\"queue_seconds\":6.67001586407423e-07,\"compile_seconds\":0.00447820796398446,\"total_seconds\":0.1864075839985162},\"probability_status\":[\"uncalibrated_conditional_option_scores\"],\"fingerprint\":\"253f98cb629ee7d9f1ab115c84846e674edba61aa4d1acb894a7b79c4d96f73d\"}}",
+      "ms": 188.1,
+      "via": "http"
+    },
+    {
+      "case": "score-levels:5",
+      "method": "POST",
+      "path": "/v1/systemone",
+      "request": {
+        "model": "jev-latest",
+        "state": "Hi, I was charged twice for my March invoice (order #4471) and the refund I was promised last week still hasn't arrived. I've emailed three times. Please fix this today or I will dispute the charge with my bank.",
+        "questions": {
+          "anger": {
+            "type": "score",
+            "instructions": "How frustrated is the customer?",
+            "criteria": [
+              "Level 0: calm",
+              "Level 1: angrier",
+              "Level 2: angrier",
+              "Level 3: angrier",
+              "Level 4: angrier"
+            ]
+          }
+        }
+      },
+      "status": 200,
+      "response": "{\"model\":\"rizzo-spark-x2.5-1.7b-q8_0\",\"answers\":{\"anger\":{\"type\":\"score\",\"score\":1.5603322667900965,\"legend\":{\"0\":\"Level 0: calm\",\"1\":\"Level 1: angrier\",\"2\":\"Level 2: angrier\",\"3\":\"Level 3: angrier\",\"4\":\"Level 4: angrier\"},\"probabilities\":{\"0\":0.008964852774146742,\"1\":0.4316664452427158,\"2\":0.5497534646392024,\"3\":0.009302057106764322,\"4\":0.00031318023717073664},\"confidence\":0.43719183079900303}},\"usage\":{\"input_tokens\":241,\"output_tokens\":0},\"x_rizzo\":{\"timing\":{\"inference_seconds\":0.20642233302351087,\"prefill_seconds\":0.0,\"shared_prefix_tokens\":0,\"evaluated_tokens_including_padding\":241,\"logical_input_tokens\":241,\"batches\":1,\"generated_tokens\":0,\"peak_device_bytes\":2476851200,\"queue_seconds\":3.750319592654705e-07,\"compile_seconds\":0.006013540958520025,\"total_seconds\":0.2125549580086954},\"probability_status\":[\"uncalibrated_conditional_option_scores\"],\"fingerprint\":\"253f98cb629ee7d9f1ab115c84846e674edba61aa4d1acb894a7b79c4d96f73d\"}}",
+      "ms": 214.2,
+      "via": "http"
+    },
+    {
+      "case": "score-levels:10",
+      "method": "POST",
+      "path": "/v1/systemone",
+      "request": {
+        "model": "jev-latest",
+        "state": "Hi, I was charged twice for my March invoice (order #4471) and the refund I was promised last week still hasn't arrived. I've emailed three times. Please fix this today or I will dispute the charge with my bank.",
+        "questions": {
+          "anger": {
+            "type": "score",
+            "instructions": "How frustrated is the customer?",
+            "criteria": [
+              "Level 0: calm",
+              "Level 1: angrier",
+              "Level 2: angrier",
+              "Level 3: angrier",
+              "Level 4: angrier",
+              "Level 5: angrier",
+              "Level 6: angrier",
+              "Level 7: angrier",
+              "Level 8: angrier",
+              "Level 9: angrier"
+            ]
+          }
+        }
+      },
+      "status": 200,
+      "response": "{\"model\":\"rizzo-spark-x2.5-1.7b-q8_0\",\"answers\":{\"anger\":{\"type\":\"score\",\"score\":2.0764617757135473,\"legend\":{\"0\":\"Level 0: calm\",\"1\":\"Level 1: angrier\",\"2\":\"Level 2: angrier\",\"3\":\"Level 3: angrier\",\"4\":\"Level 4: angrier\",\"5\":\"Level 5: angrier\",\"6\":\"Level 6: angrier\",\"7\":\"Level 7: angrier\",\"8\":\"Level 8: angrier\",\"9\":\"Level 9: angrier\"},\"probabilities\":{\"0\":0.010502283551721519,\"1\":0.30162810981044874,\"2\":0.5570883255107376,\"3\":0.00033123051787531973,\"4\":0.00010971735135962346,\"5\":0.12824977907639515,\"6\":0.0001731708766218126,\"7\":0.00014587763250399995,\"8\":2.816119770161562e-05,\"9\":0.0017433444746345961},\"confidence\":0.5078759172341529}},\"usage\":{\"input_tokens\":286,\"output_tokens\":0},\"x_rizzo\":{\"timing\":{\"inference_seconds\":0.2303934579831548,\"prefill_seconds\":0.0,\"shared_prefix_tokens\":0,\"evaluated_tokens_including_padding\":286,\"logical_input_tokens\":286,\"batches\":1,\"generated_tokens\":0,\"peak_device_bytes\":2476851200,\"queue_seconds\":5.839974619448185e-07,\"compile_seconds\":0.010975665994919837,\"total_seconds\":0.24150287499651313},\"probability_status\":[\"uncalibrated_conditional_option_scores\"],\"fingerprint\":\"253f98cb629ee7d9f1ab115c84846e674edba61aa4d1acb894a7b79c4d96f73d\"}}",
+      "ms": 243.2,
+      "via": "http"
+    },
+    {
+      "case": "choice-ambiguous",
+      "method": "POST",
+      "path": "/v1/systemone",
+      "request": {
+        "model": "jev-latest",
+        "state": "Hello.",
+        "questions": {
+          "team": {
+            "type": "choice",
+            "instructions": "Which of these colours is the writer's favourite?",
+            "criteria": {
+              "Red": null,
+              "Green": null,
+              "Blue": null,
+              "Yellow": null,
+              "Purple": null
+            }
+          },
+          "mood": {
+            "type": "score",
+            "instructions": "How much does the writer enjoy jazz?",
+            "criteria": [
+              "Not at all",
+              "A little",
+              "Somewhat",
+              "A lot",
+              "More than anything"
+            ]
+          }
+        }
+      },
+      "status": 200,
+      "response": "{\"model\":\"rizzo-spark-x2.5-1.7b-q8_0\",\"answers\":{\"team\":{\"type\":\"choice\",\"choice\":\"Red\",\"probabilities\":{\"Red\":0.9985232422348381,\"Green\":0.0013126464186210998,\"Blue\":4.008324973853032e-05,\"Yellow\":0.00011310254490932825,\"Purple\":1.09255518929828e-05},\"confidence\":0.9981540527935477},\"mood\":{\"type\":\"score\",\"score\":0.0003259579778985928,\"legend\":{\"0\":\"Not at all\",\"1\":\"A little\",\"2\":\"Somewhat\",\"3\":\"A lot\",\"4\":\"More than anything\"},\"probabilities\":{\"0\":0.9996881501922414,\"1\":0.00030148852295359225,\"2\":6.889550531776475e-06,\"3\":3.1965832114279806e-06,\"4\":2.751510617909109e-07},\"confidence\":0.9996101877403019}},\"usage\":{\"input_tokens\":230,\"output_tokens\":0},\"x_rizzo\":{\"timing\":{\"inference_seconds\":0.21586287498939782,\"prefill_seconds\":0.10848950000945479,\"shared_prefix_tokens\":117,\"evaluated_tokens_including_padding\":230,\"logical_input_tokens\":347,\"batches\":1,\"generated_tokens\":0,\"peak_device_bytes\":2476851200,\"queue_seconds\":4.1601015254855156e-07,\"compile_seconds\":0.009633834008127451,\"total_seconds\":0.22572804102674127},\"probability_status\":[\"uncalibrated_conditional_option_scores\"],\"fingerprint\":\"253f98cb629ee7d9f1ab115c84846e674edba61aa4d1acb894a7b79c4d96f73d\"}}",
+      "ms": 227.5,
+      "via": "http"
+    },
+    {
+      "case": "state-types:string",
+      "method": "POST",
+      "path": "/v1/systemone",
+      "request": {
+        "model": "jev-latest",
+        "state": "Hi, I was charged twice for my March invoice (order #4471) and the refund I was promised last week still hasn't arrived. I've emailed three times. Please fix this today or I will dispute the charge with my bank.",
+        "questions": {
+          "refund": {
+            "type": "noul",
+            "instructions": "Is the customer asking for money back?"
+          }
+        }
+      },
+      "status": 200,
+      "response": "{\"model\":\"rizzo-spark-x2.5-1.7b-q8_0\",\"answers\":{\"refund\":{\"type\":\"noul\",\"noul\":0.9964249999068141}},\"usage\":{\"input_tokens\":230,\"output_tokens\":0},\"x_rizzo\":{\"timing\":{\"inference_seconds\":0.2049693749868311,\"prefill_seconds\":0.0,\"shared_prefix_tokens\":0,\"evaluated_tokens_including_padding\":230,\"logical_input_tokens\":230,\"batches\":1,\"generated_tokens\":0,\"peak_device_bytes\":2476851200,\"queue_seconds\":8.750357665121555e-07,\"compile_seconds\":0.003797916986513883,\"total_seconds\":0.2088672500103712},\"probability_status\":[\"uncalibrated_conditional_option_scores\"],\"fingerprint\":\"253f98cb629ee7d9f1ab115c84846e674edba61aa4d1acb894a7b79c4d96f73d\"}}",
+      "ms": 210.5,
+      "via": "http"
+    },
+    {
+      "case": "state-types:object",
+      "method": "POST",
+      "path": "/v1/systemone",
+      "request": {
+        "model": "jev-latest",
+        "state": {
+          "subject": "Charged twice",
+          "body": "Hi, I was charged twice for my March invoice (order #4471) and the refund I was promised last week still hasn't arrived. I've emailed three times. Please fix this today or I will dispute the charge with my bank.",
+          "customer": {
+            "plan": "pro",
+            "tickets": 3
+          }
+        },
+        "questions": {
+          "refund": {
+            "type": "noul",
+            "instructions": "Is the customer asking for money back?"
+          }
+        }
+      },
+      "status": 200,
+      "response": "{\"model\":\"rizzo-spark-x2.5-1.7b-q8_0\",\"answers\":{\"refund\":{\"type\":\"noul\",\"noul\":0.996287588513754}},\"usage\":{\"input_tokens\":271,\"output_tokens\":0},\"x_rizzo\":{\"timing\":{\"inference_seconds\":0.23205258400412276,\"prefill_seconds\":0.0,\"shared_prefix_tokens\":0,\"evaluated_tokens_including_padding\":271,\"logical_input_tokens\":271,\"batches\":1,\"generated_tokens\":0,\"peak_device_bytes\":2476851200,\"queue_seconds\":5.409820005297661e-07,\"compile_seconds\":0.004217042005620897,\"total_seconds\":0.23637041600886732},\"probability_status\":[\"uncalibrated_conditional_option_scores\"],\"fingerprint\":\"253f98cb629ee7d9f1ab115c84846e674edba61aa4d1acb894a7b79c4d96f73d\"}}",
+      "ms": 238.0,
+      "via": "http"
+    },
+    {
+      "case": "state-types:array",
+      "method": "POST",
+      "path": "/v1/systemone",
+      "request": {
+        "model": "jev-latest",
+        "state": [
+          "Charged twice for March.",
+          "Refund promised last week, not received.",
+          "Will dispute the charge."
+        ],
+        "questions": {
+          "refund": {
+            "type": "noul",
+            "instructions": "Is the customer asking for money back?"
+          }
+        }
+      },
+      "status": 200,
+      "response": "{\"model\":\"rizzo-spark-x2.5-1.7b-q8_0\",\"answers\":{\"refund\":{\"type\":\"noul\",\"noul\":0.37654308406947457}},\"usage\":{\"input_tokens\":208,\"output_tokens\":0},\"x_rizzo\":{\"timing\":{\"inference_seconds\":0.17939150001620874,\"prefill_seconds\":0.0,\"shared_prefix_tokens\":0,\"evaluated_tokens_including_padding\":208,\"logical_input_tokens\":208,\"batches\":1,\"generated_tokens\":0,\"peak_device_bytes\":2476851200,\"queue_seconds\":5.00003807246685e-07,\"compile_seconds\":0.0032224579481408,\"total_seconds\":0.18274458299856633},\"probability_status\":[\"uncalibrated_conditional_option_scores\"],\"fingerprint\":\"253f98cb629ee7d9f1ab115c84846e674edba61aa4d1acb894a7b79c4d96f73d\"}}",
+      "ms": 184.7,
+      "via": "http"
+    },
+    {
+      "case": "structured-text:noul",
+      "method": "POST",
+      "path": "/v1/systemone",
+      "request": {
+        "model": "jev-latest",
+        "state": "Hi, I was charged twice for my March invoice (order #4471) and the refund I was promised last week still hasn't arrived. I've emailed three times. Please fix this today or I will dispute the charge with my bank.",
+        "questions": {
+          "q": {
+            "type": "noul",
+            "instructions": {
+              "task": "Decide whether the customer wants money back",
+              "include": [
+                "refunds",
+                "chargebacks"
+              ]
+            },
+            "criteria": {
+              "true": {
+                "examples": [
+                  "refund me",
+                  "I'll dispute this"
+                ]
+              },
+              "false": [
+                "questions",
+                "complaints without a request"
+              ]
+            }
+          }
+        }
+      },
+      "status": 200,
+      "response": "{\"model\":\"rizzo-spark-x2.5-1.7b-q8_0\",\"answers\":{\"q\":{\"type\":\"noul\",\"noul\":0.9999213858732248}},\"usage\":{\"input_tokens\":249,\"output_tokens\":0},\"x_rizzo\":{\"timing\":{\"inference_seconds\":0.2144566670176573,\"prefill_seconds\":0.0,\"shared_prefix_tokens\":0,\"evaluated_tokens_including_padding\":249,\"logical_input_tokens\":249,\"batches\":1,\"generated_tokens\":0,\"peak_device_bytes\":2476851200,\"queue_seconds\":9.589712135493755e-07,\"compile_seconds\":0.007535250042565167,\"total_seconds\":0.22213683399604633},\"probability_status\":[\"uncalibrated_conditional_option_scores\"],\"fingerprint\":\"253f98cb629ee7d9f1ab115c84846e674edba61aa4d1acb894a7b79c4d96f73d\"}}",
+      "ms": 224.7,
+      "via": "http"
+    },
+    {
+      "case": "structured-text:choice",
+      "method": "POST",
+      "path": "/v1/systemone",
+      "request": {
+        "model": "jev-latest",
+        "state": "Hi, I was charged twice for my March invoice (order #4471) and the refund I was promised last week still hasn't arrived. I've emailed three times. Please fix this today or I will dispute the charge with my bank.",
+        "questions": {
+          "q": {
+            "type": "choice",
+            "instructions": [
+              "Route the ticket.",
+              "Pick exactly one team."
+            ],
+            "criteria": {
+              "Billing": {
+                "owns": [
+                  "invoices",
+                  "refunds"
+                ]
+              },
+              "Technical": [
+                "bugs",
+                "outages"
+              ],
+              "Sales": "Pricing"
+            }
+          }
+        }
+      },
+      "status": 200,
+      "response": "{\"model\":\"rizzo-spark-x2.5-1.7b-q8_0\",\"answers\":{\"q\":{\"type\":\"choice\",\"choice\":\"Billing\",\"probabilities\":{\"Billing\":0.9468114877840286,\"Technical\":0.05279620828603643,\"Sales\":0.00039230392993492257},\"confidence\":0.9202172316760429}},\"usage\":{\"input_tokens\":242,\"output_tokens\":0},\"x_rizzo\":{\"timing\":{\"inference_seconds\":0.20640908303903416,\"prefill_seconds\":0.0,\"shared_prefix_tokens\":0,\"evaluated_tokens_including_padding\":242,\"logical_input_tokens\":242,\"batches\":1,\"generated_tokens\":0,\"peak_device_bytes\":2476851200,\"queue_seconds\":1.0829535312950611e-06,\"compile_seconds\":0.008039584034122527,\"total_seconds\":0.2145837919670157},\"probability_status\":[\"uncalibrated_conditional_option_scores\"],\"fingerprint\":\"253f98cb629ee7d9f1ab115c84846e674edba61aa4d1acb894a7b79c4d96f73d\"}}",
+      "ms": 216.9,
+      "via": "http"
+    },
+    {
+      "case": "structured-text:score",
+      "method": "POST",
+      "path": "/v1/systemone",
+      "request": {
+        "model": "jev-latest",
+        "state": "Hi, I was charged twice for my March invoice (order #4471) and the refund I was promised last week still hasn't arrived. I've emailed three times. Please fix this today or I will dispute the charge with my bank.",
+        "questions": {
+          "q": {
+            "type": "score",
+            "instructions": {
+              "scale": "frustration"
+            },
+            "criteria": [
+              {
+                "label": "Calm"
+              },
+              {
+                "label": "Frustrated"
+              },
+              {
+                "label": "Very angry",
+                "signals": [
+                  "threats"
+                ]
+              }
+            ]
+          }
+        }
+      },
+      "status": 200,
+      "response": "{\"model\":\"rizzo-spark-x2.5-1.7b-q8_0\",\"answers\":{\"q\":{\"type\":\"score\",\"score\":1.0000998032341493,\"legend\":{\"0\":\"{\\\"label\\\":\\\"Calm\\\"}\",\"1\":\"{\\\"label\\\":\\\"Frustrated\\\"}\",\"2\":\"{\\\"label\\\":\\\"Very angry\\\",\\\"signals\\\":[\\\"threats\\\"]}\"},\"probabilities\":{\"0\":1.7501951289636572e-06,\"1\":0.9998966963755931,\"2\":0.00010155342927803892},\"confidence\":0.9998450445633895}},\"usage\":{\"input_tokens\":234,\"output_tokens\":0},\"x_rizzo\":{\"timing\":{\"inference_seconds\":0.2057677090051584,\"prefill_seconds\":0.0,\"shared_prefix_tokens\":0,\"evaluated_tokens_including_padding\":234,\"logical_input_tokens\":234,\"batches\":1,\"generated_tokens\":0,\"peak_device_bytes\":2476851200,\"queue_seconds\":4.1601015254855156e-07,\"compile_seconds\":0.004139041993767023,\"total_seconds\":0.21000825002556667},\"probability_status\":[\"uncalibrated_conditional_option_scores\"],\"fingerprint\":\"253f98cb629ee7d9f1ab115c84846e674edba61aa4d1acb894a7b79c4d96f73d\"}}",
+      "ms": 211.6,
+      "via": "http"
+    },
+    {
+      "case": "multi-question",
+      "method": "POST",
+      "path": "/v1/systemone",
+      "request": {
+        "model": "jev-latest",
+        "state": "Hi, I was charged twice for my March invoice (order #4471) and the refund I was promised last week still hasn't arrived. I've emailed three times. Please fix this today or I will dispute the charge with my bank.",
+        "questions": {
+          "refund": {
+            "type": "noul",
+            "instructions": "Is the customer asking for money back?"
+          },
+          "team": {
+            "type": "choice",
+            "instructions": "Which team should handle this ticket?",
+            "criteria": {
+              "Billing": "Payments, invoices, refunds",
+              "Technical": "Bugs, outages, integrations",
+              "Sales": "Pricing questions, upgrades, new contracts"
+            }
+          },
+          "anger": {
+            "type": "score",
+            "instructions": "How frustrated is the customer?",
+            "criteria": [
+              "Calm",
+              "Frustrated",
+              "Very angry"
+            ]
+          }
+        }
+      },
+      "status": 200,
+      "response": "{\"model\":\"rizzo-spark-x2.5-1.7b-q8_0\",\"answers\":{\"refund\":{\"type\":\"noul\",\"noul\":0.9964474390591339},\"team\":{\"type\":\"choice\",\"choice\":\"Billing\",\"probabilities\":{\"Billing\":0.9997623432467894,\"Technical\":0.00023587864558459866,\"Sales\":1.7781076261450962e-06},\"confidence\":0.9996435148701841},\"anger\":{\"type\":\"score\",\"score\":1.0001129310646963,\"legend\":{\"0\":\"Calm\",\"1\":\"Frustrated\",\"2\":\"Very angry\"},\"probabilities\":{\"0\":1.4759022527773813e-06,\"1\":0.999884117130798,\"2\":0.00011440696694917756},\"confidence\":0.9998261756961968}},\"usage\":{\"input_tokens\":347,\"output_tokens\":0},\"x_rizzo\":{\"timing\":{\"inference_seconds\":0.31247233296744525,\"prefill_seconds\":0.1551326250191778,\"shared_prefix_tokens\":167,\"evaluated_tokens_including_padding\":347,\"logical_input_tokens\":681,\"batches\":1,\"generated_tokens\":0,\"peak_device_bytes\":2476851200,\"queue_seconds\":5.00003807246685e-07,\"compile_seconds\":0.012335665989667177,\"total_seconds\":0.3249762500054203},\"probability_status\":[\"uncalibrated_conditional_option_scores\"],\"fingerprint\":\"253f98cb629ee7d9f1ab115c84846e674edba61aa4d1acb894a7b79c4d96f73d\"}}",
+      "ms": 326.8,
+      "via": "http"
+    },
+    {
+      "case": "question-ids:ticket-1",
+      "method": "POST",
+      "path": "/v1/systemone",
+      "request": {
+        "model": "jev-latest",
+        "state": "Hi, I was charged twice for my March invoice (order #4471) and the refund I was promised last week still hasn't arrived. I've emailed three times. Please fix this today or I will dispute the charge with my bank.",
+        "questions": {
+          "ticket-1": {
+            "type": "noul",
+            "instructions": "Is the customer asking for money back?"
+          }
+        }
+      },
+      "status": 200,
+      "response": "{\"model\":\"rizzo-spark-x2.5-1.7b-q8_0\",\"answers\":{\"ticket-1\":{\"type\":\"noul\",\"noul\":0.9964249999068141}},\"usage\":{\"input_tokens\":230,\"output_tokens\":0},\"x_rizzo\":{\"timing\":{\"inference_seconds\":0.20304691698402166,\"prefill_seconds\":0.0,\"shared_prefix_tokens\":0,\"evaluated_tokens_including_padding\":230,\"logical_input_tokens\":230,\"batches\":1,\"generated_tokens\":0,\"peak_device_bytes\":2476851200,\"queue_seconds\":4.169996827840805e-07,\"compile_seconds\":0.004173625027760863,\"total_seconds\":0.2073121250141412},\"probability_status\":[\"uncalibrated_conditional_option_scores\"],\"fingerprint\":\"253f98cb629ee7d9f1ab115c84846e674edba61aa4d1acb894a7b79c4d96f73d\"}}",
+      "ms": 209.0,
+      "via": "http"
+    },
+    {
+      "case": "question-ids:q.2",
+      "method": "POST",
+      "path": "/v1/systemone",
+      "request": {
+        "model": "jev-latest",
+        "state": "Hi, I was charged twice for my March invoice (order #4471) and the refund I was promised last week still hasn't arrived. I've emailed three times. Please fix this today or I will dispute the charge with my bank.",
+        "questions": {
+          "q.2": {
+            "type": "noul",
+            "instructions": "Is the customer asking for money back?"
+          }
+        }
+      },
+      "status": 200,
+      "response": "{\"model\":\"rizzo-spark-x2.5-1.7b-q8_0\",\"answers\":{\"q.2\":{\"type\":\"noul\",\"noul\":0.9964249999068141}},\"usage\":{\"input_tokens\":230,\"output_tokens\":0},\"x_rizzo\":{\"timing\":{\"inference_seconds\":0.20433841703925282,\"prefill_seconds\":0.0,\"shared_prefix_tokens\":0,\"evaluated_tokens_including_padding\":230,\"logical_input_tokens\":230,\"batches\":1,\"generated_tokens\":0,\"peak_device_bytes\":2476851200,\"queue_seconds\":4.169996827840805e-07,\"compile_seconds\":0.0037045409553684294,\"total_seconds\":0.20817958295810968},\"probability_status\":[\"uncalibrated_conditional_option_scores\"],\"fingerprint\":\"253f98cb629ee7d9f1ab115c84846e674edba61aa4d1acb894a7b79c4d96f73d\"}}",
+      "ms": 209.9,
+      "via": "http"
+    },
+    {
+      "case": "question-ids:with space",
+      "method": "POST",
+      "path": "/v1/systemone",
+      "request": {
+        "model": "jev-latest",
+        "state": "Hi, I was charged twice for my March invoice (order #4471) and the refund I was promised last week still hasn't arrived. I've emailed three times. Please fix this today or I will dispute the charge with my bank.",
+        "questions": {
+          "with space": {
+            "type": "noul",
+            "instructions": "Is the customer asking for money back?"
+          }
+        }
+      },
+      "status": 200,
+      "response": "{\"model\":\"rizzo-spark-x2.5-1.7b-q8_0\",\"answers\":{\"with space\":{\"type\":\"noul\",\"noul\":0.9964249999068141}},\"usage\":{\"input_tokens\":230,\"output_tokens\":0},\"x_rizzo\":{\"timing\":{\"inference_seconds\":0.20474025001749396,\"prefill_seconds\":0.0,\"shared_prefix_tokens\":0,\"evaluated_tokens_including_padding\":230,\"logical_input_tokens\":230,\"batches\":1,\"generated_tokens\":0,\"peak_device_bytes\":2476851200,\"queue_seconds\":5.41971530765295e-07,\"compile_seconds\":0.0036777500063180923,\"total_seconds\":0.20856233296217397},\"probability_status\":[\"uncalibrated_conditional_option_scores\"],\"fingerprint\":\"253f98cb629ee7d9f1ab115c84846e674edba61aa4d1acb894a7b79c4d96f73d\"}}",
+      "ms": 210.6,
+      "via": "http"
+    },
+    {
+      "case": "question-ids:질문",
+      "method": "POST",
+      "path": "/v1/systemone",
+      "request": {
+        "model": "jev-latest",
+        "state": "Hi, I was charged twice for my March invoice (order #4471) and the refund I was promised last week still hasn't arrived. I've emailed three times. Please fix this today or I will dispute the charge with my bank.",
+        "questions": {
+          "질문": {
+            "type": "noul",
+            "instructions": "Is the customer asking for money back?"
+          }
+        }
+      },
+      "status": 200,
+      "response": "{\"model\":\"rizzo-spark-x2.5-1.7b-q8_0\",\"answers\":{\"질문\":{\"type\":\"noul\",\"noul\":0.9964249999068141}},\"usage\":{\"input_tokens\":230,\"output_tokens\":0},\"x_rizzo\":{\"timing\":{\"inference_seconds\":0.2060356250149198,\"prefill_seconds\":0.0,\"shared_prefix_tokens\":0,\"evaluated_tokens_including_padding\":230,\"logical_input_tokens\":230,\"batches\":1,\"generated_tokens\":0,\"peak_device_bytes\":2476851200,\"queue_seconds\":7.079797796905041e-07,\"compile_seconds\":0.00843066704692319,\"total_seconds\":0.21463520801626146},\"probability_status\":[\"uncalibrated_conditional_option_scores\"],\"fingerprint\":\"253f98cb629ee7d9f1ab115c84846e674edba61aa4d1acb894a7b79c4d96f73d\"}}",
+      "ms": 217.4,
+      "via": "http"
+    },
+    {
+      "case": "question-ids:🎯",
+      "method": "POST",
+      "path": "/v1/systemone",
+      "request": {
+        "model": "jev-latest",
+        "state": "Hi, I was charged twice for my March invoice (order #4471) and the refund I was promised last week still hasn't arrived. I've emailed three times. Please fix this today or I will dispute the charge with my bank.",
+        "questions": {
+          "🎯": {
+            "type": "noul",
+            "instructions": "Is the customer asking for money back?"
+          }
+        }
+      },
+      "status": 200,
+      "response": "{\"model\":\"rizzo-spark-x2.5-1.7b-q8_0\",\"answers\":{\"🎯\":{\"type\":\"noul\",\"noul\":0.9964249999068141}},\"usage\":{\"input_tokens\":230,\"output_tokens\":0},\"x_rizzo\":{\"timing\":{\"inference_seconds\":0.2048791659763083,\"prefill_seconds\":0.0,\"shared_prefix_tokens\":0,\"evaluated_tokens_including_padding\":230,\"logical_input_tokens\":230,\"batches\":1,\"generated_tokens\":0,\"peak_device_bytes\":2476851200,\"queue_seconds\":8.330098353326321e-07,\"compile_seconds\":0.006819083995651454,\"total_seconds\":0.21180920803453773},\"probability_status\":[\"uncalibrated_conditional_option_scores\"],\"fingerprint\":\"253f98cb629ee7d9f1ab115c84846e674edba61aa4d1acb894a7b79c4d96f73d\"}}",
+      "ms": 213.9,
+      "via": "http"
+    },
+    {
+      "case": "unicode",
+      "method": "POST",
+      "path": "/v1/systemone",
+      "request": {
+        "model": "jev-latest",
+        "state": "배송이 3일째 안 와요. 그냥 환불해 주세요 😡",
+        "questions": {
+          "kind": {
+            "type": "choice",
+            "instructions": "이 문의는 어떤 유형인가요?",
+            "criteria": {
+              "환불 요청": "고객이 돈을 돌려받기를 원함",
+              "배송 문의": "배송 상태를 물음",
+              "🙂 기타": "그 외"
+            }
+          }
+        }
+      },
+      "status": 200,
+      "response": "{\"model\":\"rizzo-spark-x2.5-1.7b-q8_0\",\"answers\":{\"kind\":{\"type\":\"choice\",\"choice\":\"환불 요청\",\"probabilities\":{\"환불 요청\":0.9673227035170285,\"배송 문의\":0.03250114865856705,\"🙂 기타\":0.0001761478244044323},\"confidence\":0.9509840552755429}},\"usage\":{\"input_tokens\":227,\"output_tokens\":0},\"x_rizzo\":{\"timing\":{\"inference_seconds\":0.20361987501382828,\"prefill_seconds\":0.0,\"shared_prefix_tokens\":0,\"evaluated_tokens_including_padding\":227,\"logical_input_tokens\":227,\"batches\":1,\"generated_tokens\":0,\"peak_device_bytes\":2476851200,\"queue_seconds\":4.169996827840805e-07,\"compile_seconds\":0.005783958011306822,\"total_seconds\":0.20949595898855478},\"probability_status\":[\"uncalibrated_conditional_option_scores\"],\"fingerprint\":\"253f98cb629ee7d9f1ab115c84846e674edba61aa4d1acb894a7b79c4d96f73d\"}}",
+      "ms": 211.1,
+      "via": "http"
+    },
+    {
+      "case": "unknown-fields",
+      "method": "POST",
+      "path": "/v1/systemone",
+      "request": {
+        "model": "jev-latest",
+        "state": "Hi, I was charged twice for my March invoice (order #4471) and the refund I was promised last week still hasn't arrived. I've emailed three times. Please fix this today or I will dispute the charge with my bank.",
+        "questions": {
+          "refund": {
+            "type": "noul",
+            "instructions": "Is the customer asking for money back?"
+          }
+        },
+        "x_trace_id": "jevcompat",
+        "seed": 7
+      },
+      "status": 422,
+      "response": "{\"detail\":[{\"type\":\"extra_forbidden\",\"loc\":[\"body\",\"x_trace_id\"],\"msg\":\"Extra inputs are not permitted\",\"input\":\"jevcompat\"},{\"type\":\"extra_forbidden\",\"loc\":[\"body\",\"seed\"],\"msg\":\"Extra inputs are not permitted\",\"input\":7}]}",
+      "ms": 1.0,
+      "via": "http"
+    },
+    {
+      "case": "invalid:not-json",
+      "method": "POST",
+      "path": "/v1/systemone",
+      "request": "{\"model\": \"jev-latest\", \"state\": \"x\", \"questions\": {",
+      "status": 422,
+      "response": "{\"detail\":[{\"type\":\"json_invalid\",\"loc\":[\"body\",52],\"msg\":\"JSON decode error\",\"input\":{},\"ctx\":{\"error\":\"Expecting property name enclosed in double quotes\"}}]}",
+      "ms": 0.6,
+      "via": "http"
+    },
+    {
+      "case": "invalid:missing-state",
+      "method": "POST",
+      "path": "/v1/systemone",
+      "request": {
+        "model": "jev-latest",
+        "questions": {
+          "refund": {
+            "type": "noul",
+            "instructions": "Is the customer asking for money back?"
+          }
+        }
+      },
+      "status": 422,
+      "response": "{\"detail\":[{\"type\":\"missing\",\"loc\":[\"body\",\"state\"],\"msg\":\"Field required\",\"input\":{\"model\":\"jev-latest\",\"questions\":{\"refund\":{\"type\":\"noul\",\"instructions\":\"Is the customer asking for money back?\"}}}}]}",
+      "ms": 0.8,
+      "via": "http"
+    },
+    {
+      "case": "invalid:missing-questions",
+      "method": "POST",
+      "path": "/v1/systemone",
+      "request": {
+        "model": "jev-latest",
+        "state": "Hi, I was charged twice for my March invoice (order #4471) and the refund I was promised last week still hasn't arrived. I've emailed three times. Please fix this today or I will dispute the charge with my bank."
+      },
+      "status": 422,
+      "response": "{\"detail\":[{\"type\":\"missing\",\"loc\":[\"body\",\"questions\"],\"msg\":\"Field required\",\"input\":{\"model\":\"jev-latest\",\"state\":\"Hi, I was charged twice for my March invoice (order #4471) and the refund I was promised last week still hasn't arrived. I've emailed three times. Please fix this today or I will dispute the charge with my bank.\"}}]}",
+      "ms": 0.8,
+      "via": "http"
+    },
+    {
+      "case": "invalid:empty-questions",
+      "method": "POST",
+      "path": "/v1/systemone",
+      "request": {
+        "model": "jev-latest",
+        "state": "Hi, I was charged twice for my March invoice (order #4471) and the refund I was promised last week still hasn't arrived. I've emailed three times. Please fix this today or I will dispute the charge with my bank.",
+        "questions": {}
+      },
+      "status": 422,
+      "response": "{\"detail\":[{\"type\":\"too_short\",\"loc\":[\"body\",\"questions\"],\"msg\":\"Dictionary should have at least 1 item after validation, not 0\",\"input\":{},\"ctx\":{\"field_type\":\"Dictionary\",\"min_length\":1,\"actual_length\":0}}]}",
+      "ms": 0.7,
+      "via": "http"
+    },
+    {
+      "case": "invalid:missing-type",
+      "method": "POST",
+      "path": "/v1/systemone",
+      "request": {
+        "model": "jev-latest",
+        "state": "Hi, I was charged twice for my March invoice (order #4471) and the refund I was promised last week still hasn't arrived. I've emailed three times. Please fix this today or I will dispute the charge with my bank.",
+        "questions": {
+          "refund": {
+            "instructions": "Refund?"
+          }
+        }
+      },
+      "status": 422,
+      "response": "{\"detail\":[{\"type\":\"union_tag_not_found\",\"loc\":[\"body\",\"questions\",\"refund\"],\"msg\":\"Unable to extract tag using discriminator 'type'\",\"input\":{\"instructions\":\"Refund?\"},\"ctx\":{\"discriminator\":\"'type'\"}}]}",
+      "ms": 0.7,
+      "via": "http"
+    },
+    {
+      "case": "invalid:type-boolean",
+      "method": "POST",
+      "path": "/v1/systemone",
+      "request": {
+        "model": "jev-latest",
+        "state": "Hi, I was charged twice for my March invoice (order #4471) and the refund I was promised last week still hasn't arrived. I've emailed three times. Please fix this today or I will dispute the charge with my bank.",
+        "questions": {
+          "refund": {
+            "type": "boolean",
+            "instructions": "Refund?"
+          }
+        }
+      },
+      "status": 422,
+      "response": "{\"detail\":[{\"type\":\"union_tag_invalid\",\"loc\":[\"body\",\"questions\",\"refund\"],\"msg\":\"Input tag 'boolean' found using 'type' does not match any of the expected tags: 'noul', 'choice', 'score'\",\"input\":{\"type\":\"boolean\",\"instructions\":\"Refund?\"},\"ctx\":{\"discriminator\":\"'type'\",\"tag\":\"boolean\",\"expected_tags\":\"'noul', 'choice', 'score'\"}}]}",
+      "ms": 0.7,
+      "via": "http"
+    },
+    {
+      "case": "invalid:choice-no-options",
+      "method": "POST",
+      "path": "/v1/systemone",
+      "request": {
+        "model": "jev-latest",
+        "state": "Hi, I was charged twice for my March invoice (order #4471) and the refund I was promised last week still hasn't arrived. I've emailed three times. Please fix this today or I will dispute the charge with my bank.",
+        "questions": {
+          "team": {
+            "type": "choice",
+            "instructions": "Team?",
+            "criteria": {}
+          }
+        }
+      },
+      "status": 422,
+      "response": "{\"detail\":[{\"type\":\"too_short\",\"loc\":[\"body\",\"questions\",\"team\",\"choice\",\"criteria\"],\"msg\":\"Dictionary should have at least 2 items after validation, not 0\",\"input\":{},\"ctx\":{\"field_type\":\"Dictionary\",\"min_length\":2,\"actual_length\":0}}]}",
+      "ms": 0.7,
+      "via": "http"
+    },
+    {
+      "case": "invalid:score-map",
+      "method": "POST",
+      "path": "/v1/systemone",
+      "request": {
+        "model": "jev-latest",
+        "state": "Hi, I was charged twice for my March invoice (order #4471) and the refund I was promised last week still hasn't arrived. I've emailed three times. Please fix this today or I will dispute the charge with my bank.",
+        "questions": {
+          "anger": {
+            "type": "score",
+            "instructions": "How frustrated?",
+            "criteria": {
+              "0": "Calm",
+              "1": "Frustrated",
+              "2": "Very angry"
+            }
+          }
+        }
+      },
+      "status": 422,
+      "response": "{\"detail\":[{\"type\":\"list_type\",\"loc\":[\"body\",\"questions\",\"anger\",\"score\",\"criteria\"],\"msg\":\"Input should be a valid list\",\"input\":{\"0\":\"Calm\",\"1\":\"Frustrated\",\"2\":\"Very angry\"}}]}",
+      "ms": 0.7,
+      "via": "http"
+    },
+    {
+      "case": "out-of-range:choice-1",
+      "method": "POST",
+      "path": "/v1/systemone",
+      "request": {
+        "model": "jev-latest",
+        "state": "Hi, I was charged twice for my March invoice (order #4471) and the refund I was promised last week still hasn't arrived. I've emailed three times. Please fix this today or I will dispute the charge with my bank.",
+        "questions": {
+          "team": {
+            "type": "choice",
+            "instructions": "Team?",
+            "criteria": {
+              "Billing": null
+            }
+          }
+        }
+      },
+      "status": 422,
+      "response": "{\"detail\":[{\"type\":\"too_short\",\"loc\":[\"body\",\"questions\",\"team\",\"choice\",\"criteria\"],\"msg\":\"Dictionary should have at least 2 items after validation, not 1\",\"input\":{\"Billing\":null},\"ctx\":{\"field_type\":\"Dictionary\",\"min_length\":2,\"actual_length\":1}}]}",
+      "ms": 0.7,
+      "via": "http"
+    },
+    {
+      "case": "out-of-range:choice-256",
+      "method": "POST",
+      "path": "/v1/systemone",
+      "request": {
+        "model": "jev-latest",
+        "state": "Hi, I was charged twice for my March invoice (order #4471) and the refund I was promised last week still hasn't arrived. I've emailed three times. Please fix this today or I will dispute the charge with my bank.",
+        "questions": {
+          "queue": {
+            "type": "choice",
+            "instructions": "Queue?",
+            "criteria": {
+              "Billing": null,
+              "Queue 001": null,
+              "Queue 002": null,
+              "Queue 003": null,
+              "Queue 004": null,
+              "Queue 005": null,
+              "Queue 006": null,
+              "Queue 007": null,
+              "Queue 008": null,
+              "Queue 009": null,
+              "Queue 010": null,
+              "Queue 011": null,
+              "Queue 012": null,
+              "Queue 013": null,
+              "Queue 014": null,
+              "Queue 015": null,
+              "Queue 016": null,
+              "Queue 017": null,
+              "Queue 018": null,
+              "Queue 019": null,
+              "Queue 020": null,
+              "Queue 021": null,
+              "Queue 022": null,
+              "Queue 023": null,
+              "Queue 024": null,
+              "Queue 025": null,
+              "Queue 026": null,
+              "Queue 027": null,
+              "Queue 028": null,
+              "Queue 029": null,
+              "Queue 030": null,
+              "Queue 031": null,
+              "Queue 032": null,
+              "Queue 033": null,
+              "Queue 034": null,
+              "Queue 035": null,
+              "Queue 036": null,
+              "Queue 037": null,
+              "Queue 038": null,
+              "Queue 039": null,
+              "Queue 040": null,
+              "Queue 041": null,
+              "Queue 042": null,
+              "Queue 043": null,
+              "Queue 044": null,
+              "Queue 045": null,
+              "Queue 046": null,
+              "Queue 047": null,
+              "Queue 048": null,
+              "Queue 049": null,
+              "Queue 050": null,
+              "Queue 051": null,
+              "Queue 052": null,
+              "Queue 053": null,
+              "Queue 054": null,
+              "Queue 055": null,
+              "Queue 056": null,
+              "Queue 057": null,
+              "Queue 058": null,
+              "Queue 059": null,
+              "Queue 060": null,
+              "Queue 061": null,
+              "Queue 062": null,
+              "Queue 063": null,
+              "Queue 064": null,
+              "Queue 065": null,
+              "Queue 066": null,
+              "Queue 067": null,
+              "Queue 068": null,
+              "Queue 069": null,
+              "Queue 070": null,
+              "Queue 071": null,
+              "Queue 072": null,
+              "Queue 073": null,
+              "Queue 074": null,
+              "Queue 075": null,
+              "Queue 076": null,
+              "Queue 077": null,
+              "Queue 078": null,
+              "Queue 079": null,
+              "Queue 080": null,
+              "Queue 081": null,
+              "Queue 082": null,
+              "Queue 083": null,
+              "Queue 084": null,
+              "Queue 085": null,
+              "Queue 086": null,
+              "Queue 087": null,
+              "Queue 088": null,
+              "Queue 089": null,
+              "Queue 090": null,
+              "Queue 091": null,
+              "Queue 092": null,
+              "Queue 093": null,
+              "Queue 094": null,
+              "Queue 095": null,
+              "Queue 096": null,
+              "Queue 097": null,
+              "Queue 098": null,
+              "Queue 099": null,
+              "Queue 100": null,
+              "Queue 101": null,
+              "Queue 102": null,
+              "Queue 103": null,
+              "Queue 104": null,
+              "Queue 105": null,
+              "Queue 106": null,
+              "Queue 107": null,
+              "Queue 108": null,
+              "Queue 109": null,
+              "Queue 110": null,
+              "Queue 111": null,
+              "Queue 112": null,
+              "Queue 113": null,
+              "Queue 114": null,
+              "Queue 115": null,
+              "Queue 116": null,
+              "Queue 117": null,
+              "Queue 118": null,
+              "Queue 119": null,
+              "Queue 120": null,
+              "Queue 121": null,
+              "Queue 122": null,
+              "Queue 123": null,
+              "Queue 124": null,
+              "Queue 125": null,
+              "Queue 126": null,
+              "Queue 127": null,
+              "Queue 128": null,
+              "Queue 129": null,
+              "Queue 130": null,
+              "Queue 131": null,
+              "Queue 132": null,
+              "Queue 133": null,
+              "Queue 134": null,
+              "Queue 135": null,
+              "Queue 136": null,
+              "Queue 137": null,
+              "Queue 138": null,
+              "Queue 139": null,
+              "Queue 140": null,
+              "Queue 141": null,
+              "Queue 142": null,
+              "Queue 143": null,
+              "Queue 144": null,
+              "Queue 145": null,
+              "Queue 146": null,
+              "Queue 147": null,
+              "Queue 148": null,
+              "Queue 149": null,
+              "Queue 150": null,
+              "Queue 151": null,
+              "Queue 152": null,
+              "Queue 153": null,
+              "Queue 154": null,
+              "Queue 155": null,
+              "Queue 156": null,
+              "Queue 157": null,
+              "Queue 158": null,
+              "Queue 159": null,
+              "Queue 160": null,
+              "Queue 161": null,
+              "Queue 162": null,
+              "Queue 163": null,
+              "Queue 164": null,
+              "Queue 165": null,
+              "Queue 166": null,
+              "Queue 167": null,
+              "Queue 168": null,
+              "Queue 169": null,
+              "Queue 170": null,
+              "Queue 171": null,
+              "Queue 172": null,
+              "Queue 173": null,
+              "Queue 174": null,
+              "Queue 175": null,
+              "Queue 176": null,
+              "Queue 177": null,
+              "Queue 178": null,
+              "Queue 179": null,
+              "Queue 180": null,
+              "Queue 181": null,
+              "Queue 182": null,
+              "Queue 183": null,
+              "Queue 184": null,
+              "Queue 185": null,
+              "Queue 186": null,
+              "Queue 187": null,
+              "Queue 188": null,
+              "Queue 189": null,
+              "Queue 190": null,
+              "Queue 191": null,
+              "Queue 192": null,
+              "Queue 193": null,
+              "Queue 194": null,
+              "Queue 195": null,
+              "Queue 196": null,
+              "Queue 197": null,
+              "Queue 198": null,
+              "Queue 199": null,
+              "Queue 200": null,
+              "Queue 201": null,
+              "Queue 202": null,
+              "Queue 203": null,
+              "Queue 204": null,
+              "Queue 205": null,
+              "Queue 206": null,
+              "Queue 207": null,
+              "Queue 208": null,
+              "Queue 209": null,
+              "Queue 210": null,
+              "Queue 211": null,
+              "Queue 212": null,
+              "Queue 213": null,
+              "Queue 214": null,
+              "Queue 215": null,
+              "Queue 216": null,
+              "Queue 217": null,
+              "Queue 218": null,
+              "Queue 219": null,
+              "Queue 220": null,
+              "Queue 221": null,
+              "Queue 222": null,
+              "Queue 223": null,
+              "Queue 224": null,
+              "Queue 225": null,
+              "Queue 226": null,
+              "Queue 227": null,
+              "Queue 228": null,
+              "Queue 229": null,
+              "Queue 230": null,
+              "Queue 231": null,
+              "Queue 232": null,
+              "Queue 233": null,
+              "Queue 234": null,
+              "Queue 235": null,
+              "Queue 236": null,
+              "Queue 237": null,
+              "Queue 238": null,
+              "Queue 239": null,
+              "Queue 240": null,
+              "Queue 241": null,
+              "Queue 242": null,
+              "Queue 243": null,
+              "Queue 244": null,
+              "Queue 245": null,
+              "Queue 246": null,
+              "Queue 247": null,
+              "Queue 248": null,
+              "Queue 249": null,
+              "Queue 250": null,
+              "Queue 251": null,
+              "Queue 252": null,
+              "Queue 253": null,
+              "Queue 254": null,
+              "Queue 255": null
+            }
+          }
+        }
+      },
+      "status": 422,
+      "response": "{\"detail\":[{\"type\":\"too_long\",\"loc\":[\"body\",\"questions\",\"queue\",\"choice\",\"criteria\"],\"msg\":\"Dictionary should have at most 26 items after validation, not 256\",\"input\":{\"Billing\":null,\"Queue 001\":null,\"Queue 002\":null,\"Queue 003\":null,\"Queue 004\":null,\"Queue 005\":null,\"Queue 006\":null,\"Queue 007\":null,\"Queue 008\":null,\"Queue 009\":null,\"Queue 010\":null,\"Queue 011\":null,\"Queue 012\":null,\"Queue 013\":null,\"Queue 014\":null,\"Queue 015\":null,\"Queue 016\":null,\"Queue 017\":null,\"Queue 018\":null,\"Queue 019\":null,\"Queue 020\":null,\"Queue 021\":null,\"Queue 022\":null,\"Queue 023\":null,\"Queue 024\":null,\"Queue 025\":null,\"Queue 026\":null,\"Queue 027\":null,\"Queue 028\":null,\"Queue 029\":null,\"Queue 030\":null,\"Queue 031\":null,\"Queue 032\":null,\"Queue 033\":null,\"Queue 034\":null,\"Queue 035\":null,\"Queue 036\":null,\"Queue 037\":null,\"Queue 038\":null,\"Queue 039\":null,\"Queue 040\":null,\"Queue 041\":null,\"Queue 042\":null,\"Queue 043\":null,\"Queue 044\":null,\"Queue 045\":null,\"Queue 046\":null,\"Queue 047\":null,\"Queue 048\":null,\"Queue 049\":null,\"Queue 050\":null,\"Queue 051\":null,\"Queue 052\":null,\"Queue 053\":null,\"Queue 054\":null,\"Queue 055\":null,\"Queue 056\":null,\"Queue 057\":null,\"Queue 058\":null,\"Queue 059\":null,\"Queue 060\":null,\"Queue 061\":null,\"Queue 062\":null,\"Queue 063\":null,\"Queue 064\":null,\"Queue 065\":null,\"Queue 066\":null,\"Queue 067\":null,\"Queue 068\":null,\"Queue 069\":null,\"Queue 070\":null,\"Queue 071\":null,\"Queue 072\":null,\"Queue 073\":null,\"Queue 074\":null,\"Queue 075\":null,\"Queue 076\":null,\"Queue 077\":null,\"Queue 078\":null,\"Queue 079\":null,\"Queue 080\":null,\"Queue 081\":null,\"Queue 082\":null,\"Queue 083\":null,\"Queue 084\":null,\"Queue 085\":null,\"Queue 086\":null,\"Queue 087\":null,\"Queue 088\":null,\"Queue 089\":null,\"Queue 090\":null,\"Queue 091\":null,\"Queue 092\":null,\"Queue 093\":null,\"Queue 094\":null,\"Queue 095\":null,\"Queue 096\":null,\"Queue 097\":null,\"Queue 098\":null,\"Queue 099\":null,\"Queue 100\":null,\"Queue 101\":null,\"Queue 102\":null,\"Queue 103\":null,\"Queue 104\":null,\"Queue 105\":null,\"Queue 106\":null,\"Queue 107\":null,\"Queue 108\":null,\"Queue 109\":null,\"Queue 110\":null,\"Queue 111\":null,\"Queue 112\":null,\"Queue 113\":null,\"Queue 114\":null,\"Queue 115\":null,\"Queue 116\":null,\"Queue 117\":null,\"Queue 118\":null,\"Queue 119\":null,\"Queue 120\":null,\"Queue 121\":null,\"Queue 122\":null,\"Queue 123\":null,\"Queue 124\":null,\"Queue 125\":null,\"Queue 126\":null,\"Queue 127\":null,\"Queue 128\":null,\"Queue 129\":null,\"Queue 130\":null,\"Queue 131\":null,\"Queue 132\":null,\"Queue 133\":null,\"Queue 134\":null,\"Queue 135\":null,\"Queue 136\":null,\"Queue 137\":null,\"Queue 138\":null,\"Queue 139\":null,\"Queue 140\":null,\"Queue 141\":null,\"Queue 142\":null,\"Queue 143\":null,\"Queue 144\":null,\"Queue 145\":null,\"Queue 146\":null,\"Queue 147\":null,\"Queue 148\":null,\"Queue 149\":null,\"Queue 150\":null,\"Queue 151\":null,\"Queue 152\":null,\"Queue 153\":null,\"Queue 154\":null,\"Queue 155\":null,\"Queue 156\":null,\"Queue 157\":null,\"Queue 158\":null,\"Queue 159\":null,\"Queue 160\":null,\"Queue 161\":null,\"Queue 162\":null,\"Queue 163\":null,\"Queue 164\":null,\"Queue 165\":null,\"Queue 166\":null,\"Queue 167\":null,\"Queue 168\":null,\"Queue 169\":null,\"Queue 170\":null,\"Queue 171\":null,\"Queue 172\":null,\"Queue 173\":null,\"Queue 174\":null,\"Queue 175\":null,\"Queue 176\":null,\"Queue 177\":null,\"Queue 178\":null,\"Queue 179\":null,\"Queue 180\":null,\"Queue 181\":null,\"Queue 182\":null,\"Queue 183\":null,\"Queue 184\":null,\"Queue 185\":null,\"Queue 186\":null,\"Queue 187\":null,\"Queue 188\":null,\"Queue 189\":null,\"Queue 190\":null,\"Queue 191\":null,\"Queue 192\":null,\"Queue 193\":null,\"Queue 194\":null,\"Queue 195\":null,\"Queue 196\":null,\"Queue 197\":null,\"Queue 198\":null,\"Queue 199\":null,\"Queue 200\":null,\"Queue 201\":null,\"Queue 202\":null,\"Queue 203\":null,\"Queue 204\":null,\"Queue 205\":null,\"Queue 206\":null,\"Queue 207\":null,\"Queue 208\":null,\"Queue 209\":null,\"Queue 210\":null,\"Queue 211\":null,\"Queue 212\":null,\"Queue 213\":null,\"Queue 214\":null,\"Queue 215\":null,\"Queue 216\":null,\"Queue 217\":null,\"Queue 218\":null,\"Queue 219\":null,\"Queue 220\":null,\"Queue 221\":null,\"Queue 222\":null,\"Queue 223\":null,\"Queue 224\":null,\"Queue 22… (4591 bytes)",
+      "ms": 1.1,
+      "via": "http"
+    },
+    {
+      "case": "out-of-range:score-1",
+      "method": "POST",
+      "path": "/v1/systemone",
+      "request": {
+        "model": "jev-latest",
+        "state": "Hi, I was charged twice for my March invoice (order #4471) and the refund I was promised last week still hasn't arrived. I've emailed three times. Please fix this today or I will dispute the charge with my bank.",
+        "questions": {
+          "anger": {
+            "type": "score",
+            "instructions": "Frustration?",
+            "criteria": [
+              "Calm"
+            ]
+          }
+        }
+      },
+      "status": 422,
+      "response": "{\"detail\":[{\"type\":\"too_short\",\"loc\":[\"body\",\"questions\",\"anger\",\"score\",\"criteria\"],\"msg\":\"List should have at least 2 items after validation, not 1\",\"input\":[\"Calm\"],\"ctx\":{\"field_type\":\"List\",\"min_length\":2,\"actual_length\":1}}]}",
+      "ms": 0.7,
+      "via": "http"
+    },
+    {
+      "case": "out-of-range:score-11",
+      "method": "POST",
+      "path": "/v1/systemone",
+      "request": {
+        "model": "jev-latest",
+        "state": "Hi, I was charged twice for my March invoice (order #4471) and the refund I was promised last week still hasn't arrived. I've emailed three times. Please fix this today or I will dispute the charge with my bank.",
+        "questions": {
+          "anger": {
+            "type": "score",
+            "instructions": "Frustration?",
+            "criteria": [
+              "Level 0",
+              "Level 1",
+              "Level 2",
+              "Level 3",
+              "Level 4",
+              "Level 5",
+              "Level 6",
+              "Level 7",
+              "Level 8",
+              "Level 9",
+              "Level 10"
+            ]
+          }
+        }
+      },
+      "status": 422,
+      "response": "{\"detail\":[{\"type\":\"too_long\",\"loc\":[\"body\",\"questions\",\"anger\",\"score\",\"criteria\"],\"msg\":\"List should have at most 10 items after validation, not 11\",\"input\":[\"Level 0\",\"Level 1\",\"Level 2\",\"Level 3\",\"Level 4\",\"Level 5\",\"Level 6\",\"Level 7\",\"Level 8\",\"Level 9\",\"Level 10\"],\"ctx\":{\"field_type\":\"List\",\"max_length\":10,\"actual_length\":11}}]}",
+      "ms": 0.7,
+      "via": "http"
+    },
+    {
+      "case": "out-of-range:score-null-level",
+      "method": "POST",
+      "path": "/v1/systemone",
+      "request": {
+        "model": "jev-latest",
+        "state": "Hi, I was charged twice for my March invoice (order #4471) and the refund I was promised last week still hasn't arrived. I've emailed three times. Please fix this today or I will dispute the charge with my bank.",
+        "questions": {
+          "anger": {
+            "type": "score",
+            "instructions": "Frustration?",
+            "criteria": [
+              "Calm",
+              null
+            ]
+          }
+        }
+      },
+      "status": 422,
+      "response": "{\"detail\":[{\"type\":\"string_type\",\"loc\":[\"body\",\"questions\",\"anger\",\"score\",\"criteria\",1,\"str\"],\"msg\":\"Input should be a valid string\",\"input\":null},{\"type\":\"dict_type\",\"loc\":[\"body\",\"questions\",\"anger\",\"score\",\"criteria\",1,\"dict[str,json-or-python[json=any,python=tagged-union[list[...],dict[str,...],str,bool,int,float,none]]]\"],\"msg\":\"Input should be a valid dictionary\",\"input\":null},{\"type\":\"list_type\",\"loc\":[\"body\",\"questions\",\"anger\",\"score\",\"criteria\",1,\"list[json-or-python[json=any,python=tagged-union[list[...],dict[str,...],str,bool,int,float,none]]]\"],\"msg\":\"Input should be a valid list\",\"input\":null}]}",
+      "ms": 0.8,
+      "via": "http"
+    },
+    {
+      "case": "out-of-range:state-null",
+      "method": "POST",
+      "path": "/v1/systemone",
+      "request": {
+        "model": "jev-latest",
+        "state": null,
+        "questions": {
+          "refund": {
+            "type": "noul",
+            "instructions": "Is the customer asking for money back?"
+          }
+        }
+      },
+      "status": 422,
+      "response": "{\"detail\":[{\"type\":\"string_type\",\"loc\":[\"body\",\"state\",\"str\"],\"msg\":\"Input should be a valid string\",\"input\":null},{\"type\":\"dict_type\",\"loc\":[\"body\",\"state\",\"dict[str,...]\"],\"msg\":\"Input should be a valid dictionary\",\"input\":null},{\"type\":\"list_type\",\"loc\":[\"body\",\"state\",\"list[json-or-python[json=any,python=tagged-union[list[...],dict[str,...],str,bool,int,float,none]]]\"],\"msg\":\"Input should be a valid list\",\"input\":null}]}",
+      "ms": 0.7,
+      "via": "http"
+    },
+    {
+      "case": "unknown-model",
+      "method": "POST",
+      "path": "/v1/systemone",
+      "request": {
+        "model": "jevcompat-no-such-model",
+        "state": "Hi, I was charged twice for my March invoice (order #4471) and the refund I was promised last week still hasn't arrived. I've emailed three times. Please fix this today or I will dispute the charge with my bank.",
+        "questions": {
+          "refund": {
+            "type": "noul",
+            "instructions": "Is the customer asking for money back?"
+          }
+        }
+      },
+      "status": 422,
+      "response": "{\"detail\":\"Unknown model 'jevcompat-no-such-model'. Use 'rizzo-latest', 'rizzo-spark-x2.5-1.7b-q8_0' or a jev-* alias.\"}",
+      "ms": 0.7,
+      "via": "http"
+    },
+    {
+      "case": "semantics-baseline:1",
+      "method": "POST",
+      "path": "/v1/systemone",
+      "request": {
+        "model": "jev-latest",
+        "state": "Hi, I was charged twice for my March invoice (order #4471) and the refund I was promised last week still hasn't arrived. I've emailed three times. Please fix this today or I will dispute the charge with my bank.",
+        "questions": {
+          "refund": {
+            "type": "noul",
+            "instructions": "Is the customer asking for money back?"
+          },
+          "team": {
+            "type": "choice",
+            "instructions": "Which team should handle this ticket?",
+            "criteria": {
+              "Billing": "Payments, invoices, refunds",
+              "Technical": "Bugs, outages, integrations",
+              "Sales": "Pricing questions, upgrades, new contracts"
+            }
+          },
+          "anger": {
+            "type": "score",
+            "instructions": "How frustrated is the customer?",
+            "criteria": [
+              "Calm",
+              "Frustrated",
+              "Very angry"
+            ]
+          }
+        }
+      },
+      "status": 200,
+      "response": "{\"model\":\"rizzo-spark-x2.5-1.7b-q8_0\",\"answers\":{\"refund\":{\"type\":\"noul\",\"noul\":0.9964474390591339},\"team\":{\"type\":\"choice\",\"choice\":\"Billing\",\"probabilities\":{\"Billing\":0.9997623432467894,\"Technical\":0.00023587864558459866,\"Sales\":1.7781076261450962e-06},\"confidence\":0.9996435148701841},\"anger\":{\"type\":\"score\",\"score\":1.0001129310646963,\"legend\":{\"0\":\"Calm\",\"1\":\"Frustrated\",\"2\":\"Very angry\"},\"probabilities\":{\"0\":1.4759022527773813e-06,\"1\":0.999884117130798,\"2\":0.00011440696694917756},\"confidence\":0.9998261756961968}},\"usage\":{\"input_tokens\":347,\"output_tokens\":0},\"x_rizzo\":{\"timing\":{\"inference_seconds\":0.3114519999944605,\"prefill_seconds\":0.15335508296266198,\"shared_prefix_tokens\":167,\"evaluated_tokens_including_padding\":347,\"logical_input_tokens\":681,\"batches\":1,\"generated_tokens\":0,\"peak_device_bytes\":2476851200,\"queue_seconds\":6.249756552278996e-07,\"compile_seconds\":0.011111332976724952,\"total_seconds\":0.32270424999296665},\"probability_status\":[\"uncalibrated_conditional_option_scores\"],\"fingerprint\":\"253f98cb629ee7d9f1ab115c84846e674edba61aa4d1acb894a7b79c4d96f73d\"}}",
+      "ms": 324.3,
+      "via": "http"
+    },
+    {
+      "case": "semantics-baseline:2",
+      "method": "POST",
+      "path": "/v1/systemone",
+      "request": {
+        "model": "jev-latest",
+        "state": "Hi, I was charged twice for my March invoice (order #4471) and the refund I was promised last week still hasn't arrived. I've emailed three times. Please fix this today or I will dispute the charge with my bank.",
+        "questions": {
+          "refund": {
+            "type": "noul",
+            "instructions": "Is the customer asking for money back?"
+          },
+          "team": {
+            "type": "choice",
+            "instructions": "Which team should handle this ticket?",
+            "criteria": {
+              "Billing": "Payments, invoices, refunds",
+              "Technical": "Bugs, outages, integrations",
+              "Sales": "Pricing questions, upgrades, new contracts"
+            }
+          },
+          "anger": {
+            "type": "score",
+            "instructions": "How frustrated is the customer?",
+            "criteria": [
+              "Calm",
+              "Frustrated",
+              "Very angry"
+            ]
+          }
+        }
+      },
+      "status": 200,
+      "response": "{\"model\":\"rizzo-spark-x2.5-1.7b-q8_0\",\"answers\":{\"refund\":{\"type\":\"noul\",\"noul\":0.9964474390591339},\"team\":{\"type\":\"choice\",\"choice\":\"Billing\",\"probabilities\":{\"Billing\":0.9997623432467894,\"Technical\":0.00023587864558459866,\"Sales\":1.7781076261450962e-06},\"confidence\":0.9996435148701841},\"anger\":{\"type\":\"score\",\"score\":1.0001129310646963,\"legend\":{\"0\":\"Calm\",\"1\":\"Frustrated\",\"2\":\"Very angry\"},\"probabilities\":{\"0\":1.4759022527773813e-06,\"1\":0.999884117130798,\"2\":0.00011440696694917756},\"confidence\":0.9998261756961968}},\"usage\":{\"input_tokens\":347,\"output_tokens\":0},\"x_rizzo\":{\"timing\":{\"inference_seconds\":0.31081833300413564,\"prefill_seconds\":0.15447387500898913,\"shared_prefix_tokens\":167,\"evaluated_tokens_including_padding\":347,\"logical_input_tokens\":681,\"batches\":1,\"generated_tokens\":0,\"peak_device_bytes\":2476851200,\"queue_seconds\":6.25033862888813e-07,\"compile_seconds\":0.01491695799631998,\"total_seconds\":0.3258868750417605},\"probability_status\":[\"uncalibrated_conditional_option_scores\"],\"fingerprint\":\"253f98cb629ee7d9f1ab115c84846e674edba61aa4d1acb894a7b79c4d96f73d\"}}",
+      "ms": 327.7,
+      "via": "http"
+    },
+    {
+      "case": "semantics-baseline:3",
+      "method": "POST",
+      "path": "/v1/systemone",
+      "request": {
+        "model": "jev-latest",
+        "state": "Hi, I was charged twice for my March invoice (order #4471) and the refund I was promised last week still hasn't arrived. I've emailed three times. Please fix this today or I will dispute the charge with my bank.",
+        "questions": {
+          "refund": {
+            "type": "noul",
+            "instructions": "Is the customer asking for money back?"
+          },
+          "team": {
+            "type": "choice",
+            "instructions": "Which team should handle this ticket?",
+            "criteria": {
+              "Billing": "Payments, invoices, refunds",
+              "Technical": "Bugs, outages, integrations",
+              "Sales": "Pricing questions, upgrades, new contracts"
+            }
+          },
+          "anger": {
+            "type": "score",
+            "instructions": "How frustrated is the customer?",
+            "criteria": [
+              "Calm",
+              "Frustrated",
+              "Very angry"
+            ]
+          }
+        }
+      },
+      "status": 200,
+      "response": "{\"model\":\"rizzo-spark-x2.5-1.7b-q8_0\",\"answers\":{\"refund\":{\"type\":\"noul\",\"noul\":0.9964474390591339},\"team\":{\"type\":\"choice\",\"choice\":\"Billing\",\"probabilities\":{\"Billing\":0.9997623432467894,\"Technical\":0.00023587864558459866,\"Sales\":1.7781076261450962e-06},\"confidence\":0.9996435148701841},\"anger\":{\"type\":\"score\",\"score\":1.0001129310646963,\"legend\":{\"0\":\"Calm\",\"1\":\"Frustrated\",\"2\":\"Very angry\"},\"probabilities\":{\"0\":1.4759022527773813e-06,\"1\":0.999884117130798,\"2\":0.00011440696694917756},\"confidence\":0.9998261756961968}},\"usage\":{\"input_tokens\":347,\"output_tokens\":0},\"x_rizzo\":{\"timing\":{\"inference_seconds\":0.310520083992742,\"prefill_seconds\":0.15346374997170642,\"shared_prefix_tokens\":167,\"evaluated_tokens_including_padding\":347,\"logical_input_tokens\":681,\"batches\":1,\"generated_tokens\":0,\"peak_device_bytes\":2476851200,\"queue_seconds\":4.5803608372807503e-07,\"compile_seconds\":0.011542207968886942,\"total_seconds\":0.32228758302517235},\"probability_status\":[\"uncalibrated_conditional_option_scores\"],\"fingerprint\":\"253f98cb629ee7d9f1ab115c84846e674edba61aa4d1acb894a7b79c4d96f73d\"}}",
+      "ms": 324.1,
+      "via": "http"
+    },
+    {
+      "case": "semantics-question-id:1",
+      "method": "POST",
+      "path": "/v1/systemone",
+      "request": {
+        "model": "jev-latest",
+        "state": "Hi, I was charged twice for my March invoice (order #4471) and the refund I was promised last week still hasn't arrived. I've emailed three times. Please fix this today or I will dispute the charge with my bank.",
+        "questions": {
+          "zz-renamed.1": {
+            "type": "noul",
+            "instructions": "Is the customer asking for money back?"
+          },
+          "Q 🙂": {
+            "type": "choice",
+            "instructions": "Which team should handle this ticket?",
+            "criteria": {
+              "Billing": "Payments, invoices, refunds",
+              "Technical": "Bugs, outages, integrations",
+              "Sales": "Pricing questions, upgrades, new contracts"
+            }
+          },
+          "x_y_z": {
+            "type": "score",
+            "instructions": "How frustrated is the customer?",
+            "criteria": [
+              "Calm",
+              "Frustrated",
+              "Very angry"
+            ]
+          }
+        }
+      },
+      "status": 200,
+      "response": "{\"model\":\"rizzo-spark-x2.5-1.7b-q8_0\",\"answers\":{\"zz-renamed.1\":{\"type\":\"noul\",\"noul\":0.9964474390591339},\"Q 🙂\":{\"type\":\"choice\",\"choice\":\"Billing\",\"probabilities\":{\"Billing\":0.9997623432467894,\"Technical\":0.00023587864558459866,\"Sales\":1.7781076261450962e-06},\"confidence\":0.9996435148701841},\"x_y_z\":{\"type\":\"score\",\"score\":1.0001129310646963,\"legend\":{\"0\":\"Calm\",\"1\":\"Frustrated\",\"2\":\"Very angry\"},\"probabilities\":{\"0\":1.4759022527773813e-06,\"1\":0.999884117130798,\"2\":0.00011440696694917756},\"confidence\":0.9998261756961968}},\"usage\":{\"input_tokens\":347,\"output_tokens\":0},\"x_rizzo\":{\"timing\":{\"inference_seconds\":0.31066404102602974,\"prefill_seconds\":0.15351595799438655,\"shared_prefix_tokens\":167,\"evaluated_tokens_including_padding\":347,\"logical_input_tokens\":681,\"batches\":1,\"generated_tokens\":0,\"peak_device_bytes\":2476851200,\"queue_seconds\":6.660120561718941e-07,\"compile_seconds\":0.012545750010758638,\"total_seconds\":0.32337087497580796},\"probability_status\":[\"uncalibrated_conditional_option_scores\"],\"fingerprint\":\"253f98cb629ee7d9f1ab115c84846e674edba61aa4d1acb894a7b79c4d96f73d\"}}",
+      "ms": 325.2,
+      "via": "http"
+    },
+    {
+      "case": "semantics-question-id:2",
+      "method": "POST",
+      "path": "/v1/systemone",
+      "request": {
+        "model": "jev-latest",
+        "state": "Hi, I was charged twice for my March invoice (order #4471) and the refund I was promised last week still hasn't arrived. I've emailed three times. Please fix this today or I will dispute the charge with my bank.",
+        "questions": {
+          "zz-renamed.1": {
+            "type": "noul",
+            "instructions": "Is the customer asking for money back?"
+          },
+          "Q 🙂": {
+            "type": "choice",
+            "instructions": "Which team should handle this ticket?",
+            "criteria": {
+              "Billing": "Payments, invoices, refunds",
+              "Technical": "Bugs, outages, integrations",
+              "Sales": "Pricing questions, upgrades, new contracts"
+            }
+          },
+          "x_y_z": {
+            "type": "score",
+            "instructions": "How frustrated is the customer?",
+            "criteria": [
+              "Calm",
+              "Frustrated",
+              "Very angry"
+            ]
+          }
+        }
+      },
+      "status": 200,
+      "response": "{\"model\":\"rizzo-spark-x2.5-1.7b-q8_0\",\"answers\":{\"zz-renamed.1\":{\"type\":\"noul\",\"noul\":0.9964474390591339},\"Q 🙂\":{\"type\":\"choice\",\"choice\":\"Billing\",\"probabilities\":{\"Billing\":0.9997623432467894,\"Technical\":0.00023587864558459866,\"Sales\":1.7781076261450962e-06},\"confidence\":0.9996435148701841},\"x_y_z\":{\"type\":\"score\",\"score\":1.0001129310646963,\"legend\":{\"0\":\"Calm\",\"1\":\"Frustrated\",\"2\":\"Very angry\"},\"probabilities\":{\"0\":1.4759022527773813e-06,\"1\":0.999884117130798,\"2\":0.00011440696694917756},\"confidence\":0.9998261756961968}},\"usage\":{\"input_tokens\":347,\"output_tokens\":0},\"x_rizzo\":{\"timing\":{\"inference_seconds\":0.3120372910052538,\"prefill_seconds\":0.15457758295815438,\"shared_prefix_tokens\":167,\"evaluated_tokens_including_padding\":347,\"logical_input_tokens\":681,\"batches\":1,\"generated_tokens\":0,\"peak_device_bytes\":2476851200,\"queue_seconds\":5.84055669605732e-07,\"compile_seconds\":0.016160374972969294,\"total_seconds\":0.3283467920264229},\"probability_status\":[\"uncalibrated_conditional_option_scores\"],\"fingerprint\":\"253f98cb629ee7d9f1ab115c84846e674edba61aa4d1acb894a7b79c4d96f73d\"}}",
+      "ms": 330.2,
+      "via": "http"
+    },
+    {
+      "case": "semantics-question-id:3",
+      "method": "POST",
+      "path": "/v1/systemone",
+      "request": {
+        "model": "jev-latest",
+        "state": "Hi, I was charged twice for my March invoice (order #4471) and the refund I was promised last week still hasn't arrived. I've emailed three times. Please fix this today or I will dispute the charge with my bank.",
+        "questions": {
+          "zz-renamed.1": {
+            "type": "noul",
+            "instructions": "Is the customer asking for money back?"
+          },
+          "Q 🙂": {
+            "type": "choice",
+            "instructions": "Which team should handle this ticket?",
+            "criteria": {
+              "Billing": "Payments, invoices, refunds",
+              "Technical": "Bugs, outages, integrations",
+              "Sales": "Pricing questions, upgrades, new contracts"
+            }
+          },
+          "x_y_z": {
+            "type": "score",
+            "instructions": "How frustrated is the customer?",
+            "criteria": [
+              "Calm",
+              "Frustrated",
+              "Very angry"
+            ]
+          }
+        }
+      },
+      "status": 200,
+      "response": "{\"model\":\"rizzo-spark-x2.5-1.7b-q8_0\",\"answers\":{\"zz-renamed.1\":{\"type\":\"noul\",\"noul\":0.9964474390591339},\"Q 🙂\":{\"type\":\"choice\",\"choice\":\"Billing\",\"probabilities\":{\"Billing\":0.9997623432467894,\"Technical\":0.00023587864558459866,\"Sales\":1.7781076261450962e-06},\"confidence\":0.9996435148701841},\"x_y_z\":{\"type\":\"score\",\"score\":1.0001129310646963,\"legend\":{\"0\":\"Calm\",\"1\":\"Frustrated\",\"2\":\"Very angry\"},\"probabilities\":{\"0\":1.4759022527773813e-06,\"1\":0.999884117130798,\"2\":0.00011440696694917756},\"confidence\":0.9998261756961968}},\"usage\":{\"input_tokens\":347,\"output_tokens\":0},\"x_rizzo\":{\"timing\":{\"inference_seconds\":0.3111962919938378,\"prefill_seconds\":0.15487487497739494,\"shared_prefix_tokens\":167,\"evaluated_tokens_including_padding\":347,\"logical_input_tokens\":681,\"batches\":1,\"generated_tokens\":0,\"peak_device_bytes\":2476851200,\"queue_seconds\":4.5803608372807503e-07,\"compile_seconds\":0.012093791970983148,\"total_seconds\":0.32343158300500363},\"probability_status\":[\"uncalibrated_conditional_option_scores\"],\"fingerprint\":\"253f98cb629ee7d9f1ab115c84846e674edba61aa4d1acb894a7b79c4d96f73d\"}}",
+      "ms": 325.1,
+      "via": "http"
+    },
+    {
+      "case": "semantics-batching:1",
+      "method": "POST",
+      "path": "/v1/systemone",
+      "request": {
+        "model": "jev-latest",
+        "state": "Hi, I was charged twice for my March invoice (order #4471) and the refund I was promised last week still hasn't arrived. I've emailed three times. Please fix this today or I will dispute the charge with my bank.",
+        "questions": {
+          "refund": {
+            "type": "noul",
+            "instructions": "Is the customer asking for money back?"
+          },
+          "team": {
+            "type": "choice",
+            "instructions": "Which team should handle this ticket?",
+            "criteria": {
+              "Billing": "Payments, invoices, refunds",
+              "Technical": "Bugs, outages, integrations",
+              "Sales": "Pricing questions, upgrades, new contracts"
+            }
+          },
+          "anger": {
+            "type": "score",
+            "instructions": "How frustrated is the customer?",
+            "criteria": [
+              "Calm",
+              "Frustrated",
+              "Very angry"
+            ]
+          },
+          "urgent": {
+            "type": "noul",
+            "instructions": "Does the customer need an answer today?"
+          },
+          "lang": {
+            "type": "choice",
+            "instructions": "What language is the ticket in?",
+            "criteria": {
+              "English": null,
+              "Other": null
+            }
+          },
+          "polite": {
+            "type": "score",
+            "instructions": "How polite is the message?",
+            "criteria": [
+              "Rude",
+              "Neutral",
+              "Polite"
+            ]
+          }
+        }
+      },
+      "status": 200,
+      "response": "{\"model\":\"rizzo-spark-x2.5-1.7b-q8_0\",\"answers\":{\"refund\":{\"type\":\"noul\",\"noul\":0.9963940145949529},\"team\":{\"type\":\"choice\",\"choice\":\"Billing\",\"probabilities\":{\"Billing\":0.9997581194273943,\"Technical\":0.00024007183920349883,\"Sales\":1.8087334020715137e-06},\"confidence\":0.9996371791410916},\"anger\":{\"type\":\"score\",\"score\":1.0001093449014877,\"legend\":{\"0\":\"Calm\",\"1\":\"Frustrated\",\"2\":\"Very angry\"},\"probabilities\":{\"0\":1.4636849433644022e-06,\"1\":0.9998877277286256,\"2\":0.00011080858643106124},\"confidence\":0.9998315915929383},\"urgent\":{\"type\":\"noul\",\"noul\":0.4631923229830603},\"lang\":{\"type\":\"choice\",\"choice\":\"English\",\"probabilities\":{\"English\":0.9888296640010042,\"Other\":0.01117033599899567},\"confidence\":0.9776593280020085},\"polite\":{\"type\":\"score\",\"score\":1.987617827914829,\"legend\":{\"0\":\"Rude\",\"1\":\"Neutral\",\"2\":\"Polite\"},\"probabilities\":{\"0\":0.005377140544305196,\"1\":0.0016278909965607357,\"2\":0.9929949684591342},\"confidence\":0.9894924526887012}},\"usage\":{\"input_tokens\":494,\"output_tokens\":0},\"x_rizzo\":{\"timing\":{\"inference_seconds\":0.4719167919829488,\"prefill_seconds\":0.1553917919518426,\"shared_prefix_tokens\":167,\"evaluated_tokens_including_padding\":494,\"logical_input_tokens\":1329,\"batches\":2,\"generated_tokens\":0,\"peak_device_bytes\":2476851200,\"queue_seconds\":3.33995558321476e-07,\"compile_seconds\":0.021489166014362127,\"total_seconds\":0.4936677090008743},\"probability_status\":[\"uncalibrated_conditional_option_scores\"],\"fingerprint\":\"253f98cb629ee7d9f1ab115c84846e674edba61aa4d1acb894a7b79c4d96f73d\"}}",
+      "ms": 496.1,
+      "via": "http"
+    },
+    {
+      "case": "semantics-batching:2",
+      "method": "POST",
+      "path": "/v1/systemone",
+      "request": {
+        "model": "jev-latest",
+        "state": "Hi, I was charged twice for my March invoice (order #4471) and the refund I was promised last week still hasn't arrived. I've emailed three times. Please fix this today or I will dispute the charge with my bank.",
+        "questions": {
+          "refund": {
+            "type": "noul",
+            "instructions": "Is the customer asking for money back?"
+          },
+          "team": {
+            "type": "choice",
+            "instructions": "Which team should handle this ticket?",
+            "criteria": {
+              "Billing": "Payments, invoices, refunds",
+              "Technical": "Bugs, outages, integrations",
+              "Sales": "Pricing questions, upgrades, new contracts"
+            }
+          },
+          "anger": {
+            "type": "score",
+            "instructions": "How frustrated is the customer?",
+            "criteria": [
+              "Calm",
+              "Frustrated",
+              "Very angry"
+            ]
+          },
+          "urgent": {
+            "type": "noul",
+            "instructions": "Does the customer need an answer today?"
+          },
+          "lang": {
+            "type": "choice",
+            "instructions": "What language is the ticket in?",
+            "criteria": {
+              "English": null,
+              "Other": null
+            }
+          },
+          "polite": {
+            "type": "score",
+            "instructions": "How polite is the message?",
+            "criteria": [
+              "Rude",
+              "Neutral",
+              "Polite"
+            ]
+          }
+        }
+      },
+      "status": 200,
+      "response": "{\"model\":\"rizzo-spark-x2.5-1.7b-q8_0\",\"answers\":{\"refund\":{\"type\":\"noul\",\"noul\":0.9963940145949529},\"team\":{\"type\":\"choice\",\"choice\":\"Billing\",\"probabilities\":{\"Billing\":0.9997581194273943,\"Technical\":0.00024007183920349883,\"Sales\":1.8087334020715137e-06},\"confidence\":0.9996371791410916},\"anger\":{\"type\":\"score\",\"score\":1.0001093449014877,\"legend\":{\"0\":\"Calm\",\"1\":\"Frustrated\",\"2\":\"Very angry\"},\"probabilities\":{\"0\":1.4636849433644022e-06,\"1\":0.9998877277286256,\"2\":0.00011080858643106124},\"confidence\":0.9998315915929383},\"urgent\":{\"type\":\"noul\",\"noul\":0.4631923229830603},\"lang\":{\"type\":\"choice\",\"choice\":\"English\",\"probabilities\":{\"English\":0.9888296640010042,\"Other\":0.01117033599899567},\"confidence\":0.9776593280020085},\"polite\":{\"type\":\"score\",\"score\":1.987617827914829,\"legend\":{\"0\":\"Rude\",\"1\":\"Neutral\",\"2\":\"Polite\"},\"probabilities\":{\"0\":0.005377140544305196,\"1\":0.0016278909965607357,\"2\":0.9929949684591342},\"confidence\":0.9894924526887012}},\"usage\":{\"input_tokens\":494,\"output_tokens\":0},\"x_rizzo\":{\"timing\":{\"inference_seconds\":0.46535883302567527,\"prefill_seconds\":0.15472562494687736,\"shared_prefix_tokens\":167,\"evaluated_tokens_including_padding\":494,\"logical_input_tokens\":1329,\"batches\":2,\"generated_tokens\":0,\"peak_device_bytes\":2476851200,\"queue_seconds\":8.33999365568161e-07,\"compile_seconds\":0.03212012501899153,\"total_seconds\":0.4977312089758925},\"probability_status\":[\"uncalibrated_conditional_option_scores\"],\"fingerprint\":\"253f98cb629ee7d9f1ab115c84846e674edba61aa4d1acb894a7b79c4d96f73d\"}}",
+      "ms": 500.4,
+      "via": "http"
+    },
+    {
+      "case": "semantics-batching:3",
+      "method": "POST",
+      "path": "/v1/systemone",
+      "request": {
+        "model": "jev-latest",
+        "state": "Hi, I was charged twice for my March invoice (order #4471) and the refund I was promised last week still hasn't arrived. I've emailed three times. Please fix this today or I will dispute the charge with my bank.",
+        "questions": {
+          "refund": {
+            "type": "noul",
+            "instructions": "Is the customer asking for money back?"
+          },
+          "team": {
+            "type": "choice",
+            "instructions": "Which team should handle this ticket?",
+            "criteria": {
+              "Billing": "Payments, invoices, refunds",
+              "Technical": "Bugs, outages, integrations",
+              "Sales": "Pricing questions, upgrades, new contracts"
+            }
+          },
+          "anger": {
+            "type": "score",
+            "instructions": "How frustrated is the customer?",
+            "criteria": [
+              "Calm",
+              "Frustrated",
+              "Very angry"
+            ]
+          },
+          "urgent": {
+            "type": "noul",
+            "instructions": "Does the customer need an answer today?"
+          },
+          "lang": {
+            "type": "choice",
+            "instructions": "What language is the ticket in?",
+            "criteria": {
+              "English": null,
+              "Other": null
+            }
+          },
+          "polite": {
+            "type": "score",
+            "instructions": "How polite is the message?",
+            "criteria": [
+              "Rude",
+              "Neutral",
+              "Polite"
+            ]
+          }
+        }
+      },
+      "status": 200,
+      "response": "{\"model\":\"rizzo-spark-x2.5-1.7b-q8_0\",\"answers\":{\"refund\":{\"type\":\"noul\",\"noul\":0.9963940145949529},\"team\":{\"type\":\"choice\",\"choice\":\"Billing\",\"probabilities\":{\"Billing\":0.9997581194273943,\"Technical\":0.00024007183920349883,\"Sales\":1.8087334020715137e-06},\"confidence\":0.9996371791410916},\"anger\":{\"type\":\"score\",\"score\":1.0001093449014877,\"legend\":{\"0\":\"Calm\",\"1\":\"Frustrated\",\"2\":\"Very angry\"},\"probabilities\":{\"0\":1.4636849433644022e-06,\"1\":0.9998877277286256,\"2\":0.00011080858643106124},\"confidence\":0.9998315915929383},\"urgent\":{\"type\":\"noul\",\"noul\":0.4631923229830603},\"lang\":{\"type\":\"choice\",\"choice\":\"English\",\"probabilities\":{\"English\":0.9888296640010042,\"Other\":0.01117033599899567},\"confidence\":0.9776593280020085},\"polite\":{\"type\":\"score\",\"score\":1.987617827914829,\"legend\":{\"0\":\"Rude\",\"1\":\"Neutral\",\"2\":\"Polite\"},\"probabilities\":{\"0\":0.005377140544305196,\"1\":0.0016278909965607357,\"2\":0.9929949684591342},\"confidence\":0.9894924526887012}},\"usage\":{\"input_tokens\":494,\"output_tokens\":0},\"x_rizzo\":{\"timing\":{\"inference_seconds\":0.4635933749959804,\"prefill_seconds\":0.15452691697282717,\"shared_prefix_tokens\":167,\"evaluated_tokens_including_padding\":494,\"logical_input_tokens\":1329,\"batches\":2,\"generated_tokens\":0,\"peak_device_bytes\":2476851200,\"queue_seconds\":5.420297384262085e-07,\"compile_seconds\":0.031083749956451356,\"total_seconds\":0.49485391698544845},\"probability_status\":[\"uncalibrated_conditional_option_scores\"],\"fingerprint\":\"253f98cb629ee7d9f1ab115c84846e674edba61aa4d1acb894a7b79c4d96f73d\"}}",
+      "ms": 497.1,
+      "via": "http"
+    },
+    {
+      "case": "semantics-question-order:1",
+      "method": "POST",
+      "path": "/v1/systemone",
+      "request": {
+        "model": "jev-latest",
+        "state": "Hi, I was charged twice for my March invoice (order #4471) and the refund I was promised last week still hasn't arrived. I've emailed three times. Please fix this today or I will dispute the charge with my bank.",
+        "questions": {
+          "anger": {
+            "type": "score",
+            "instructions": "How frustrated is the customer?",
+            "criteria": [
+              "Calm",
+              "Frustrated",
+              "Very angry"
+            ]
+          },
+          "team": {
+            "type": "choice",
+            "instructions": "Which team should handle this ticket?",
+            "criteria": {
+              "Billing": "Payments, invoices, refunds",
+              "Technical": "Bugs, outages, integrations",
+              "Sales": "Pricing questions, upgrades, new contracts"
+            }
+          },
+          "refund": {
+            "type": "noul",
+            "instructions": "Is the customer asking for money back?"
+          }
+        }
+      },
+      "status": 200,
+      "response": "{\"model\":\"rizzo-spark-x2.5-1.7b-q8_0\",\"answers\":{\"anger\":{\"type\":\"score\",\"score\":1.0001129310646963,\"legend\":{\"0\":\"Calm\",\"1\":\"Frustrated\",\"2\":\"Very angry\"},\"probabilities\":{\"0\":1.4759022527773813e-06,\"1\":0.999884117130798,\"2\":0.00011440696694917756},\"confidence\":0.9998261756961968},\"team\":{\"type\":\"choice\",\"choice\":\"Billing\",\"probabilities\":{\"Billing\":0.9997623432467894,\"Technical\":0.00023587864558459866,\"Sales\":1.7781076261450962e-06},\"confidence\":0.9996435148701841},\"refund\":{\"type\":\"noul\",\"noul\":0.9964474390591339}},\"usage\":{\"input_tokens\":347,\"output_tokens\":0},\"x_rizzo\":{\"timing\":{\"inference_seconds\":0.31174045795341954,\"prefill_seconds\":0.15607162500964478,\"shared_prefix_tokens\":167,\"evaluated_tokens_including_padding\":347,\"logical_input_tokens\":681,\"batches\":1,\"generated_tokens\":0,\"peak_device_bytes\":2476851200,\"queue_seconds\":5.00003807246685e-07,\"compile_seconds\":0.01107875001616776,\"total_seconds\":0.3230173750198446},\"probability_status\":[\"uncalibrated_conditional_option_scores\"],\"fingerprint\":\"253f98cb629ee7d9f1ab115c84846e674edba61aa4d1acb894a7b79c4d96f73d\"}}",
+      "ms": 325.1,
+      "via": "http"
+    },
+    {
+      "case": "semantics-question-order:2",
+      "method": "POST",
+      "path": "/v1/systemone",
+      "request": {
+        "model": "jev-latest",
+        "state": "Hi, I was charged twice for my March invoice (order #4471) and the refund I was promised last week still hasn't arrived. I've emailed three times. Please fix this today or I will dispute the charge with my bank.",
+        "questions": {
+          "anger": {
+            "type": "score",
+            "instructions": "How frustrated is the customer?",
+            "criteria": [
+              "Calm",
+              "Frustrated",
+              "Very angry"
+            ]
+          },
+          "team": {
+            "type": "choice",
+            "instructions": "Which team should handle this ticket?",
+            "criteria": {
+              "Billing": "Payments, invoices, refunds",
+              "Technical": "Bugs, outages, integrations",
+              "Sales": "Pricing questions, upgrades, new contracts"
+            }
+          },
+          "refund": {
+            "type": "noul",
+            "instructions": "Is the customer asking for money back?"
+          }
+        }
+      },
+      "status": 200,
+      "response": "{\"model\":\"rizzo-spark-x2.5-1.7b-q8_0\",\"answers\":{\"anger\":{\"type\":\"score\",\"score\":1.0001129310646963,\"legend\":{\"0\":\"Calm\",\"1\":\"Frustrated\",\"2\":\"Very angry\"},\"probabilities\":{\"0\":1.4759022527773813e-06,\"1\":0.999884117130798,\"2\":0.00011440696694917756},\"confidence\":0.9998261756961968},\"team\":{\"type\":\"choice\",\"choice\":\"Billing\",\"probabilities\":{\"Billing\":0.9997623432467894,\"Technical\":0.00023587864558459866,\"Sales\":1.7781076261450962e-06},\"confidence\":0.9996435148701841},\"refund\":{\"type\":\"noul\",\"noul\":0.9964474390591339}},\"usage\":{\"input_tokens\":347,\"output_tokens\":0},\"x_rizzo\":{\"timing\":{\"inference_seconds\":0.3111063329852186,\"prefill_seconds\":0.15599041699897498,\"shared_prefix_tokens\":167,\"evaluated_tokens_including_padding\":347,\"logical_input_tokens\":681,\"batches\":1,\"generated_tokens\":0,\"peak_device_bytes\":2476851200,\"queue_seconds\":8.33999365568161e-07,\"compile_seconds\":0.019087125023361295,\"total_seconds\":0.3303421250311658},\"probability_status\":[\"uncalibrated_conditional_option_scores\"],\"fingerprint\":\"253f98cb629ee7d9f1ab115c84846e674edba61aa4d1acb894a7b79c4d96f73d\"}}",
+      "ms": 332.5,
+      "via": "http"
+    },
+    {
+      "case": "semantics-question-order:3",
+      "method": "POST",
+      "path": "/v1/systemone",
+      "request": {
+        "model": "jev-latest",
+        "state": "Hi, I was charged twice for my March invoice (order #4471) and the refund I was promised last week still hasn't arrived. I've emailed three times. Please fix this today or I will dispute the charge with my bank.",
+        "questions": {
+          "anger": {
+            "type": "score",
+            "instructions": "How frustrated is the customer?",
+            "criteria": [
+              "Calm",
+              "Frustrated",
+              "Very angry"
+            ]
+          },
+          "team": {
+            "type": "choice",
+            "instructions": "Which team should handle this ticket?",
+            "criteria": {
+              "Billing": "Payments, invoices, refunds",
+              "Technical": "Bugs, outages, integrations",
+              "Sales": "Pricing questions, upgrades, new contracts"
+            }
+          },
+          "refund": {
+            "type": "noul",
+            "instructions": "Is the customer asking for money back?"
+          }
+        }
+      },
+      "status": 200,
+      "response": "{\"model\":\"rizzo-spark-x2.5-1.7b-q8_0\",\"answers\":{\"anger\":{\"type\":\"score\",\"score\":1.0001129310646963,\"legend\":{\"0\":\"Calm\",\"1\":\"Frustrated\",\"2\":\"Very angry\"},\"probabilities\":{\"0\":1.4759022527773813e-06,\"1\":0.999884117130798,\"2\":0.00011440696694917756},\"confidence\":0.9998261756961968},\"team\":{\"type\":\"choice\",\"choice\":\"Billing\",\"probabilities\":{\"Billing\":0.9997623432467894,\"Technical\":0.00023587864558459866,\"Sales\":1.7781076261450962e-06},\"confidence\":0.9996435148701841},\"refund\":{\"type\":\"noul\",\"noul\":0.9964474390591339}},\"usage\":{\"input_tokens\":347,\"output_tokens\":0},\"x_rizzo\":{\"timing\":{\"inference_seconds\":0.31084058299893513,\"prefill_seconds\":0.15631854202365503,\"shared_prefix_tokens\":167,\"evaluated_tokens_including_padding\":347,\"logical_input_tokens\":681,\"batches\":1,\"generated_tokens\":0,\"peak_device_bytes\":2476851200,\"queue_seconds\":5.00003807246685e-07,\"compile_seconds\":0.011888833018019795,\"total_seconds\":0.3228924170252867},\"probability_status\":[\"uncalibrated_conditional_option_scores\"],\"fingerprint\":\"253f98cb629ee7d9f1ab115c84846e674edba61aa4d1acb894a7b79c4d96f73d\"}}",
+      "ms": 324.8,
+      "via": "http"
+    },
+    {
+      "case": "sdk-python",
+      "method": "POST",
+      "path": "/v1/systemone",
+      "request": {
+        "model": "jev-latest",
+        "questions": {
+          "refund": {
+            "type": "noul",
+            "instructions": "Is the customer asking for money back?"
+          },
+          "team": {
+            "type": "choice",
+            "instructions": "Which team should handle this ticket?",
+            "criteria": {
+              "Billing": "Payments, invoices, refunds",
+              "Technical": "Bugs, outages, integrations",
+              "Sales": "Pricing questions, upgrades, new contracts"
+            }
+          },
+          "anger": {
+            "type": "score",
+            "instructions": "How frustrated is the customer?",
+            "criteria": [
+              "Calm",
+              "Frustrated",
+              "Very angry"
+            ]
+          }
+        },
+        "state": "Hi, I was charged twice for my March invoice (order #4471) and the refund I was promised last week still hasn't arrived. I've emailed three times. Please fix this today or I will dispute the charge with my bank."
+      },
+      "status": 200,
+      "response": "{\"refund\": 0.9964474390591339, \"team\": \"Billing\", \"anger\": 1.0001129310646963}",
+      "ms": null,
+      "via": "typesafe-sdk"
+    }
+  ],
+  "info": {
+    "model_reported": "rizzo-spark-x2.5-1.7b-q8_0",
+    "types_ok": [
+      "choice",
+      "noul",
+      "score"
+    ],
+    "typesafe_sdk": "0.7.1",
+    "limits": {
+      "choice options accepted up to": 26,
+      "choice options rejected at": 64,
+      "score levels accepted up to": 10
+    },
+    "unknown_fields_ok": false
+  },
+  "aborted": null,
+  "case_errors": [],
+  "inconclusive": [],
+  "summary": {
+    "verdict": "not conformant",
+    "conformant": false,
+    "untested_musts": [],
+    "MUST": {
+      "passed": 31,
+      "failed": 1,
+      "skipped": 1,
+      "tested": 32
+    },
+    "SHOULD": {
+      "passed": 9,
+      "failed": 3,
+      "skipped": 3,
+      "tested": 12
+    }
+  }
+}

@@ -1,0 +1,120 @@
+jevcompat 0.1.0 · spec 0.1 · http://127.0.0.1:8000
+model sent 'jev-latest', server reports 'laya-rl-agent' · 61 requests · 4.8s · typesafe-sdk 0.7.1
+
+§1 Transport
+  ✓ MUST   http.endpoint              POST /v1/systemone answers valid requests with 200
+  ✓ MUST   http.json                  200 bodies are JSON
+  ✓ SHOULD http.content-type          responses declare a JSON media type
+  ✗ SHOULD http.models                GET /v1/models lists models
+      models-endpoint: GET /v1/models got 404
+        ← 404 {"detail":"Not Found"}
+
+§2 Authentication
+  ✓ MUST   auth.ignored-when-off      without auth, an Authorization header is accepted
+  – MUST   auth.bearer                the key is read from Authorization: Bearer  (no --key given (auth is off, or untested))
+  – SHOULD auth.missing               a missing key gets 401/403 with authentication_error  (no --key given (auth is off, or untested))
+  – SHOULD auth.invalid               a wrong key gets 401 with authentication_error  (no --key given (auth is off, or untested))
+
+§3.1 Request
+  ✓ MUST   request.state              state may be a string, object or array
+  ✓ MUST   request.model-alias        model "jev-latest" is accepted
+  ✓ MUST   request.multi              several questions of mixed types in one request
+  ✓ MUST   request.question-ids       any non-empty string is a question id
+  ✓ MUST   request.unicode            non-ASCII text is accepted and option names round-trip
+  ✓ SHOULD request.unknown-fields     unknown top-level fields are ignored
+  ✓ MUST   request.structured-text    instructions and descriptions may be objects or arrays
+
+§3.2 Noul
+  ✓ MUST   noul.criteria              noul criteria may be absent, null, two- or one-sided
+  ✗ SHOULD noul.no-instructions       a noul without instructions is accepted
+      noul-no-instructions: valid request got 422: {"detail":"question 'threat': no 'instructions'; add the text the model should answer"}
+        → POST /v1/systemone {"questions": {"threat": {"type": "noul", "criteria": {"true": "The customer threatens a chargeback", "false": "No threat"}}}, "model": "jev-latest", "state": "Hi, I was charged twice for my March invoice (order #4471) a…"}
+        ← 422 {"detail":"question 'threat': no 'instructions'; add the text the model should answer"}
+
+§3.3 Choice
+  ✓ MUST   choice.null-description    an option description may be null
+  ✗ MUST   choice.options             2 to 255 options are accepted
+      choice-options:128: valid request got 422: {"detail":"question 'queue' options exceed head_max_len=192"}
+        → POST /v1/systemone {"questions": {"queue": {"type": "choice", "instructions": "Which queue should this ticket go to?", "criteria": {"Billing": "Payments, invoices, refunds", "Queue 001": "Tickets routed to queue 1", "Queue 002": "Tickets routed to queue 2", "Queue 003": "Tickets… (5734 chars)
+        ← 422 {"detail":"question 'queue' options exceed head_max_len=192"}
+
+§3.4 Score
+  ✓ MUST   score.levels               2 to 10 levels are accepted
+  ✓ SHOULD score.map-rejected         map-form score criteria are rejected with 4xx
+
+§4.1 Response envelope
+  ✓ MUST   response.envelope          model, answers and usage are present
+  ✓ MUST   response.usage             token counts are non-negative integers
+  ✓ MUST   response.answer-ids        one answer per question id, none extra
+  ✓ MUST   response.answer-type       each answer's type matches its question
+  ✓ MUST   response.finite            no NaN or Infinity
+  ✗ SHOULD response.extensions        extra fields are prefixed x_
+      noul-basic: unprefixed top-level field(s) routing
+        → POST /v1/systemone {"questions": {"refund": {"type": "noul", "instructions": "Is the customer asking for money back?"}}, "model": "jev-latest", "state": "Hi, I was charged twice for my March invoice (order #4471) a…"}
+        ← 200 {"model":"laya-rl-agent","answers":{"refund":{"type":"noul","noul":0.8593,"confidence":0.8593,"action":{"act_probability":1.0}}},"usage":{"input_tokens":83,"output_tokens":0},"routing":{"model":"english","repo":"convaiinnovations/laya","reason":"English Latin … (452 chars)
+      noul-basic answers['refund']: unprefixed field(s) action, confidence
+        → POST /v1/systemone {"questions": {"refund": {"type": "noul", "instructions": "Is the customer asking for money back?"}}, "model": "jev-latest", "state": "Hi, I was charged twice for my March invoice (order #4471) a…"}
+        ← 200 {"model":"laya-rl-agent","answers":{"refund":{"type":"noul","noul":0.8593,"confidence":0.8593,"action":{"act_probability":1.0}}},"usage":{"input_tokens":83,"output_tokens":0},"routing":{"model":"english","repo":"convaiinnovations/laya","reason":"English Latin … (452 chars)
+      … 69 more
+
+§4.2 Noul answer
+  ✓ MUST   noul.answer                noul is a probability in [0, 1]
+
+§4.3 Choice answer
+  ✓ MUST   choice.answer              choice, probabilities and confidence are present
+  ✓ MUST   choice.probability-keys    probability keys are exactly the option names
+  ✓ MUST   choice.distribution        probabilities are in [0, 1] and sum to 1
+  ✓ MUST   choice.argmax              choice is the most probable option
+
+§4.4 Score answer
+  ✓ MUST   score.answer               score, legend, probabilities and confidence are present
+  ✗ MUST   score.legend               legend maps "0".."n-1" to the level descriptions
+      out-of-range:score-null-level answers['anger']: legend['1'] is a null legend value, which the official SDK rejects
+        → POST /v1/systemone {"questions": {"anger": {"type": "score", "instructions": "Frustration?", "criteria": ["Calm", null]}}, "model": "jev-latest", "state": "Hi, I was charged twice for my March invoice (order #4471) a…"}
+        ← 200 {"model":"laya-rl-agent","answers":{"anger":{"type":"score","score":0.853,"legend":{"0":"Calm","1":null},"probabilities":{"0":0.147,"1":0.853},"confidence":0.3977,"action":{"act_probability":1.0}}},"usage":{"input_tokens":70,"output_tokens":0},"routing":{"mode… (521 chars)
+  ✓ MUST   score.probability-keys     probability keys are "0".."n-1"
+  ✓ MUST   score.distribution         probabilities are in [0, 1] and sum to 1
+  ✓ MUST   score.expectation          score is the expectation of the probabilities
+
+§4.5 Confidence
+  ✓ MUST   confidence.range           confidence is in [0, 1]
+  ✗ SHOULD confidence.formula         confidence follows the reference formula
+      choice-basic answers['team']: confidence is 0.922; the reference formula gives 0.978
+        → POST /v1/systemone {"questions": {"team": {"type": "choice", "instructions": "Which team should handle this ticket?", "criteria": {"Billing": "Payments, invoices, refunds", "Technical": "Bugs, outages, integrations", "Sales": "Pricing questions, upgrades, new contracts"}}}, "mod… (352 chars)
+        ← 200 {"model":"laya-rl-agent","answers":{"team":{"type":"choice","choice":"Billing","probabilities":{"Billing":0.9856,"Technical":0.0066,"Sales":0.0078},"confidence":0.9224,"action":{"act_probability":1.0}}},"usage":{"input_tokens":98,"output_tokens":0},"routing":{… (526 chars)
+      choice-null-description answers['team']: confidence is 0.701; the reference formula gives 0.883
+        → POST /v1/systemone {"questions": {"team": {"type": "choice", "instructions": "Which team should handle this ticket?", "criteria": {"Billing": null, "Technical": null, "Sales": null}}}, "model": "jev-latest", "state": "Hi, I was charged twice for my March invoice (order #4471) a…… (262 chars)
+        ← 200 {"model":"laya-rl-agent","answers":{"team":{"type":"choice","choice":"Billing","probabilities":{"Billing":0.9218,"Technical":0.0364,"Sales":0.0418},"confidence":0.7012,"action":{"act_probability":1.0}}},"usage":{"input_tokens":70,"output_tokens":0},"routing":{… (526 chars)
+      … 14 more
+
+§6 Errors
+  ✓ SHOULD errors.json                error bodies are JSON
+  ✓ MUST   errors.no-5xx              bad requests never get a 5xx
+  ✗ SHOULD errors.reject-invalid      invalid requests get a 4xx, not an answer
+      invalid:missing-state: invalid request was answered with 200
+        → POST /v1/systemone {"questions": {"refund": {"type": "noul", "instructions": "Is the customer asking for money back?"}}, "model": "jev-latest"}
+        ← 200 {"model":"laya-rl-agent","answers":{"refund":{"type":"noul","noul":0.1109,"confidence":0.8891,"action":{"act_probability":1.0}}},"usage":{"input_tokens":35,"output_tokens":0},"routing":{"model":"english","repo":"convaiinnovations/laya","reason":"no letters det… (477 chars)
+      invalid:empty-questions: invalid request was answered with 200
+        → POST /v1/systemone {"questions": {}, "model": "jev-latest", "state": "Hi, I was charged twice for my March invoice (order #4471) a…"}
+        ← 200 {"model":"laya-rl-agent","answers":{},"usage":{"input_tokens":0,"output_tokens":0},"routing":{"model":"english","repo":"convaiinnovations/laya","reason":"English Latin text","detection":{"script":"latin","script_profile":{"latin":1.0},"language":"en","is_engli… (360 chars)
+  ✗ SHOULD errors.validation-shape    validation errors are 422 with detail[]
+      invalid:not-json: status 400; validation failures use 422
+        → POST /v1/systemone {"model": "jev-latest", "state": "x", "questions": {
+        ← 400 {"detail":"request body must be valid JSON"}
+      invalid:not-json: body is not {"detail": [{"loc": ["body", …], "msg", "type"}]}: {"detail":"request body must be valid JSON"}
+        → POST /v1/systemone {"model": "jev-latest", "state": "x", "questions": {
+        ← 400 {"detail":"request body must be valid JSON"}
+      … 7 more
+  – SHOULD errors.shape               other errors carry detail.error_type and detail.message  (not exercised: the server never produced the situation it covers)
+
+§7 Semantics
+  ✓ MUST   semantics.question-id      renaming a question id does not change its answer
+  ✓ SHOULD semantics.batching         other questions in the request do not change an answer
+  ✓ SHOULD semantics.question-order   question order does not change answers
+
+§8 Drop-in
+  ✓ MUST   dropin.sdk-python          the official Python SDK parses every answer type
+
+not conformant to spec 0.1: MUST 30/32, SHOULD 6/12
+  wrote ./results/laya/report.json
+  wrote ./results/laya/report.md

@@ -1,0 +1,112 @@
+jevcompat 0.1.0 · spec 0.1 · http://127.0.0.1:8000
+model sent 'jev-latest', server reports 'von-1.1.0' · 62 requests · 9.8s · typesafe-sdk 0.7.1
+
+§1 Transport
+  ✓ MUST   http.endpoint              POST /v1/systemone answers valid requests with 200
+  ✓ MUST   http.json                  200 bodies are JSON
+  ✓ SHOULD http.content-type          responses declare a JSON media type
+  ✓ SHOULD http.models                GET /v1/models lists models
+
+§2 Authentication
+  ✓ MUST   auth.ignored-when-off      without auth, an Authorization header is accepted
+  – MUST   auth.bearer                the key is read from Authorization: Bearer  (no --key given (auth is off, or untested))
+  – SHOULD auth.missing               a missing key gets 401/403 with authentication_error  (no --key given (auth is off, or untested))
+  – SHOULD auth.invalid               a wrong key gets 401 with authentication_error  (no --key given (auth is off, or untested))
+
+§3.1 Request
+  ✓ MUST   request.state              state may be a string, object or array
+  ✓ MUST   request.model-alias        model "jev-latest" is accepted
+  ✓ MUST   request.multi              several questions of mixed types in one request
+  ✓ MUST   request.question-ids       any non-empty string is a question id
+  ✓ MUST   request.unicode            non-ASCII text is accepted and option names round-trip
+  ✓ SHOULD request.unknown-fields     unknown top-level fields are ignored
+  ✗ MUST   request.structured-text    instructions and descriptions may be objects or arrays
+      structured-text:noul: valid request got 422: {"detail":"3 validation errors for Noul\ninstructions\n  Input should be a valid string [type=string_type, input_value={'task': 'Decide whether ...efunds', 'chargebacks']}, input_type=dict]\n    For f… (731 bytes)
+        → POST /v1/systemone {"questions": {"q": {"type": "noul", "instructions": {"task": "Decide whether the customer wants money back", "include": ["refunds", "chargebacks"]}, "criteria": {"true": {"examples": ["refund me", "I'll dispute this"]}, "false": ["questions", "complaints with… (376 chars)
+        ← 422 {"detail":"3 validation errors for Noul\ninstructions\n  Input should be a valid string [type=string_type, input_value={'task': 'Decide whether ...efunds', 'chargebacks']}, input_type=dict]\n    For further information visit https://errors.pydantic.dev/2.13/v/… (731 chars)
+      structured-text:choice: valid request got 422: {"detail":"3 validation errors for Choice\ninstructions\n  Input should be a valid string [type=string_type, input_value=['Route the ticket.', 'Pick exactly one team.'], input_type=list]\n    For furt… (692 bytes)
+        → POST /v1/systemone {"questions": {"q": {"type": "choice", "instructions": ["Route the ticket.", "Pick exactly one team."], "criteria": {"Billing": {"owns": ["invoices", "refunds"]}, "Technical": ["bugs", "outages"], "Sales": "Pricing"}}}, "model": "jev-latest", "state": "Hi, I w… (316 chars)
+        ← 422 {"detail":"3 validation errors for Choice\ninstructions\n  Input should be a valid string [type=string_type, input_value=['Route the ticket.', 'Pick exactly one team.'], input_type=list]\n    For further information visit https://errors.pydantic.dev/2.13/v/str… (692 chars)
+      … 1 more
+
+§3.2 Noul
+  ✓ MUST   noul.criteria              noul criteria may be absent, null, two- or one-sided
+  ✗ SHOULD noul.no-instructions       a noul without instructions is accepted
+      noul-no-instructions: valid request got 422: {"detail":"1 validation error for Noul\ninstructions\n  Field required [type=missing, input_value={'type': 'noul', 'criteri..., 'false': 'No threat'}}, input_type=dict]\n    For further information vi… (248 bytes)
+        → POST /v1/systemone {"questions": {"threat": {"type": "noul", "criteria": {"true": "The customer threatens a chargeback", "false": "No threat"}}}, "model": "jev-latest", "state": "Hi, I was charged twice for my March invoice (order #4471) a…"}
+        ← 422 {"detail":"1 validation error for Noul\ninstructions\n  Field required [type=missing, input_value={'type': 'noul', 'criteri..., 'false': 'No threat'}}, input_type=dict]\n    For further information visit https://errors.pydantic.dev/2.13/v/missing"}
+
+§3.3 Choice
+  ✓ MUST   choice.null-description    an option description may be null
+  ✓ MUST   choice.options             2 to 255 options are accepted
+
+§3.4 Score
+  ✓ MUST   score.levels               2 to 10 levels are accepted
+  ✓ SHOULD score.map-rejected         map-form score criteria are rejected with 4xx
+
+§4.1 Response envelope
+  ✓ MUST   response.envelope          model, answers and usage are present
+  ✓ MUST   response.usage             token counts are non-negative integers
+  ✓ MUST   response.answer-ids        one answer per question id, none extra
+  ✓ MUST   response.answer-type       each answer's type matches its question
+  ✓ MUST   response.finite            no NaN or Infinity
+  ✓ SHOULD response.extensions        extra fields are prefixed x_
+
+§4.2 Noul answer
+  ✓ MUST   noul.answer                noul is a probability in [0, 1]
+
+§4.3 Choice answer
+  ✓ MUST   choice.answer              choice, probabilities and confidence are present
+  ✓ MUST   choice.probability-keys    probability keys are exactly the option names
+  ✓ MUST   choice.distribution        probabilities are in [0, 1] and sum to 1
+  ✓ MUST   choice.argmax              choice is the most probable option
+
+§4.4 Score answer
+  ✓ MUST   score.answer               score, legend, probabilities and confidence are present
+  ✓ MUST   score.legend               legend maps "0".."n-1" to the level descriptions
+  ✓ MUST   score.probability-keys     probability keys are "0".."n-1"
+  ✓ MUST   score.distribution         probabilities are in [0, 1] and sum to 1
+  ✓ MUST   score.expectation          score is the expectation of the probabilities
+
+§4.5 Confidence
+  ✓ MUST   confidence.range           confidence is in [0, 1]
+  ✗ SHOULD confidence.formula         confidence follows the reference formula
+      choice-null-description answers['team']: confidence is 0.012; the reference formula gives 0.044
+        → POST /v1/systemone {"questions": {"team": {"type": "choice", "instructions": "Which team should handle this ticket?", "criteria": {"Billing": null, "Technical": null, "Sales": null}}}, "model": "jev-latest", "state": "Hi, I was charged twice for my March invoice (order #4471) a…… (262 chars)
+        ← 200 {"model":"von-1.1.0","answers":{"team":{"type":"choice","choice":"Technical","probabilities":{"Billing":0.2861,"Technical":0.3629,"Sales":0.351},"confidence":0.012}},"usage":{"input_tokens":61,"output_tokens":1}}
+      score-levels:3 answers['anger']: confidence is 0.394; the reference formulas give 0.430 (distance) or 0.431 (top probability)
+        → POST /v1/systemone {"questions": {"anger": {"type": "score", "instructions": "How frustrated is the customer?", "criteria": ["Calm", "Frustrated", "Very angry"]}}, "model": "jev-latest", "state": "Hi, I was charged twice for my March invoice (order #4471) a…"}
+        ← 200 {"model":"von-1.1.0","answers":{"anger":{"type":"score","score":1.07,"confidence":0.394,"legend":{"0":"Calm","1":"Frustrated","2":"Very angry"},"probabilities":{"0":0.1534,"1":0.6204,"2":0.2263}}},"usage":{"input_tokens":59,"output_tokens":1}}
+      … 5 more
+
+§6 Errors
+  ✓ SHOULD errors.json                error bodies are JSON
+  ✓ MUST   errors.no-5xx              bad requests never get a 5xx
+  ✗ SHOULD errors.reject-invalid      invalid requests get a 4xx, not an answer
+      invalid:empty-questions: invalid request was answered with 200
+        → POST /v1/systemone {"questions": {}, "model": "jev-latest", "state": "Hi, I was charged twice for my March invoice (order #4471) a…"}
+        ← 200 {"model":"von-1.1.0","answers":{},"usage":{"input_tokens":53,"output_tokens":0}}
+      invalid:choice-no-options: invalid request was answered with 200
+        → POST /v1/systemone {"questions": {"team": {"type": "choice", "instructions": "Team?", "criteria": {}}}, "model": "jev-latest", "state": "Hi, I was charged twice for my March invoice (order #4471) a…"}
+        ← 200 {"model":"von-1.1.0","answers":{"team":{"type":"choice","choice":"","probabilities":{},"confidence":0.0}},"usage":{"input_tokens":53,"output_tokens":1}}
+  ✗ SHOULD errors.validation-shape    validation errors are 422 with detail[]
+      invalid:missing-type: body is not {"detail": [{"loc": ["body", …], "msg", "type"}]}: {"detail":"1 validation error for Choice\ncriteria\n  Field required [type=missing, input_value={'instructions': 'Refund?'}, input_type=dict]\n    For further i… (221 bytes)
+        → POST /v1/systemone {"questions": {"refund": {"instructions": "Refund?"}}, "model": "jev-latest", "state": "Hi, I was charged twice for my March invoice (order #4471) a…"}
+        ← 422 {"detail":"1 validation error for Choice\ncriteria\n  Field required [type=missing, input_value={'instructions': 'Refund?'}, input_type=dict]\n    For further information visit https://errors.pydantic.dev/2.13/v/missing"}
+      invalid:type-boolean: body is not {"detail": [{"loc": ["body", …], "msg", "type"}]}: {"detail":"Unknown question type 'boolean'"}
+        → POST /v1/systemone {"questions": {"refund": {"type": "boolean", "instructions": "Refund?"}}, "model": "jev-latest", "state": "Hi, I was charged twice for my March invoice (order #4471) a…"}
+        ← 422 {"detail":"Unknown question type 'boolean'"}
+      … 2 more
+  – SHOULD errors.shape               other errors carry detail.error_type and detail.message  (not exercised: the server never produced the situation it covers)
+
+§7 Semantics
+  ✓ MUST   semantics.question-id      renaming a question id does not change its answer
+  ✓ SHOULD semantics.batching         other questions in the request do not change an answer
+  ✓ SHOULD semantics.question-order   question order does not change answers
+
+§8 Drop-in
+  ✓ MUST   dropin.sdk-python          the official Python SDK parses every answer type
+
+not conformant to spec 0.1: MUST 31/32, SHOULD 8/12
+  wrote ./results/von/report.json
+  wrote ./results/von/report.md

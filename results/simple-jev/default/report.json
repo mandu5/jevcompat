@@ -1,0 +1,576 @@
+{
+  "url": "http://127.0.0.1:8000",
+  "model": "jev-latest",
+  "spec_version": "0.1",
+  "tool_version": "0.1.0",
+  "started": "2026-09-23T23:07:29+00:00",
+  "seconds": 0.0,
+  "results": [
+    {
+      "id": "http.endpoint",
+      "level": "MUST",
+      "section": "1",
+      "title": "POST /v1/systemone answers valid requests with 200",
+      "status": "skip",
+      "findings": [],
+      "cases": [],
+      "reason": "not reached: the server rejects a minimal valid request (422: {\"error\":{\"message\":\"Loaded model is 'Qwen/Qwen3.5-0.8B'\",\"type\":\"invalid_request_error\",\"code\":422,\"param\":null,\"details\":[]}}); if it needs a particular model name, pass --model NAME"
+    },
+    {
+      "id": "http.json",
+      "level": "MUST",
+      "section": "1",
+      "title": "200 bodies are JSON",
+      "status": "skip",
+      "findings": [],
+      "cases": [],
+      "reason": "not reached: the server rejects a minimal valid request (422: {\"error\":{\"message\":\"Loaded model is 'Qwen/Qwen3.5-0.8B'\",\"type\":\"invalid_request_error\",\"code\":422,\"param\":null,\"details\":[]}}); if it needs a particular model name, pass --model NAME"
+    },
+    {
+      "id": "http.content-type",
+      "level": "SHOULD",
+      "section": "1",
+      "title": "responses declare a JSON media type",
+      "status": "skip",
+      "findings": [],
+      "cases": [],
+      "reason": "not reached: the server rejects a minimal valid request (422: {\"error\":{\"message\":\"Loaded model is 'Qwen/Qwen3.5-0.8B'\",\"type\":\"invalid_request_error\",\"code\":422,\"param\":null,\"details\":[]}}); if it needs a particular model name, pass --model NAME"
+    },
+    {
+      "id": "http.models",
+      "level": "SHOULD",
+      "section": "1",
+      "title": "GET /v1/models lists models",
+      "status": "skip",
+      "findings": [],
+      "cases": [],
+      "reason": "not reached: the server rejects a minimal valid request (422: {\"error\":{\"message\":\"Loaded model is 'Qwen/Qwen3.5-0.8B'\",\"type\":\"invalid_request_error\",\"code\":422,\"param\":null,\"details\":[]}}); if it needs a particular model name, pass --model NAME"
+    },
+    {
+      "id": "auth.ignored-when-off",
+      "level": "MUST",
+      "section": "2",
+      "title": "without auth, an Authorization header is accepted",
+      "status": "pass",
+      "findings": [],
+      "cases": [
+        "preflight"
+      ],
+      "reason": ""
+    },
+    {
+      "id": "auth.bearer",
+      "level": "MUST",
+      "section": "2",
+      "title": "the key is read from Authorization: Bearer",
+      "status": "skip",
+      "findings": [],
+      "cases": [],
+      "reason": "not reached: the server rejects a minimal valid request (422: {\"error\":{\"message\":\"Loaded model is 'Qwen/Qwen3.5-0.8B'\",\"type\":\"invalid_request_error\",\"code\":422,\"param\":null,\"details\":[]}}); if it needs a particular model name, pass --model NAME"
+    },
+    {
+      "id": "auth.missing",
+      "level": "SHOULD",
+      "section": "2",
+      "title": "a missing key gets 401/403 with authentication_error",
+      "status": "skip",
+      "findings": [],
+      "cases": [],
+      "reason": "not reached: the server rejects a minimal valid request (422: {\"error\":{\"message\":\"Loaded model is 'Qwen/Qwen3.5-0.8B'\",\"type\":\"invalid_request_error\",\"code\":422,\"param\":null,\"details\":[]}}); if it needs a particular model name, pass --model NAME"
+    },
+    {
+      "id": "auth.invalid",
+      "level": "SHOULD",
+      "section": "2",
+      "title": "a wrong key gets 401 with authentication_error",
+      "status": "skip",
+      "findings": [],
+      "cases": [],
+      "reason": "not reached: the server rejects a minimal valid request (422: {\"error\":{\"message\":\"Loaded model is 'Qwen/Qwen3.5-0.8B'\",\"type\":\"invalid_request_error\",\"code\":422,\"param\":null,\"details\":[]}}); if it needs a particular model name, pass --model NAME"
+    },
+    {
+      "id": "request.state",
+      "level": "MUST",
+      "section": "3.1",
+      "title": "state may be a string, object or array",
+      "status": "skip",
+      "findings": [],
+      "cases": [],
+      "reason": "not reached: the server rejects a minimal valid request (422: {\"error\":{\"message\":\"Loaded model is 'Qwen/Qwen3.5-0.8B'\",\"type\":\"invalid_request_error\",\"code\":422,\"param\":null,\"details\":[]}}); if it needs a particular model name, pass --model NAME"
+    },
+    {
+      "id": "request.model-alias",
+      "level": "MUST",
+      "section": "3.1",
+      "title": "model \"jev-latest\" is accepted",
+      "status": "skip",
+      "findings": [],
+      "cases": [],
+      "reason": "not reached: the server rejects a minimal valid request (422: {\"error\":{\"message\":\"Loaded model is 'Qwen/Qwen3.5-0.8B'\",\"type\":\"invalid_request_error\",\"code\":422,\"param\":null,\"details\":[]}}); if it needs a particular model name, pass --model NAME"
+    },
+    {
+      "id": "request.multi",
+      "level": "MUST",
+      "section": "3.1",
+      "title": "several questions of mixed types in one request",
+      "status": "skip",
+      "findings": [],
+      "cases": [],
+      "reason": "not reached: the server rejects a minimal valid request (422: {\"error\":{\"message\":\"Loaded model is 'Qwen/Qwen3.5-0.8B'\",\"type\":\"invalid_request_error\",\"code\":422,\"param\":null,\"details\":[]}}); if it needs a particular model name, pass --model NAME"
+    },
+    {
+      "id": "request.question-ids",
+      "level": "MUST",
+      "section": "3.1",
+      "title": "any non-empty string is a question id",
+      "status": "skip",
+      "findings": [],
+      "cases": [],
+      "reason": "not reached: the server rejects a minimal valid request (422: {\"error\":{\"message\":\"Loaded model is 'Qwen/Qwen3.5-0.8B'\",\"type\":\"invalid_request_error\",\"code\":422,\"param\":null,\"details\":[]}}); if it needs a particular model name, pass --model NAME"
+    },
+    {
+      "id": "request.unicode",
+      "level": "MUST",
+      "section": "3.1",
+      "title": "non-ASCII text is accepted and option names round-trip",
+      "status": "skip",
+      "findings": [],
+      "cases": [],
+      "reason": "not reached: the server rejects a minimal valid request (422: {\"error\":{\"message\":\"Loaded model is 'Qwen/Qwen3.5-0.8B'\",\"type\":\"invalid_request_error\",\"code\":422,\"param\":null,\"details\":[]}}); if it needs a particular model name, pass --model NAME"
+    },
+    {
+      "id": "request.unknown-fields",
+      "level": "SHOULD",
+      "section": "3.1",
+      "title": "unknown top-level fields are ignored",
+      "status": "skip",
+      "findings": [],
+      "cases": [],
+      "reason": "not reached: the server rejects a minimal valid request (422: {\"error\":{\"message\":\"Loaded model is 'Qwen/Qwen3.5-0.8B'\",\"type\":\"invalid_request_error\",\"code\":422,\"param\":null,\"details\":[]}}); if it needs a particular model name, pass --model NAME"
+    },
+    {
+      "id": "request.structured-text",
+      "level": "MUST",
+      "section": "3.1",
+      "title": "instructions and descriptions may be objects or arrays",
+      "status": "skip",
+      "findings": [],
+      "cases": [],
+      "reason": "not reached: the server rejects a minimal valid request (422: {\"error\":{\"message\":\"Loaded model is 'Qwen/Qwen3.5-0.8B'\",\"type\":\"invalid_request_error\",\"code\":422,\"param\":null,\"details\":[]}}); if it needs a particular model name, pass --model NAME"
+    },
+    {
+      "id": "noul.criteria",
+      "level": "MUST",
+      "section": "3.2",
+      "title": "noul criteria may be absent, null, two- or one-sided",
+      "status": "skip",
+      "findings": [],
+      "cases": [],
+      "reason": "not reached: the server rejects a minimal valid request (422: {\"error\":{\"message\":\"Loaded model is 'Qwen/Qwen3.5-0.8B'\",\"type\":\"invalid_request_error\",\"code\":422,\"param\":null,\"details\":[]}}); if it needs a particular model name, pass --model NAME"
+    },
+    {
+      "id": "noul.no-instructions",
+      "level": "SHOULD",
+      "section": "3.2",
+      "title": "a noul without instructions is accepted",
+      "status": "skip",
+      "findings": [],
+      "cases": [],
+      "reason": "not reached: the server rejects a minimal valid request (422: {\"error\":{\"message\":\"Loaded model is 'Qwen/Qwen3.5-0.8B'\",\"type\":\"invalid_request_error\",\"code\":422,\"param\":null,\"details\":[]}}); if it needs a particular model name, pass --model NAME"
+    },
+    {
+      "id": "choice.null-description",
+      "level": "MUST",
+      "section": "3.3",
+      "title": "an option description may be null",
+      "status": "skip",
+      "findings": [],
+      "cases": [],
+      "reason": "not reached: the server rejects a minimal valid request (422: {\"error\":{\"message\":\"Loaded model is 'Qwen/Qwen3.5-0.8B'\",\"type\":\"invalid_request_error\",\"code\":422,\"param\":null,\"details\":[]}}); if it needs a particular model name, pass --model NAME"
+    },
+    {
+      "id": "choice.options",
+      "level": "MUST",
+      "section": "3.3",
+      "title": "2 to 255 options are accepted",
+      "status": "skip",
+      "findings": [],
+      "cases": [],
+      "reason": "not reached: the server rejects a minimal valid request (422: {\"error\":{\"message\":\"Loaded model is 'Qwen/Qwen3.5-0.8B'\",\"type\":\"invalid_request_error\",\"code\":422,\"param\":null,\"details\":[]}}); if it needs a particular model name, pass --model NAME"
+    },
+    {
+      "id": "score.levels",
+      "level": "MUST",
+      "section": "3.4",
+      "title": "2 to 10 levels are accepted",
+      "status": "skip",
+      "findings": [],
+      "cases": [],
+      "reason": "not reached: the server rejects a minimal valid request (422: {\"error\":{\"message\":\"Loaded model is 'Qwen/Qwen3.5-0.8B'\",\"type\":\"invalid_request_error\",\"code\":422,\"param\":null,\"details\":[]}}); if it needs a particular model name, pass --model NAME"
+    },
+    {
+      "id": "score.map-rejected",
+      "level": "SHOULD",
+      "section": "3.4",
+      "title": "map-form score criteria are rejected with 4xx",
+      "status": "skip",
+      "findings": [],
+      "cases": [],
+      "reason": "not reached: the server rejects a minimal valid request (422: {\"error\":{\"message\":\"Loaded model is 'Qwen/Qwen3.5-0.8B'\",\"type\":\"invalid_request_error\",\"code\":422,\"param\":null,\"details\":[]}}); if it needs a particular model name, pass --model NAME"
+    },
+    {
+      "id": "response.envelope",
+      "level": "MUST",
+      "section": "4.1",
+      "title": "model, answers and usage are present",
+      "status": "skip",
+      "findings": [],
+      "cases": [],
+      "reason": "not reached: the server rejects a minimal valid request (422: {\"error\":{\"message\":\"Loaded model is 'Qwen/Qwen3.5-0.8B'\",\"type\":\"invalid_request_error\",\"code\":422,\"param\":null,\"details\":[]}}); if it needs a particular model name, pass --model NAME"
+    },
+    {
+      "id": "response.usage",
+      "level": "MUST",
+      "section": "4.1",
+      "title": "token counts are non-negative integers",
+      "status": "skip",
+      "findings": [],
+      "cases": [],
+      "reason": "not reached: the server rejects a minimal valid request (422: {\"error\":{\"message\":\"Loaded model is 'Qwen/Qwen3.5-0.8B'\",\"type\":\"invalid_request_error\",\"code\":422,\"param\":null,\"details\":[]}}); if it needs a particular model name, pass --model NAME"
+    },
+    {
+      "id": "response.answer-ids",
+      "level": "MUST",
+      "section": "4.1",
+      "title": "one answer per question id, none extra",
+      "status": "skip",
+      "findings": [],
+      "cases": [],
+      "reason": "not reached: the server rejects a minimal valid request (422: {\"error\":{\"message\":\"Loaded model is 'Qwen/Qwen3.5-0.8B'\",\"type\":\"invalid_request_error\",\"code\":422,\"param\":null,\"details\":[]}}); if it needs a particular model name, pass --model NAME"
+    },
+    {
+      "id": "response.answer-type",
+      "level": "MUST",
+      "section": "4.1",
+      "title": "each answer's type matches its question",
+      "status": "skip",
+      "findings": [],
+      "cases": [],
+      "reason": "not reached: the server rejects a minimal valid request (422: {\"error\":{\"message\":\"Loaded model is 'Qwen/Qwen3.5-0.8B'\",\"type\":\"invalid_request_error\",\"code\":422,\"param\":null,\"details\":[]}}); if it needs a particular model name, pass --model NAME"
+    },
+    {
+      "id": "response.finite",
+      "level": "MUST",
+      "section": "4.1",
+      "title": "no NaN or Infinity",
+      "status": "skip",
+      "findings": [],
+      "cases": [],
+      "reason": "not reached: the server rejects a minimal valid request (422: {\"error\":{\"message\":\"Loaded model is 'Qwen/Qwen3.5-0.8B'\",\"type\":\"invalid_request_error\",\"code\":422,\"param\":null,\"details\":[]}}); if it needs a particular model name, pass --model NAME"
+    },
+    {
+      "id": "response.extensions",
+      "level": "SHOULD",
+      "section": "4.1",
+      "title": "extra fields are prefixed x_",
+      "status": "skip",
+      "findings": [],
+      "cases": [],
+      "reason": "not reached: the server rejects a minimal valid request (422: {\"error\":{\"message\":\"Loaded model is 'Qwen/Qwen3.5-0.8B'\",\"type\":\"invalid_request_error\",\"code\":422,\"param\":null,\"details\":[]}}); if it needs a particular model name, pass --model NAME"
+    },
+    {
+      "id": "noul.answer",
+      "level": "MUST",
+      "section": "4.2",
+      "title": "noul is a probability in [0, 1]",
+      "status": "skip",
+      "findings": [],
+      "cases": [],
+      "reason": "not reached: the server rejects a minimal valid request (422: {\"error\":{\"message\":\"Loaded model is 'Qwen/Qwen3.5-0.8B'\",\"type\":\"invalid_request_error\",\"code\":422,\"param\":null,\"details\":[]}}); if it needs a particular model name, pass --model NAME"
+    },
+    {
+      "id": "choice.answer",
+      "level": "MUST",
+      "section": "4.3",
+      "title": "choice, probabilities and confidence are present",
+      "status": "skip",
+      "findings": [],
+      "cases": [],
+      "reason": "not reached: the server rejects a minimal valid request (422: {\"error\":{\"message\":\"Loaded model is 'Qwen/Qwen3.5-0.8B'\",\"type\":\"invalid_request_error\",\"code\":422,\"param\":null,\"details\":[]}}); if it needs a particular model name, pass --model NAME"
+    },
+    {
+      "id": "choice.probability-keys",
+      "level": "MUST",
+      "section": "4.3",
+      "title": "probability keys are exactly the option names",
+      "status": "skip",
+      "findings": [],
+      "cases": [],
+      "reason": "not reached: the server rejects a minimal valid request (422: {\"error\":{\"message\":\"Loaded model is 'Qwen/Qwen3.5-0.8B'\",\"type\":\"invalid_request_error\",\"code\":422,\"param\":null,\"details\":[]}}); if it needs a particular model name, pass --model NAME"
+    },
+    {
+      "id": "choice.distribution",
+      "level": "MUST",
+      "section": "4.3",
+      "title": "probabilities are in [0, 1] and sum to 1",
+      "status": "skip",
+      "findings": [],
+      "cases": [],
+      "reason": "not reached: the server rejects a minimal valid request (422: {\"error\":{\"message\":\"Loaded model is 'Qwen/Qwen3.5-0.8B'\",\"type\":\"invalid_request_error\",\"code\":422,\"param\":null,\"details\":[]}}); if it needs a particular model name, pass --model NAME"
+    },
+    {
+      "id": "choice.argmax",
+      "level": "MUST",
+      "section": "4.3",
+      "title": "choice is the most probable option",
+      "status": "skip",
+      "findings": [],
+      "cases": [],
+      "reason": "not reached: the server rejects a minimal valid request (422: {\"error\":{\"message\":\"Loaded model is 'Qwen/Qwen3.5-0.8B'\",\"type\":\"invalid_request_error\",\"code\":422,\"param\":null,\"details\":[]}}); if it needs a particular model name, pass --model NAME"
+    },
+    {
+      "id": "score.answer",
+      "level": "MUST",
+      "section": "4.4",
+      "title": "score, legend, probabilities and confidence are present",
+      "status": "skip",
+      "findings": [],
+      "cases": [],
+      "reason": "not reached: the server rejects a minimal valid request (422: {\"error\":{\"message\":\"Loaded model is 'Qwen/Qwen3.5-0.8B'\",\"type\":\"invalid_request_error\",\"code\":422,\"param\":null,\"details\":[]}}); if it needs a particular model name, pass --model NAME"
+    },
+    {
+      "id": "score.legend",
+      "level": "MUST",
+      "section": "4.4",
+      "title": "legend maps \"0\"..\"n-1\" to the level descriptions",
+      "status": "skip",
+      "findings": [],
+      "cases": [],
+      "reason": "not reached: the server rejects a minimal valid request (422: {\"error\":{\"message\":\"Loaded model is 'Qwen/Qwen3.5-0.8B'\",\"type\":\"invalid_request_error\",\"code\":422,\"param\":null,\"details\":[]}}); if it needs a particular model name, pass --model NAME"
+    },
+    {
+      "id": "score.probability-keys",
+      "level": "MUST",
+      "section": "4.4",
+      "title": "probability keys are \"0\"..\"n-1\"",
+      "status": "skip",
+      "findings": [],
+      "cases": [],
+      "reason": "not reached: the server rejects a minimal valid request (422: {\"error\":{\"message\":\"Loaded model is 'Qwen/Qwen3.5-0.8B'\",\"type\":\"invalid_request_error\",\"code\":422,\"param\":null,\"details\":[]}}); if it needs a particular model name, pass --model NAME"
+    },
+    {
+      "id": "score.distribution",
+      "level": "MUST",
+      "section": "4.4",
+      "title": "probabilities are in [0, 1] and sum to 1",
+      "status": "skip",
+      "findings": [],
+      "cases": [],
+      "reason": "not reached: the server rejects a minimal valid request (422: {\"error\":{\"message\":\"Loaded model is 'Qwen/Qwen3.5-0.8B'\",\"type\":\"invalid_request_error\",\"code\":422,\"param\":null,\"details\":[]}}); if it needs a particular model name, pass --model NAME"
+    },
+    {
+      "id": "score.expectation",
+      "level": "MUST",
+      "section": "4.4",
+      "title": "score is the expectation of the probabilities",
+      "status": "skip",
+      "findings": [],
+      "cases": [],
+      "reason": "not reached: the server rejects a minimal valid request (422: {\"error\":{\"message\":\"Loaded model is 'Qwen/Qwen3.5-0.8B'\",\"type\":\"invalid_request_error\",\"code\":422,\"param\":null,\"details\":[]}}); if it needs a particular model name, pass --model NAME"
+    },
+    {
+      "id": "confidence.range",
+      "level": "MUST",
+      "section": "4.5",
+      "title": "confidence is in [0, 1]",
+      "status": "skip",
+      "findings": [],
+      "cases": [],
+      "reason": "not reached: the server rejects a minimal valid request (422: {\"error\":{\"message\":\"Loaded model is 'Qwen/Qwen3.5-0.8B'\",\"type\":\"invalid_request_error\",\"code\":422,\"param\":null,\"details\":[]}}); if it needs a particular model name, pass --model NAME"
+    },
+    {
+      "id": "confidence.formula",
+      "level": "SHOULD",
+      "section": "4.5",
+      "title": "confidence follows the reference formula",
+      "status": "skip",
+      "findings": [],
+      "cases": [],
+      "reason": "not reached: the server rejects a minimal valid request (422: {\"error\":{\"message\":\"Loaded model is 'Qwen/Qwen3.5-0.8B'\",\"type\":\"invalid_request_error\",\"code\":422,\"param\":null,\"details\":[]}}); if it needs a particular model name, pass --model NAME"
+    },
+    {
+      "id": "errors.json",
+      "level": "SHOULD",
+      "section": "6",
+      "title": "error bodies are JSON",
+      "status": "skip",
+      "findings": [],
+      "cases": [],
+      "reason": "not reached: the server rejects a minimal valid request (422: {\"error\":{\"message\":\"Loaded model is 'Qwen/Qwen3.5-0.8B'\",\"type\":\"invalid_request_error\",\"code\":422,\"param\":null,\"details\":[]}}); if it needs a particular model name, pass --model NAME"
+    },
+    {
+      "id": "errors.no-5xx",
+      "level": "MUST",
+      "section": "6",
+      "title": "bad requests never get a 5xx",
+      "status": "skip",
+      "findings": [],
+      "cases": [],
+      "reason": "not reached: the server rejects a minimal valid request (422: {\"error\":{\"message\":\"Loaded model is 'Qwen/Qwen3.5-0.8B'\",\"type\":\"invalid_request_error\",\"code\":422,\"param\":null,\"details\":[]}}); if it needs a particular model name, pass --model NAME"
+    },
+    {
+      "id": "errors.reject-invalid",
+      "level": "SHOULD",
+      "section": "6",
+      "title": "invalid requests get a 4xx, not an answer",
+      "status": "skip",
+      "findings": [],
+      "cases": [],
+      "reason": "not reached: the server rejects a minimal valid request (422: {\"error\":{\"message\":\"Loaded model is 'Qwen/Qwen3.5-0.8B'\",\"type\":\"invalid_request_error\",\"code\":422,\"param\":null,\"details\":[]}}); if it needs a particular model name, pass --model NAME"
+    },
+    {
+      "id": "errors.validation-shape",
+      "level": "SHOULD",
+      "section": "6",
+      "title": "validation errors are 422 with detail[]",
+      "status": "skip",
+      "findings": [],
+      "cases": [],
+      "reason": "not reached: the server rejects a minimal valid request (422: {\"error\":{\"message\":\"Loaded model is 'Qwen/Qwen3.5-0.8B'\",\"type\":\"invalid_request_error\",\"code\":422,\"param\":null,\"details\":[]}}); if it needs a particular model name, pass --model NAME"
+    },
+    {
+      "id": "errors.shape",
+      "level": "SHOULD",
+      "section": "6",
+      "title": "other errors carry detail.error_type and detail.message",
+      "status": "skip",
+      "findings": [],
+      "cases": [],
+      "reason": "not reached: the server rejects a minimal valid request (422: {\"error\":{\"message\":\"Loaded model is 'Qwen/Qwen3.5-0.8B'\",\"type\":\"invalid_request_error\",\"code\":422,\"param\":null,\"details\":[]}}); if it needs a particular model name, pass --model NAME"
+    },
+    {
+      "id": "semantics.question-id",
+      "level": "MUST",
+      "section": "7",
+      "title": "renaming a question id does not change its answer",
+      "status": "skip",
+      "findings": [],
+      "cases": [],
+      "reason": "not reached: the server rejects a minimal valid request (422: {\"error\":{\"message\":\"Loaded model is 'Qwen/Qwen3.5-0.8B'\",\"type\":\"invalid_request_error\",\"code\":422,\"param\":null,\"details\":[]}}); if it needs a particular model name, pass --model NAME"
+    },
+    {
+      "id": "semantics.batching",
+      "level": "SHOULD",
+      "section": "7",
+      "title": "other questions in the request do not change an answer",
+      "status": "skip",
+      "findings": [],
+      "cases": [],
+      "reason": "not reached: the server rejects a minimal valid request (422: {\"error\":{\"message\":\"Loaded model is 'Qwen/Qwen3.5-0.8B'\",\"type\":\"invalid_request_error\",\"code\":422,\"param\":null,\"details\":[]}}); if it needs a particular model name, pass --model NAME"
+    },
+    {
+      "id": "semantics.question-order",
+      "level": "SHOULD",
+      "section": "7",
+      "title": "question order does not change answers",
+      "status": "skip",
+      "findings": [],
+      "cases": [],
+      "reason": "not reached: the server rejects a minimal valid request (422: {\"error\":{\"message\":\"Loaded model is 'Qwen/Qwen3.5-0.8B'\",\"type\":\"invalid_request_error\",\"code\":422,\"param\":null,\"details\":[]}}); if it needs a particular model name, pass --model NAME"
+    },
+    {
+      "id": "dropin.sdk-python",
+      "level": "MUST",
+      "section": "8",
+      "title": "the official Python SDK parses every answer type",
+      "status": "skip",
+      "findings": [],
+      "cases": [],
+      "reason": "not reached: the server rejects a minimal valid request (422: {\"error\":{\"message\":\"Loaded model is 'Qwen/Qwen3.5-0.8B'\",\"type\":\"invalid_request_error\",\"code\":422,\"param\":null,\"details\":[]}}); if it needs a particular model name, pass --model NAME"
+    }
+  ],
+  "exchanges": [
+    {
+      "case": "preflight",
+      "method": "POST",
+      "path": "/v1/systemone",
+      "request": {
+        "model": "jev-latest",
+        "state": "Hi, I was charged twice for my March invoice (order #4471) and the refund I was promised last week still hasn't arrived. I've emailed three times. Please fix this today or I will dispute the charge with my bank.",
+        "questions": {
+          "q": {
+            "type": "noul",
+            "instructions": "Is the customer asking for money back?"
+          }
+        }
+      },
+      "status": 422,
+      "response": "{\"error\":{\"message\":\"Loaded model is 'Qwen/Qwen3.5-0.8B'\",\"type\":\"invalid_request_error\",\"code\":422,\"param\":null,\"details\":[]}}",
+      "ms": 14.8,
+      "via": "http"
+    },
+    {
+      "case": "preflight",
+      "method": "GET",
+      "path": "/v1/models",
+      "request": null,
+      "status": 404,
+      "response": "{\"detail\":\"Not Found\"}",
+      "ms": 0.7,
+      "via": "http"
+    }
+  ],
+  "info": {},
+  "aborted": "the server rejects a minimal valid request (422: {\"error\":{\"message\":\"Loaded model is 'Qwen/Qwen3.5-0.8B'\",\"type\":\"invalid_request_error\",\"code\":422,\"param\":null,\"details\":[]}}); if it needs a particular model name, pass --model NAME",
+  "case_errors": [],
+  "inconclusive": [],
+  "summary": {
+    "verdict": "not tested",
+    "conformant": false,
+    "untested_musts": [
+      "http.endpoint",
+      "http.json",
+      "request.state",
+      "request.model-alias",
+      "request.multi",
+      "request.question-ids",
+      "request.unicode",
+      "request.structured-text",
+      "noul.criteria",
+      "choice.null-description",
+      "choice.options",
+      "score.levels",
+      "response.envelope",
+      "response.usage",
+      "response.answer-ids",
+      "response.answer-type",
+      "response.finite",
+      "noul.answer",
+      "choice.answer",
+      "choice.probability-keys",
+      "choice.distribution",
+      "choice.argmax",
+      "score.answer",
+      "score.legend",
+      "score.probability-keys",
+      "score.distribution",
+      "score.expectation",
+      "confidence.range",
+      "errors.no-5xx",
+      "semantics.question-id",
+      "dropin.sdk-python"
+    ],
+    "MUST": {
+      "passed": 1,
+      "failed": 0,
+      "skipped": 32,
+      "tested": 1
+    },
+    "SHOULD": {
+      "passed": 0,
+      "failed": 0,
+      "skipped": 15,
+      "tested": 0
+    }
+  }
+}

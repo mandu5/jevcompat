@@ -1,0 +1,84 @@
+jevcompat 0.1.0 · spec 0.1 · http://127.0.0.1:8000
+model sent 'jev-latest' · 2 requests · 0.0s
+
+stopped: the server rejects a minimal valid request (422: {"error":{"message":"Loaded model is 'Qwen/Qwen3.5-0.8B'","type":"invalid_request_error","code":422,"param":null,"details":[]}}); if it needs a particular model name, pass --model NAME
+
+§1 Transport
+  – MUST   http.endpoint              POST /v1/systemone answers valid requests with 200  (not reached: the server rejects a minimal valid request (422: {"error":{"message":"Loaded model is 'Qwen/Qwen3.5-0.8B'","type":"invalid_request_error","code":422,"param":null,"details":[]}}); if it needs a particular model name, pass --model NAME)
+  – MUST   http.json                  200 bodies are JSON  (not reached: the server rejects a minimal valid request (422: {"error":{"message":"Loaded model is 'Qwen/Qwen3.5-0.8B'","type":"invalid_request_error","code":422,"param":null,"details":[]}}); if it needs a particular model name, pass --model NAME)
+  – SHOULD http.content-type          responses declare a JSON media type  (not reached: the server rejects a minimal valid request (422: {"error":{"message":"Loaded model is 'Qwen/Qwen3.5-0.8B'","type":"invalid_request_error","code":422,"param":null,"details":[]}}); if it needs a particular model name, pass --model NAME)
+  – SHOULD http.models                GET /v1/models lists models  (not reached: the server rejects a minimal valid request (422: {"error":{"message":"Loaded model is 'Qwen/Qwen3.5-0.8B'","type":"invalid_request_error","code":422,"param":null,"details":[]}}); if it needs a particular model name, pass --model NAME)
+
+§2 Authentication
+  ✓ MUST   auth.ignored-when-off      without auth, an Authorization header is accepted
+  – MUST   auth.bearer                the key is read from Authorization: Bearer  (not reached: the server rejects a minimal valid request (422: {"error":{"message":"Loaded model is 'Qwen/Qwen3.5-0.8B'","type":"invalid_request_error","code":422,"param":null,"details":[]}}); if it needs a particular model name, pass --model NAME)
+  – SHOULD auth.missing               a missing key gets 401/403 with authentication_error  (not reached: the server rejects a minimal valid request (422: {"error":{"message":"Loaded model is 'Qwen/Qwen3.5-0.8B'","type":"invalid_request_error","code":422,"param":null,"details":[]}}); if it needs a particular model name, pass --model NAME)
+  – SHOULD auth.invalid               a wrong key gets 401 with authentication_error  (not reached: the server rejects a minimal valid request (422: {"error":{"message":"Loaded model is 'Qwen/Qwen3.5-0.8B'","type":"invalid_request_error","code":422,"param":null,"details":[]}}); if it needs a particular model name, pass --model NAME)
+
+§3.1 Request
+  – MUST   request.state              state may be a string, object or array  (not reached: the server rejects a minimal valid request (422: {"error":{"message":"Loaded model is 'Qwen/Qwen3.5-0.8B'","type":"invalid_request_error","code":422,"param":null,"details":[]}}); if it needs a particular model name, pass --model NAME)
+  – MUST   request.model-alias        model "jev-latest" is accepted  (not reached: the server rejects a minimal valid request (422: {"error":{"message":"Loaded model is 'Qwen/Qwen3.5-0.8B'","type":"invalid_request_error","code":422,"param":null,"details":[]}}); if it needs a particular model name, pass --model NAME)
+  – MUST   request.multi              several questions of mixed types in one request  (not reached: the server rejects a minimal valid request (422: {"error":{"message":"Loaded model is 'Qwen/Qwen3.5-0.8B'","type":"invalid_request_error","code":422,"param":null,"details":[]}}); if it needs a particular model name, pass --model NAME)
+  – MUST   request.question-ids       any non-empty string is a question id  (not reached: the server rejects a minimal valid request (422: {"error":{"message":"Loaded model is 'Qwen/Qwen3.5-0.8B'","type":"invalid_request_error","code":422,"param":null,"details":[]}}); if it needs a particular model name, pass --model NAME)
+  – MUST   request.unicode            non-ASCII text is accepted and option names round-trip  (not reached: the server rejects a minimal valid request (422: {"error":{"message":"Loaded model is 'Qwen/Qwen3.5-0.8B'","type":"invalid_request_error","code":422,"param":null,"details":[]}}); if it needs a particular model name, pass --model NAME)
+  – SHOULD request.unknown-fields     unknown top-level fields are ignored  (not reached: the server rejects a minimal valid request (422: {"error":{"message":"Loaded model is 'Qwen/Qwen3.5-0.8B'","type":"invalid_request_error","code":422,"param":null,"details":[]}}); if it needs a particular model name, pass --model NAME)
+  – MUST   request.structured-text    instructions and descriptions may be objects or arrays  (not reached: the server rejects a minimal valid request (422: {"error":{"message":"Loaded model is 'Qwen/Qwen3.5-0.8B'","type":"invalid_request_error","code":422,"param":null,"details":[]}}); if it needs a particular model name, pass --model NAME)
+
+§3.2 Noul
+  – MUST   noul.criteria              noul criteria may be absent, null, two- or one-sided  (not reached: the server rejects a minimal valid request (422: {"error":{"message":"Loaded model is 'Qwen/Qwen3.5-0.8B'","type":"invalid_request_error","code":422,"param":null,"details":[]}}); if it needs a particular model name, pass --model NAME)
+  – SHOULD noul.no-instructions       a noul without instructions is accepted  (not reached: the server rejects a minimal valid request (422: {"error":{"message":"Loaded model is 'Qwen/Qwen3.5-0.8B'","type":"invalid_request_error","code":422,"param":null,"details":[]}}); if it needs a particular model name, pass --model NAME)
+
+§3.3 Choice
+  – MUST   choice.null-description    an option description may be null  (not reached: the server rejects a minimal valid request (422: {"error":{"message":"Loaded model is 'Qwen/Qwen3.5-0.8B'","type":"invalid_request_error","code":422,"param":null,"details":[]}}); if it needs a particular model name, pass --model NAME)
+  – MUST   choice.options             2 to 255 options are accepted  (not reached: the server rejects a minimal valid request (422: {"error":{"message":"Loaded model is 'Qwen/Qwen3.5-0.8B'","type":"invalid_request_error","code":422,"param":null,"details":[]}}); if it needs a particular model name, pass --model NAME)
+
+§3.4 Score
+  – MUST   score.levels               2 to 10 levels are accepted  (not reached: the server rejects a minimal valid request (422: {"error":{"message":"Loaded model is 'Qwen/Qwen3.5-0.8B'","type":"invalid_request_error","code":422,"param":null,"details":[]}}); if it needs a particular model name, pass --model NAME)
+  – SHOULD score.map-rejected         map-form score criteria are rejected with 4xx  (not reached: the server rejects a minimal valid request (422: {"error":{"message":"Loaded model is 'Qwen/Qwen3.5-0.8B'","type":"invalid_request_error","code":422,"param":null,"details":[]}}); if it needs a particular model name, pass --model NAME)
+
+§4.1 Response envelope
+  – MUST   response.envelope          model, answers and usage are present  (not reached: the server rejects a minimal valid request (422: {"error":{"message":"Loaded model is 'Qwen/Qwen3.5-0.8B'","type":"invalid_request_error","code":422,"param":null,"details":[]}}); if it needs a particular model name, pass --model NAME)
+  – MUST   response.usage             token counts are non-negative integers  (not reached: the server rejects a minimal valid request (422: {"error":{"message":"Loaded model is 'Qwen/Qwen3.5-0.8B'","type":"invalid_request_error","code":422,"param":null,"details":[]}}); if it needs a particular model name, pass --model NAME)
+  – MUST   response.answer-ids        one answer per question id, none extra  (not reached: the server rejects a minimal valid request (422: {"error":{"message":"Loaded model is 'Qwen/Qwen3.5-0.8B'","type":"invalid_request_error","code":422,"param":null,"details":[]}}); if it needs a particular model name, pass --model NAME)
+  – MUST   response.answer-type       each answer's type matches its question  (not reached: the server rejects a minimal valid request (422: {"error":{"message":"Loaded model is 'Qwen/Qwen3.5-0.8B'","type":"invalid_request_error","code":422,"param":null,"details":[]}}); if it needs a particular model name, pass --model NAME)
+  – MUST   response.finite            no NaN or Infinity  (not reached: the server rejects a minimal valid request (422: {"error":{"message":"Loaded model is 'Qwen/Qwen3.5-0.8B'","type":"invalid_request_error","code":422,"param":null,"details":[]}}); if it needs a particular model name, pass --model NAME)
+  – SHOULD response.extensions        extra fields are prefixed x_  (not reached: the server rejects a minimal valid request (422: {"error":{"message":"Loaded model is 'Qwen/Qwen3.5-0.8B'","type":"invalid_request_error","code":422,"param":null,"details":[]}}); if it needs a particular model name, pass --model NAME)
+
+§4.2 Noul answer
+  – MUST   noul.answer                noul is a probability in [0, 1]  (not reached: the server rejects a minimal valid request (422: {"error":{"message":"Loaded model is 'Qwen/Qwen3.5-0.8B'","type":"invalid_request_error","code":422,"param":null,"details":[]}}); if it needs a particular model name, pass --model NAME)
+
+§4.3 Choice answer
+  – MUST   choice.answer              choice, probabilities and confidence are present  (not reached: the server rejects a minimal valid request (422: {"error":{"message":"Loaded model is 'Qwen/Qwen3.5-0.8B'","type":"invalid_request_error","code":422,"param":null,"details":[]}}); if it needs a particular model name, pass --model NAME)
+  – MUST   choice.probability-keys    probability keys are exactly the option names  (not reached: the server rejects a minimal valid request (422: {"error":{"message":"Loaded model is 'Qwen/Qwen3.5-0.8B'","type":"invalid_request_error","code":422,"param":null,"details":[]}}); if it needs a particular model name, pass --model NAME)
+  – MUST   choice.distribution        probabilities are in [0, 1] and sum to 1  (not reached: the server rejects a minimal valid request (422: {"error":{"message":"Loaded model is 'Qwen/Qwen3.5-0.8B'","type":"invalid_request_error","code":422,"param":null,"details":[]}}); if it needs a particular model name, pass --model NAME)
+  – MUST   choice.argmax              choice is the most probable option  (not reached: the server rejects a minimal valid request (422: {"error":{"message":"Loaded model is 'Qwen/Qwen3.5-0.8B'","type":"invalid_request_error","code":422,"param":null,"details":[]}}); if it needs a particular model name, pass --model NAME)
+
+§4.4 Score answer
+  – MUST   score.answer               score, legend, probabilities and confidence are present  (not reached: the server rejects a minimal valid request (422: {"error":{"message":"Loaded model is 'Qwen/Qwen3.5-0.8B'","type":"invalid_request_error","code":422,"param":null,"details":[]}}); if it needs a particular model name, pass --model NAME)
+  – MUST   score.legend               legend maps "0".."n-1" to the level descriptions  (not reached: the server rejects a minimal valid request (422: {"error":{"message":"Loaded model is 'Qwen/Qwen3.5-0.8B'","type":"invalid_request_error","code":422,"param":null,"details":[]}}); if it needs a particular model name, pass --model NAME)
+  – MUST   score.probability-keys     probability keys are "0".."n-1"  (not reached: the server rejects a minimal valid request (422: {"error":{"message":"Loaded model is 'Qwen/Qwen3.5-0.8B'","type":"invalid_request_error","code":422,"param":null,"details":[]}}); if it needs a particular model name, pass --model NAME)
+  – MUST   score.distribution         probabilities are in [0, 1] and sum to 1  (not reached: the server rejects a minimal valid request (422: {"error":{"message":"Loaded model is 'Qwen/Qwen3.5-0.8B'","type":"invalid_request_error","code":422,"param":null,"details":[]}}); if it needs a particular model name, pass --model NAME)
+  – MUST   score.expectation          score is the expectation of the probabilities  (not reached: the server rejects a minimal valid request (422: {"error":{"message":"Loaded model is 'Qwen/Qwen3.5-0.8B'","type":"invalid_request_error","code":422,"param":null,"details":[]}}); if it needs a particular model name, pass --model NAME)
+
+§4.5 Confidence
+  – MUST   confidence.range           confidence is in [0, 1]  (not reached: the server rejects a minimal valid request (422: {"error":{"message":"Loaded model is 'Qwen/Qwen3.5-0.8B'","type":"invalid_request_error","code":422,"param":null,"details":[]}}); if it needs a particular model name, pass --model NAME)
+  – SHOULD confidence.formula         confidence follows the reference formula  (not reached: the server rejects a minimal valid request (422: {"error":{"message":"Loaded model is 'Qwen/Qwen3.5-0.8B'","type":"invalid_request_error","code":422,"param":null,"details":[]}}); if it needs a particular model name, pass --model NAME)
+
+§6 Errors
+  – SHOULD errors.json                error bodies are JSON  (not reached: the server rejects a minimal valid request (422: {"error":{"message":"Loaded model is 'Qwen/Qwen3.5-0.8B'","type":"invalid_request_error","code":422,"param":null,"details":[]}}); if it needs a particular model name, pass --model NAME)
+  – MUST   errors.no-5xx              bad requests never get a 5xx  (not reached: the server rejects a minimal valid request (422: {"error":{"message":"Loaded model is 'Qwen/Qwen3.5-0.8B'","type":"invalid_request_error","code":422,"param":null,"details":[]}}); if it needs a particular model name, pass --model NAME)
+  – SHOULD errors.reject-invalid      invalid requests get a 4xx, not an answer  (not reached: the server rejects a minimal valid request (422: {"error":{"message":"Loaded model is 'Qwen/Qwen3.5-0.8B'","type":"invalid_request_error","code":422,"param":null,"details":[]}}); if it needs a particular model name, pass --model NAME)
+  – SHOULD errors.validation-shape    validation errors are 422 with detail[]  (not reached: the server rejects a minimal valid request (422: {"error":{"message":"Loaded model is 'Qwen/Qwen3.5-0.8B'","type":"invalid_request_error","code":422,"param":null,"details":[]}}); if it needs a particular model name, pass --model NAME)
+  – SHOULD errors.shape               other errors carry detail.error_type and detail.message  (not reached: the server rejects a minimal valid request (422: {"error":{"message":"Loaded model is 'Qwen/Qwen3.5-0.8B'","type":"invalid_request_error","code":422,"param":null,"details":[]}}); if it needs a particular model name, pass --model NAME)
+
+§7 Semantics
+  – MUST   semantics.question-id      renaming a question id does not change its answer  (not reached: the server rejects a minimal valid request (422: {"error":{"message":"Loaded model is 'Qwen/Qwen3.5-0.8B'","type":"invalid_request_error","code":422,"param":null,"details":[]}}); if it needs a particular model name, pass --model NAME)
+  – SHOULD semantics.batching         other questions in the request do not change an answer  (not reached: the server rejects a minimal valid request (422: {"error":{"message":"Loaded model is 'Qwen/Qwen3.5-0.8B'","type":"invalid_request_error","code":422,"param":null,"details":[]}}); if it needs a particular model name, pass --model NAME)
+  – SHOULD semantics.question-order   question order does not change answers  (not reached: the server rejects a minimal valid request (422: {"error":{"message":"Loaded model is 'Qwen/Qwen3.5-0.8B'","type":"invalid_request_error","code":422,"param":null,"details":[]}}); if it needs a particular model name, pass --model NAME)
+
+§8 Drop-in
+  – MUST   dropin.sdk-python          the official Python SDK parses every answer type  (not reached: the server rejects a minimal valid request (422: {"error":{"message":"Loaded model is 'Qwen/Qwen3.5-0.8B'","type":"invalid_request_error","code":422,"param":null,"details":[]}}); if it needs a particular model name, pass --model NAME)
+
+not tested: the server rejects a minimal valid request (422: {"error":{"message":"Loaded model is 'Qwen/Qwen3.5-0.8B'","type":"invalid_request_error","code":422,"param":null,"details":[]}}); if it needs a particular model name, pass --model NAME
+  wrote ./results/simple-jev/default/report.json
+  wrote ./results/simple-jev/default/report.md
