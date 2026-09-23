@@ -57,7 +57,7 @@ FAULTS: dict[str, tuple[str, str]] = {
     "noul-range": ("noul.answer", "noul above 1"),
     "choice-no-confidence": ("choice.answer", "omit confidence from choice answers"),
     "choice-key-case": ("choice.probability-keys", "lowercase option names in probabilities"),
-    "choice-sum": ("choice.distribution", "choice probabilities sum to 1.2"),
+    "choice-sum": ("choice.distribution", "choice probabilities sum to about 1.2"),
     "choice-second": ("choice.argmax", "choice is the second most likely option"),
     "score-no-legend": ("score.answer", "omit legend"),
     "legend-1-based": ("score.legend", "legend keys start at 1"),
@@ -226,8 +226,8 @@ def answer(cfg: MockConfig, state: Any, qid: str, q: dict, position: int, count:
         probs = _softmax([_logit(cfg, state, ins, n, q["criteria"][n], *salt) for n in names])
         order = sorted(range(len(names)), key=lambda i: -probs[i])
         conf = choice_confidence(probs)
-        if cfg.has("choice-sum"):
-            probs = [p * 1.2 for p in probs]
+        if cfg.has("choice-sum"):  # like independent per-option sigmoids: each in [0, 1], sum ≠ 1
+            probs = [min(1.0, p + 0.2 / len(probs)) for p in probs]
         keys = names
         if cfg.has("nfd-keys"):
             keys = [unicodedata.normalize("NFD", n) for n in names]

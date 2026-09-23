@@ -65,6 +65,26 @@ def cmd_mock(args: argparse.Namespace) -> int:
     return 0
 
 
+def cmd_proxy(args: argparse.Namespace) -> int:
+    from .proxy import ProxyConfig, make_server
+
+    upstream_key = args.upstream_key or (os.environ.get(args.upstream_key_env) if args.upstream_key_env else None)
+    cfg = ProxyConfig(upstream=args.upstream, upstream_key=upstream_key, upstream_model=args.upstream_model,
+                      upstream_path=args.upstream_path, upstream_key_header=args.upstream_key_header,
+                      key=args.key, split=args.split, timeout=args.timeout)
+    srv = make_server(cfg, host=args.host, port=args.port, verbose=args.verbose)
+    host, port = srv.server_address[:2]
+    _eprint(f"  jevcompat proxy http://{host}:{port}/v1/systemone → {cfg.upstream}{cfg.upstream_path}"
+            + (f" (model → {cfg.upstream_model})" if cfg.upstream_model else "") + ("  [split]" if cfg.split else ""))
+    try:
+        srv.serve_forever()
+    except KeyboardInterrupt:
+        pass
+    finally:
+        srv.server_close()
+    return 0
+
+
 def cmd_spec(args: argparse.Namespace) -> int:
     section = None
     for r in spec.REQUIREMENTS.values():
@@ -107,6 +127,21 @@ def build_parser() -> argparse.ArgumentParser:
     m.add_argument("--noise", type=float, default=0.0, help="random logit noise, to imitate a non-deterministic model")
     m.add_argument("-v", "--verbose", action="store_true", help="log requests")
     m.set_defaults(fn=cmd_mock)
+
+    x = sub.add_parser("proxy", help="serve a spec-conforming API in front of a non-conforming server")
+    x.add_argument("upstream", help="the server to put behind the proxy, e.g. http://localhost:8000")
+    x.add_argument("--host", default="127.0.0.1")
+    x.add_argument("--port", type=int, default=8788)
+    x.add_argument("--key", help="require this API key from clients")
+    x.add_argument("--upstream-key", help="key to send upstream")
+    x.add_argument("--upstream-key-env", metavar="VAR", help="read the upstream key from this environment variable")
+    x.add_argument("--upstream-key-header", metavar="NAME", help="send the upstream key in this header instead of Authorization: Bearer")
+    x.add_argument("--upstream-model", metavar="NAME", help="model name to send upstream (e.g. when it rejects jev-latest)")
+    x.add_argument("--upstream-path", default="/v1/systemone", help="upstream route (default /v1/systemone)")
+    x.add_argument("--split", action="store_true", help="send each question upstream on its own, so answers cannot affect each other")
+    x.add_argument("--timeout", type=float, default=120.0)
+    x.add_argument("-v", "--verbose", action="store_true")
+    x.set_defaults(fn=cmd_proxy)
 
     s = sub.add_parser("spec", help="list the requirements")
     s.set_defaults(fn=cmd_spec)
