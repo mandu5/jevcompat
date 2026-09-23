@@ -131,15 +131,18 @@ def markdown(report: Report, title: str | None = None) -> str:
     limits = report.info.get("limits") or {}
     if limits:
         out += ["Observed limits: " + ", ".join(f"{k} {v}" for k, v in limits.items()), ""]
-    out += ["| | level | requirement | |", "|---|---|---|---|"]
+    failed_musts = [r for r in report.results if r.status == "fail" and r.level == "MUST"]
+    if failed_musts:
+        out += ["**Failed MUSTs:** " + ", ".join(f"[`{r.id}`]({SPEC_URL}#{r.id}) — {r.title}" for r in failed_musts), ""]
+    out += ["| | level | requirement | result |", "|---|---|---|---|"]
     for r in report.results:
         note = r.reason if r.status == "skip" else (r.findings[0].message if r.findings else "")
-        out.append(f"| {MARK[r.status]} | {r.level} | [`{r.id}`]({SPEC_URL}) | {_md(note, 140)} |")
+        out.append(f"| {MARK[r.status]} | {r.level} | [`{r.id}`]({SPEC_URL}#{r.id}) {r.title} | {_md(note, 160)} |")
     fails = [r for r in report.results if r.status == "fail"]
     if fails:
         out += ["", "## Failures", ""]
         for r in fails:
-            out += [f"### `{r.id}` ({r.level}) — {r.title}", ""]
+            out += [f"### [`{r.id}`]({SPEC_URL}#{r.id}) ({r.level}) — {r.title}", ""]
             for f in r.findings[:3]:
                 out.append(f"- **{f.case}**{' `' + f.where + '`' if f.where else ''}: {_md(f.message, 400)}")
                 if f.exchange is not None:

@@ -123,7 +123,8 @@ def fold(ctx: Ctx, aborted: str | None) -> list[RequirementResult]:
             status, reason = "pass", ""
         else:
             status = "skip"
-            reason = ctx.skipped.get(req.id) or (f"not reached: {aborted}" if aborted else "no case observed it")
+            reason = ctx.skipped.get(req.id) or (f"not reached: {aborted}" if aborted else
+                                                 "not exercised: the server never produced the situation it covers")
         out.append(RequirementResult(req.id, req.level, req.section, req.title, status, findings, cases, reason))
     unknown = set(by_req) - set(spec.REQUIREMENTS)
     if unknown:  # a case tagged a finding with an id the spec does not have: a bug in jevcompat

@@ -26,7 +26,8 @@ def test_nonconformant_server_exits_1(tmp_path):
         code = cli.main(["test", m.url, "--no-sdk", "--markdown", str(md)])
     assert code == 1
     text = md.read_text()
-    assert "### `choice.argmax` (MUST)" in text and "<details>" in text
+    assert "choice.argmax`](https://github.com/mandu5/jevcompat/blob/main/SPEC.md#choice.argmax) (MUST)" in text and "<details>" in text
+    assert "**Failed MUSTs:**" in text
 
 
 def test_unreachable_exits_2():

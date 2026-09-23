@@ -43,16 +43,16 @@ timed out, the connection dropped — is **incomplete**, not conformant.
 
 ## 1. Transport
 
-**http.endpoint** — MUST. The server accepts `POST /v1/systemone` with a JSON request body
+<a id="http.endpoint"></a>**http.endpoint** — MUST. The server accepts `POST /v1/systemone` with a JSON request body
 (`Content-Type: application/json`) and answers valid requests with status `200`. `[api]` `[oas]`
 
-**http.json** — MUST. The body of every `200` response is JSON. `[api]` `[oas]`
+<a id="http.json"></a>**http.json** — MUST. The body of every `200` response is JSON. `[api]` `[oas]`
 
-**http.content-type** — SHOULD. Every response, success or error, declares a JSON media type
+<a id="http.content-type"></a>**http.content-type** — SHOULD. Every response, success or error, declares a JSON media type
 (`application/json`, or a `+json` type). The official server does `[live]`; the Python SDK does
 not depend on it `[sdk-py]`.
 
-**http.models** — SHOULD. `GET /v1/models` returns `200` and
+<a id="http.models"></a>**http.models** — SHOULD. `GET /v1/models` returns `200` and
 `{"models": [{"name": str, "description": str, "release_date": "YYYY-MM-DD"}, …]}` with at least one
 entry. `[oas]` `[docs]` (models)
 
@@ -62,19 +62,19 @@ A server MAY return an `x-typesafe-request-id` header. `[live]`
 
 A server MAY run without authentication.
 
-**auth.ignored-when-off** — MUST. A server that runs without authentication accepts requests that
+<a id="auth.ignored-when-off"></a>**auth.ignored-when-off** — MUST. A server that runs without authentication accepts requests that
 carry an `Authorization` header. The official SDKs always send `Authorization: Bearer <key>`.
 `[sdk-py]` `[sdk-js]`
 
 When authentication is enabled:
 
-**auth.bearer** — MUST. The key is read from `Authorization: Bearer <key>`. `[api]` `[oas]`
+<a id="auth.bearer"></a>**auth.bearer** — MUST. The key is read from `Authorization: Bearer <key>`. `[api]` `[oas]`
 
-**auth.missing** — SHOULD. A request without a key gets `401` or `403` with body
+<a id="auth.missing"></a>**auth.missing** — SHOULD. A request without a key gets `401` or `403` with body
 `{"detail": {"error_type": "authentication_error", "message": str}}`. (The docs say `401`; the
 official server returns `403`. Both are allowed: A.1.) `[api]` `[live]`
 
-**auth.invalid** — SHOULD. A request with a wrong key gets `401` with the same body shape. `[live]`
+<a id="auth.invalid"></a>**auth.invalid** — SHOULD. A request with a wrong key gets `401` with the same body shape. `[live]`
 
 ## 3. Request
 
@@ -94,55 +94,55 @@ In this section, *accepts* means: answers with `200` and a response that meets �
 
 ### 3.1 Top level
 
-**request.state** — MUST. `state` may be a string, a JSON object or a JSON array; the server
+<a id="request.state"></a>**request.state** — MUST. `state` may be a string, a JSON object or a JSON array; the server
 accepts all three. `[oas]` `[api]`
 
-**request.model-alias** — MUST. The server accepts `"model": "jev-latest"`. It is the official
+<a id="request.model-alias"></a>**request.model-alias** — MUST. The server accepts `"model": "jev-latest"`. It is the official
 SDKs' default model, and documentation examples send it. `[sdk-py]` (`DEFAULT_MODEL`) `[api]`
 `[docs]` (models) A server MAY accept
 other model names and MAY report its own name in the response's `model`.
 
-**request.multi** — MUST. The server accepts several questions of different types in one request
+<a id="request.multi"></a>**request.multi** — MUST. The server accepts several questions of different types in one request
 and answers each one. `[api]` `[docs]` (primitives)
 
-**request.question-ids** — MUST. A question id is any non-empty string; the server accepts ids
+<a id="request.question-ids"></a>**request.question-ids** — MUST. A question id is any non-empty string; the server accepts ids
 containing `-`, `.`, spaces and non-ASCII characters and returns them unchanged. `[oas]`
 
-**request.unicode** — MUST. The server accepts non-ASCII text (e.g. Hangul, emoji) in `state`,
+<a id="request.unicode"></a>**request.unicode** — MUST. The server accepts non-ASCII text (e.g. Hangul, emoji) in `state`,
 `instructions`, criteria descriptions and choice option names, and returns option names
 byte-for-byte as sent. Clients look answers up by these strings.
 
-**request.unknown-fields** — SHOULD. Unknown top-level fields are ignored. The Python SDK forwards
+<a id="request.unknown-fields"></a>**request.unknown-fields** — SHOULD. Unknown top-level fields are ignored. The Python SDK forwards
 caller-supplied extra fields (`extra_body`); the official server's schema does not forbid them.
 `[sdk-py]` `[oas]`
 
-**request.structured-text** — MUST. `instructions` and every criteria description may be a string,
+<a id="request.structured-text"></a>**request.structured-text** — MUST. `instructions` and every criteria description may be a string,
 an object or an array. `[api]` `[oas]`
 
 ### 3.2 Noul
 
-**noul.criteria** — MUST. `criteria` may be omitted, `null`, `{"true": …, "false": …}`, or one-sided
+<a id="noul.criteria"></a>**noul.criteria** — MUST. `criteria` may be omitted, `null`, `{"true": …, "false": …}`, or one-sided
 (`{"true": …}` or `{"false": …}`). `[oas]` `[sdk-js]` (live integration test)
 
-**noul.no-instructions** — SHOULD. A noul question without `instructions` is accepted. (The docs
+<a id="noul.no-instructions"></a>**noul.no-instructions** — SHOULD. A noul question without `instructions` is accepted. (The docs
 call `instructions` required; the official server's schema does not: A.2.) `[oas]` `[api]`
 
 ### 3.3 Choice
 
-**choice.null-description** — MUST. An option's description may be `null`; the option is then
+<a id="choice.null-description"></a>**choice.null-description** — MUST. An option's description may be `null`; the option is then
 interpreted by its name. `[api]`
 
-**choice.options** — MUST. The server accepts every option count from 2 to 255 inclusive. `[api]`
+<a id="choice.options"></a>**choice.options** — MUST. The server accepts every option count from 2 to 255 inclusive. `[api]`
 ("You can have a maximum of 255 options per Choice.") A server that cannot serve 255 options is
 not a drop-in replacement: a client with 100 options breaks.
 
 ### 3.4 Score
 
-**score.levels** — MUST. `criteria` is an ordered array of level descriptions, low to high; the
+<a id="score.levels"></a>**score.levels** — MUST. `criteria` is an ordered array of level descriptions, low to high; the
 server accepts every level count from 2 to 10 inclusive. `[api]` ("A Score should have at least
 two levels; the API accepts up to 10.")
 
-**score.map-rejected** — SHOULD. Score `criteria` given as an object (the pre-0.6 SDK form,
+<a id="score.map-rejected"></a>**score.map-rejected** — SHOULD. Score `criteria` given as an object (the pre-0.6 SDK form,
 `{"0": …, "1": …}`) is rejected with a 4xx status. `[oas]` `[sdk-js]` (v0.6.0 changelog)
 
 ### 3.5 Limits
@@ -174,23 +174,23 @@ with `413` or `422`, not truncate silently.
 
 ### 4.1 Envelope
 
-**response.envelope** — MUST. The body is an object with `model` (string), `answers` (object) and
+<a id="response.envelope"></a>**response.envelope** — MUST. The body is an object with `model` (string), `answers` (object) and
 `usage` (object). `[oas]` `[sdk-py]` (all three are required by the SDK's strict response model)
 
-**response.usage** — MUST. `usage.input_tokens` and `usage.output_tokens` are non-negative JSON
+<a id="response.usage"></a>**response.usage** — MUST. `usage.input_tokens` and `usage.output_tokens` are non-negative JSON
 integers. `[oas]` `[sdk-py]` (strict mode rejects `12.0` for an integer)
 
-**response.answer-ids** — MUST. `answers` has exactly one entry per question id in the request —
+<a id="response.answer-ids"></a>**response.answer-ids** — MUST. `answers` has exactly one entry per question id in the request —
 none missing, none added. `[api]` `[oas]` (A client that looks up each answer's question by id,
 as documented examples do, breaks on an added one.)
 
-**response.answer-type** — MUST. Each answer's `type` equals its question's `type`. `[oas]`
+<a id="response.answer-type"></a>**response.answer-type** — MUST. Each answer's `type` equals its question's `type`. `[oas]`
 
-**response.finite** — MUST. Every number in the response is a finite JSON number. `NaN` and
+<a id="response.finite"></a>**response.finite** — MUST. Every number in the response is a finite JSON number. `NaN` and
 `Infinity` are not JSON; Python's `json.dumps` emits them by default and every strict parser
 rejects them.
 
-**response.extensions** — SHOULD. Fields not defined by this specification — at the top level or
+<a id="response.extensions"></a>**response.extensions** — SHOULD. Fields not defined by this specification — at the top level or
 inside an answer — have names beginning with `x_` (for example `x_latency_ms`). The SDKs ignore
 unknown fields, so an extra field breaks nothing today; an unprefixed one (`confidence` on a noul
 answer, `action`, `certainty`, `metadata`) collides the day TypeSafe adds a field with that name
@@ -198,48 +198,48 @@ and a different meaning.
 
 ### 4.2 Noul answer
 
-**noul.answer** — MUST. `{"type": "noul", "noul": p}` where `p` is a number in [0, 1], the
+<a id="noul.answer"></a>**noul.answer** — MUST. `{"type": "noul", "noul": p}` where `p` is a number in [0, 1], the
 probability that the answer is yes. `[api]` `[oas]`
 
 ### 4.3 Choice answer
 
-**choice.answer** — MUST. The answer has `choice` (string), `probabilities` (object) and
+<a id="choice.answer"></a>**choice.answer** — MUST. The answer has `choice` (string), `probabilities` (object) and
 `confidence` (number). `[api]` `[oas]`
 
-**choice.probability-keys** — MUST. The keys of `probabilities` are exactly the option names of
+<a id="choice.probability-keys"></a>**choice.probability-keys** — MUST. The keys of `probabilities` are exactly the option names of
 the request, byte-for-byte. `[api]` ("covers every option")
 
-**choice.distribution** — MUST. Every probability is in [0, 1] and they sum to 1 within
+<a id="choice.distribution"></a>**choice.distribution** — MUST. Every probability is in [0, 1] and they sum to 1 within
 `ε_sum` (§5). `[api]` ("values sum to approximately 1")
 
-**choice.argmax** — MUST. `choice` is an option name whose probability is the largest, within
+<a id="choice.argmax"></a>**choice.argmax** — MUST. `choice` is an option name whose probability is the largest, within
 `ε_round` (§5). `[api]` ("the highest-probability option")
 
 ### 4.4 Score answer
 
-**score.answer** — MUST. The answer has `score` (number), `legend` (object), `probabilities`
+<a id="score.answer"></a>**score.answer** — MUST. The answer has `score` (number), `legend` (object), `probabilities`
 (object) and `confidence` (number). `[api]` `[oas]`
 
-**score.legend** — MUST. `legend` maps `"0"` … `"n-1"` (decimal strings) to the request's level
+<a id="score.legend"></a>**score.legend** — MUST. `legend` maps `"0"` … `"n-1"` (decimal strings) to the request's level
 descriptions, in order. A level sent as a string comes back as that string, unchanged. A level
 sent as an object or array comes back either unchanged or as a string rendering of it: the API
 reference types legend values as strings `[api]`, the SDK accepts both `[sdk-py]`, and no
 official source shows which one the official server returns (A.9). A legend value is never
 `null`: the SDK rejects it.
 
-**score.probability-keys** — MUST. The keys of `probabilities` are `"0"` … `"n-1"`. `[api]`
+<a id="score.probability-keys"></a>**score.probability-keys** — MUST. The keys of `probabilities` are `"0"` … `"n-1"`. `[api]`
 
-**score.distribution** — MUST. As **choice.distribution**.
+<a id="score.distribution"></a>**score.distribution** — MUST. As **choice.distribution**.
 
-**score.expectation** — MUST. `score` equals Σ i·pᵢ over the returned probabilities, within
+<a id="score.expectation"></a>**score.expectation** — MUST. `score` equals Σ i·pᵢ over the returned probabilities, within
 `ε_score` (§5). `[api]` ("the probability-weighted answer across the levels") A client that reads
 both `score` and `probabilities` must not see two different answers.
 
 ### 4.5 Confidence
 
-**confidence.range** — MUST. `confidence` is a number in [0, 1]. `[api]` `[oas]`
+<a id="confidence.range"></a>**confidence.range** — MUST. `confidence` is a number in [0, 1]. `[api]` `[oas]`
 
-**confidence.formula** — SHOULD. `confidence` equals a reference formula below within
+<a id="confidence.formula"></a>**confidence.formula** — SHOULD. `confidence` equals a reference formula below within
 `ε_conf` (§5). TypeSafe says confidence is "derived from the probabilities", that "all of it on
 one option gives 1.0; the more evenly it spreads, the lower the confidence", and uses
 `(3 × largest − 1) / 2` for three options `[docs]` (confidence).
@@ -283,26 +283,26 @@ use any of them.
 
 ## 6. Errors
 
-**errors.json** — SHOULD. Error responses have JSON bodies. The SDKs read the message from them
+<a id="errors.json"></a>**errors.json** — SHOULD. Error responses have JSON bodies. The SDKs read the message from them
 and fall back to the raw text when they are not JSON, so a plain-text or HTML error page degrades
 error messages but breaks nothing. `[sdk-py]` `[live]`
 
-**errors.no-5xx** — MUST. A request that is malformed or outside the documented ranges never
+<a id="errors.no-5xx"></a>**errors.no-5xx** — MUST. A request that is malformed or outside the documented ranges never
 produces a `5xx` status. The SDKs retry `5xx` (and `408`, `429`), so a server that answers a bad
 request with `500` makes every client retry a request that can never succeed. `[sdk-py]` `[sdk-js]`
 
-**errors.reject-invalid** — SHOULD. A request that is invalid under §3 gets a `4xx` status, not a
+<a id="errors.reject-invalid"></a>**errors.reject-invalid** — SHOULD. A request that is invalid under §3 gets a `4xx` status, not a
 `200`. A server that answers requests the official server rejects lets bugs pass in development
 that fail in production. Invalid includes: a body that is not JSON; missing `state` or `questions`;
 `questions` equal to `{}`; a question without `type`; an unknown `type` (for example `"boolean"`,
 which other decision APIs use); a choice with empty `criteria`; a score whose `criteria` is not an
 array.
 
-**errors.validation-shape** — SHOULD. Validation failures use status `422` and the body
+<a id="errors.validation-shape"></a>**errors.validation-shape** — SHOULD. Validation failures use status `422` and the body
 `{"detail": [{"loc": [..], "msg": str, "type": str}, …]}`, where `loc` locates the offending field
 starting with `"body"`. `[oas]` (`HTTPValidationError`) `[sdk-js]` (live integration test)
 
-**errors.shape** — SHOULD. Other errors use `{"detail": {"error_type": str, "message": str}}`.
+<a id="errors.shape"></a>**errors.shape** — SHOULD. Other errors use `{"detail": {"error_type": str, "message": str}}`.
 `[live]` `[sdk-js]`
 
 Servers under load SHOULD answer `429` (over a rate limit) or `529` (overloaded); the SDKs back off
@@ -325,19 +325,19 @@ differs when |m − m′| > max(0.05, 4·σ·√(2/k)).
   for the same number in the same direction. One unlucky round of a sampling server is not a
   finding.
 
-**semantics.question-id** — MUST. Renaming a question id does not change its answer. `[api]`
+<a id="semantics.question-id"></a>**semantics.question-id** — MUST. Renaming a question id does not change its answer. `[api]`
 ("The key is not sent to the underlying model and is not used in inference.")
 
-**semantics.batching** — SHOULD. A question's answer does not change when other questions are added
+<a id="semantics.batching"></a>**semantics.batching** — SHOULD. A question's answer does not change when other questions are added
 to the same request. `[docs]` (primitives: "System One models evaluate every question in a request
 in parallel"; parallel questions cookbook: "no change in the answers")
 
-**semantics.question-order** — SHOULD. The order of questions in the `questions` object does not
+<a id="semantics.question-order"></a>**semantics.question-order** — SHOULD. The order of questions in the `questions` object does not
 change any answer.
 
 ## 8. Drop-in
 
-**dropin.sdk-python** — MUST. The official Python SDK, pointed at the server with `base_url`,
+<a id="dropin.sdk-python"></a>**dropin.sdk-python** — MUST. The official Python SDK, pointed at the server with `base_url`,
 parses the server's responses to noul, choice and score questions without raising. This is the
 end-to-end form of §4 and catches anything the field-level requirements miss.
 

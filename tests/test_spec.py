@@ -16,9 +16,10 @@ def parsed() -> list[tuple[str, str, str]]:
         m = re.match(r"^#{2,3} (\d+(?:\.\d+)?)\.? ", line)
         if m:
             section = m.group(1)
-        m = re.match(r"^\*\*([a-z0-9.-]+)\*\* — (MUST|SHOULD)\.", line)
+        m = re.match(r'^<a id="([a-z0-9.-]+)"></a>\*\*([a-z0-9.-]+)\*\* — (MUST|SHOULD)\.', line)
         if m:
-            out.append((m.group(1), m.group(2), section))
+            assert m.group(1) == m.group(2), line  # the anchor reports link to must match the id
+            out.append((m.group(2), m.group(3), section))
     return out
 
 

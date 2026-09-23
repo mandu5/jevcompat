@@ -40,7 +40,12 @@ def is_int(v: Any) -> bool:
 
 
 def fmt(v: Any) -> str:
-    return repr(v)
+    """A value as it appeared on the wire (JSON), so reports say null, not None."""
+    import json
+    try:
+        return json.dumps(v, ensure_ascii=False)
+    except (TypeError, ValueError):
+        return repr(v)
 
 
 def _le(x: float, bound: float) -> bool:
@@ -237,7 +242,9 @@ def _validate_score(question: dict, answer: dict, where: str) -> list[Violation]
                 else:  # structured (or out-of-range null) level: unchanged, or rendered as a string
                     ok = isinstance(got, str) or (got == level and got is not None)
                 if not ok:
-                    out.append(Violation("score.legend", f"legend[{k!r}] is {fmt(got)}, the request's level {k} is {fmt(level)}", where))
+                    why = ("a null legend value, which the official SDK rejects" if got is None
+                           else f"{fmt(got)}, but the request's level {k} is {fmt(level)}")
+                    out.append(Violation("score.legend", f"legend[{k!r}] is {why}", where))
                     break
     probs = answer.get("probabilities")
     values, dv, r = None, [], 0.0
