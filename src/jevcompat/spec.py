@@ -20,9 +20,10 @@ def rounding(values: list[float]) -> float:
     """½·10⁻ᵈ for the smallest d in 2..6 at which every value is exact; 0 if none is.
 
     Never coarser than two decimals (the documented examples' precision): otherwise one-hot or
-    saturated answers would look "rounded to 0 decimals" and switch the checks off."""
+    saturated answers would look "rounded to 0 decimals" and switch the checks off. Exactness
+    allows 1e-7, so values rounded in float32 (0.8999999761581421) count as rounded."""
     for d in range(2, 7):
-        if all(abs(v - round(v, d)) < 1e-12 for v in values):
+        if all(abs(v - round(v, d)) < 1e-7 for v in values):
             return 0.5 / 10**d
     return 0.0
 

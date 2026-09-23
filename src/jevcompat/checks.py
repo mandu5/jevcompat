@@ -110,36 +110,33 @@ class Ctx:
         return True, {}
 
     def post(self, case: str, payload: Any, *, auth: Any = True, path: str = "/v1/systemone") -> tuple[Response, int]:
-        """POST, retrying 429/503/529 as the official SDKs do. Still busy after that: raise Busy,
-        which callers treat like a timeout — the server's load is not a conformance finding."""
-        a, headers = self._auth(auth)
         shown = payload.decode("utf-8", "replace") if isinstance(payload, bytes) else payload
         body = payload if isinstance(payload, bytes) else json.dumps(payload, ensure_ascii=False).encode("utf-8")
+        return self._call(case, "POST", path, body, shown, auth)
+
+    def get(self, case: str, path: str) -> tuple[Response, int]:
+        return self._call(case, "GET", path, None, None, True)
+
+    def _call(self, case: str, method: str, path: str, body: bytes | None, shown: Any, auth: Any) -> tuple[Response, int]:
+        """One request, retrying 429/503/529 as the official SDKs do. Still busy after that: raise
+        Busy, which callers treat like a timeout — the server's load is not a conformance finding."""
+        a, headers = self._auth(auth)
         waited = 0.0
         for attempt in range(spec.BUSY_ATTEMPTS):
             try:
-                resp = self.client.request("POST", path, body, auth=a, headers=headers)
+                resp = self.client.request(method, path, body, auth=a, headers=headers)
             except TransportError as e:
-                self._record(case, "POST", path, shown, None, str(e))
+                self._record(case, method, path, shown, None, str(e))
                 raise
             if resp.status not in (429, 503, 529):
-                return resp, self._record(case, "POST", path, shown, resp)
+                return resp, self._record(case, method, path, shown, resp)
             delay = _retry_after(resp, attempt)
             if attempt == spec.BUSY_ATTEMPTS - 1 or waited + delay > spec.BUSY_BUDGET_S:
                 break
             time.sleep(delay)
             waited += delay
-        self._record(case, "POST", path, shown, resp)
-        raise Busy(f"POST {path}: still {resp.status} after {attempt + 1} attempts over {waited:.0f}s")
-
-    def get(self, case: str, path: str) -> tuple[Response, int]:
-        a, headers = self._auth(True)
-        try:
-            resp = self.client.request("GET", path, auth=a, headers=headers)
-        except TransportError as e:
-            self._record(case, "GET", path, None, None, str(e))
-            raise
-        return resp, self._record(case, "GET", path, None, resp)
+        self._record(case, method, path, shown, resp)
+        raise Busy(f"{method} {path}: still {resp.status} after {attempt + 1} attempts over {waited:.0f}s")
 
     def payload(self, questions: dict, state: Any = TICKET, **extra: Any) -> dict:
         return {"model": self.client.model, "state": state, "questions": questions, **extra}
@@ -315,25 +312,34 @@ def preflight(ctx: Ctx) -> None:
     else:
         ctx.exercise(name, "auth.bearer")
 
+    if resp.status >= 500:  # one transient failure (a backend still starting) is not evidence yet
+        resp, xi = ctx.post(name, payload)
     if resp.status != 200 and ctx.client.model == "jev-latest":
-        # Is it the model name? Retry with a model the server lists; blame the alias only if that works.
+        # Is it the model name? Retry with a model the server lists, then jev-latest once more:
+        # blame the alias only if the listed model works and jev-latest still does not.
         other = _served_model(ctx)
         if other:
             retry, xr = ctx.post(name, {**payload, "model": other})
             if retry.status == 200:
-                ctx.exercise(name, "request.model-alias")
-                ctx.violate(name, xi, [Violation("request.model-alias", f"model \"jev-latest\" got {resp.status}: "
-                                                 f"{resp.excerpt(200)}; model {other!r} is accepted")])
-                ctx.info["model_fallback"] = other
-                ctx.client.model = other
-                resp, xi = retry, xr
+                again, xa = ctx.post(name, payload)
+                if again.status == 200:
+                    resp, xi = again, xa
+                else:
+                    ctx.exercise(name, "request.model-alias")
+                    ctx.violate(name, xa, [Violation("request.model-alias", f"model \"jev-latest\" got {again.status}: "
+                                                     f"{again.excerpt(200)}; model {other!r} is accepted")])
+                    ctx.info["model_fallback"] = other
+                    ctx.client.model = other
+                    resp, xi = retry, xr
     if resp.status != 200:
         if resp.status >= 500:
             raise Abort(f"the server fails a minimal valid request ({resp.status}: {resp.excerpt(200)})")
         if resp.status in (404, 405):
-            # Does the route exist? Compare with a route that certainly does not.
+            # Does the route exist? A GET to an existing POST route is usually 405; a missing route
+            # answers exactly like a route that certainly does not exist.
+            as_get, _ = ctx.get(name, "/v1/systemone")
             probe, _ = ctx.post(name, payload, path="/v1/jevcompat-no-such-route")
-            if probe.status == resp.status and _same_body(probe, resp):
+            if as_get.status != 405 and probe.status == resp.status and _same_body(probe, resp):
                 ctx.exercise(name, "http.endpoint")
                 ctx.violate(name, xi, [Violation("http.endpoint", f"POST /v1/systemone answers exactly like a route "
                                                                   f"that does not exist ({resp.status})")])
@@ -641,6 +647,9 @@ def _(ctx: Ctx, name: str) -> None:
     reqs = ("auth.missing", "auth.invalid")
     if not ctx.key_given:
         ctx.skip("no --key given (auth is off, or untested)", *reqs, "auth.bearer")
+        return
+    if ctx.auth_mode == "none":
+        ctx.skip("auth is off (requests without a key are answered)", *reqs, "auth.bearer")
         return
     payload = ctx.payload({"refund": dict(NOUL)})
     try:

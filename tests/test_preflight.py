@@ -117,3 +117,48 @@ def test_model_lookup_before_validation_is_not_a_missing_route():
     finally:
         srv.shutdown()
     assert "http.endpoint" not in failed(rep) and rep.verdict == "not tested"
+
+
+def test_one_transient_failure_is_not_blamed_on_the_alias():
+    state = {"n": 0}
+    def post(body):
+        state["n"] += 1
+        if state["n"] == 1:
+            return 502, {"detail": {"error_type": "upstream", "message": "backend starting"}}
+        return 200, {"model": "local", "answers": {k: {"type": "noul", "noul": 0.5} for k in body["questions"]},
+                     "usage": {"input_tokens": 1, "output_tokens": 1}}
+    get = lambda: (200, {"models": [{"name": "local", "description": "x", "release_date": "2026-09-20"}]})  # noqa: E731
+    srv, url = serve(post, get)
+    try:
+        rep = runner.run(url, sdk=False, timeout=5, only=set())
+    finally:
+        srv.shutdown()
+    assert failed(rep) == [] and "model_fallback" not in rep.info
+
+
+def test_fastapi_default_404_for_an_unknown_model_is_not_a_missing_route():
+    """Same {"detail": "Not Found"} body as an unknown route, but GET on the route is 405."""
+    import json as _json
+    from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
+    class H(BaseHTTPRequestHandler):
+        def log_message(self, *a):
+            pass
+        def _reply(self, status, body):
+            raw = _json.dumps(body).encode()
+            self.send_response(status)
+            self.send_header("Content-Type", "application/json")
+            self.send_header("Content-Length", str(len(raw)))
+            self.end_headers()
+            self.wfile.write(raw)
+        def do_POST(self):  # noqa: N802
+            self.rfile.read(int(self.headers.get("Content-Length") or 0))
+            self._reply(404, {"detail": "Not Found"})
+        def do_GET(self):  # noqa: N802
+            self._reply(405 if self.path == "/v1/systemone" else 404, {"detail": "Method Not Allowed" if self.path == "/v1/systemone" else "Not Found"})
+    srv = ThreadingHTTPServer(("127.0.0.1", 0), H)
+    threading.Thread(target=srv.serve_forever, daemon=True).start()
+    try:
+        rep = runner.run(f"http://127.0.0.1:{srv.server_address[1]}", sdk=False, timeout=5)
+    finally:
+        srv.shutdown()
+    assert failed(rep) == [] and rep.verdict == "not tested"

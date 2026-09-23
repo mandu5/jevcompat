@@ -63,3 +63,9 @@ def test_rounding_detection():
 def test_sum_bound_is_asymmetric():
     over, under = spec.eps_sum([1.0, 1.0] + [0.0] * 253, 0.005)
     assert over == 0.05 and abs(under - 1.275) < 1e-12
+
+
+def test_float32_rounding_counts_as_rounding():
+    import struct
+    f32 = [struct.unpack("f", struct.pack("f", v))[0] for v in (0.9, 0.07, 0.03)]
+    assert f32[0] != 0.9 and spec.rounding(f32) == 0.005
