@@ -16,17 +16,23 @@ EPS_CONF = 0.02
 SLACK = 1e-9
 
 
-def rounding(values: list[float], max_decimals: int = 6) -> float:
-    """½·10⁻ᵈ for the smallest d ≤ max_decimals at which every value is exact; 0 if none is."""
-    for d in range(max_decimals + 1):
-        scale = 10**d
-        if all(abs(v * scale - round(v * scale)) < 1e-6 for v in values):
-            return 0.5 / scale
+def rounding(values: list[float]) -> float:
+    """½·10⁻ᵈ for the smallest d in 2..6 at which every value is exact; 0 if none is.
+
+    Never coarser than two decimals (the documented examples' precision): otherwise one-hot or
+    saturated answers would look "rounded to 0 decimals" and switch the checks off."""
+    for d in range(2, 7):
+        if all(abs(v - round(v, d)) < 1e-12 for v in values):
+            return 0.5 / 10**d
     return 0.0
 
 
-def eps_sum(n: int, r: float) -> float:
-    return max(EPS_SUM, n * r)
+def eps_sum(values: list[float], r: float) -> tuple[float, float]:
+    """(allowed overshoot, allowed undershoot) of Σp above/below 1. Rounding moves a sum up by at
+    most r per value reported as non-zero (a reported 0 was rounded down), and down by at most r
+    per value."""
+    nonzero = sum(1 for v in values if v > 0)
+    return max(EPS_SUM, nonzero * r), max(EPS_SUM, len(values) * r)
 
 
 def eps_score(n: int, r: float) -> float:
@@ -34,10 +40,15 @@ def eps_score(n: int, r: float) -> float:
 
 
 # Semantic comparisons, SPEC.md §7.
-SEM_REPEATS = 3
+SEM_REPEATS = 3           # sends per request per round
+SEM_MAX_REPEATS = 9       # more sends before calling a server too noisy
 SEM_FLOOR = 0.05
-SEM_NOISE_K = 3.0
+SEM_Z = 4.0               # limit = max(SEM_FLOOR, SEM_Z · pooled sd · √(2/k))
 SEM_TOO_NOISY = 0.5
+
+# Busy servers (429/503/529): retry with Retry-After, then call the request inconclusive.
+BUSY_ATTEMPTS = 4
+BUSY_BUDGET_S = 60.0
 
 MAX_CHOICE_OPTIONS = 255
 MAX_SCORE_LEVELS = 10

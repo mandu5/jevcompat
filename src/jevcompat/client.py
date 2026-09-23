@@ -30,6 +30,10 @@ class Timeout(TransportError):
     """No response within the client's timeout: inconclusive, since the limit is ours."""
 
 
+class Busy(Timeout):
+    """Still rate-limited or overloaded after retrying: inconclusive, like a timeout."""
+
+
 class _NoRedirect(urllib.request.HTTPRedirectHandler):
     """Return 3xx as the response. Following it would turn a POST into a GET behind our back."""
 

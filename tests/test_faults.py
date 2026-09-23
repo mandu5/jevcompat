@@ -103,3 +103,8 @@ def test_unreachable_server_is_not_tested():
 
 def test_sdk_drop_in_detects_what_breaks_the_official_client():
     assert status_of(run_against(MockConfig(faults=frozenset({"float-usage"})), sdk=True), "dropin.sdk-python") == "fail"
+
+
+def test_rate_limiting_is_not_a_finding():
+    rep = run_against(MockConfig(busy_every=3), sdk=True)
+    assert rep.verdict == "conformant", failures(rep)

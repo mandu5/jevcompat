@@ -84,8 +84,11 @@ class MockConfig:
     key: str | None = None
     faults: frozenset[str] = frozenset()
     noise: float = 0.0
+    sampled: bool = False     # score answers are one sampled level (one-hot), like a sampling server
+    busy_every: int = 0       # every Nth request gets 429 with Retry-After: 0
     rng: random.Random = field(default_factory=lambda: random.Random(0))
     lock: threading.Lock = field(default_factory=threading.Lock)
+    requests: int = 0
 
     def __post_init__(self) -> None:
         unknown = set(self.faults) - set(FAULTS)
@@ -249,6 +252,10 @@ def answer(cfg: MockConfig, state: Any, qid: str, q: dict, position: int, count:
         return out
     levels = q["criteria"]
     probs = _softmax([_logit(cfg, state, ins, i, lv, *salt) for i, lv in enumerate(levels)])
+    if cfg.sampled:
+        with cfg.lock:
+            pick = cfg.rng.choices(range(len(probs)), weights=probs)[0]
+        probs = [1.0 if i == pick else 0.0 for i in range(len(probs))]
     score = sum(i * p for i, p in enumerate(probs))
     if cfg.has("score-argmax"):
         score = float(max(range(len(probs)), key=lambda i: probs[i]))
@@ -352,6 +359,19 @@ class Handler(BaseHTTPRequestHandler):
             self._send(404, {"detail": {"error_type": "not_found", "message": f"No route {self.path}"}})
             return
         if self._auth_error():
+            return
+        with self.cfg.lock:
+            self.cfg.requests += 1
+            busy = self.cfg.busy_every and self.cfg.requests % self.cfg.busy_every == 0
+        if busy:
+            self.rfile.read(int(self.headers.get("Content-Length") or 0))
+            self.send_response(429)
+            raw = b'{"detail": {"error_type": "rate_limit_error", "message": "slow down"}}'
+            self.send_header("Content-Type", "application/json")
+            self.send_header("Retry-After", "0")
+            self.send_header("Content-Length", str(len(raw)))
+            self.end_headers()
+            self.wfile.write(raw)
             return
         raw = read_body(self)
         try:

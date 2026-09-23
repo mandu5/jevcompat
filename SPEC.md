@@ -181,7 +181,8 @@ with `413` or `422`, not truncate silently.
 integers. `[oas]` `[sdk-py]` (strict mode rejects `12.0` for an integer)
 
 **response.answer-ids** — MUST. `answers` has exactly one entry per question id in the request —
-none missing, none added. `[api]` `[oas]`
+none missing, none added. `[api]` `[oas]` (A client that looks up each answer's question by id,
+as documented examples do, breaks on an added one.)
 
 **response.answer-type** — MUST. Each answer's `type` equals its question's `type`. `[oas]`
 
@@ -257,13 +258,14 @@ A noul answer has no `confidence`. `[docs]` (confidence)
 
 Servers may round the numbers they report, and official examples give probabilities to two
 decimals, so every comparison allows for the rounding the response actually shows. For an
-answer's probabilities, let d be the smallest number of decimal places (up to 6) at which every
-probability is exact, and r = ½·10⁻ᵈ the largest rounding error per value; unrounded values have
-r = 0. For n options or levels:
+answer's probabilities, let d be the smallest number of decimal places from 2 to 6 at which every
+probability is exact, and r = ½·10⁻ᵈ the largest rounding error per value; values exact at none
+of them have r = 0. Rounding coarser than two decimals is never assumed. For n options or levels,
+k of them reported as non-zero:
 
 | name | bound | used by |
 |---|---|---|
-| `ε_sum` | max(0.05, n·r) | `\|Σp − 1\| ≤ ε_sum`. 0.05 is the bound the official JS SDK's live test uses (`toBeCloseTo(1, 1)`); n·r is the most that rounding n values can move a sum. |
+| `ε_sum` | above 1: max(0.05, k·r); below 1: max(0.05, n·r) | how far Σp may be from 1. 0.05 is the bound the official JS SDK's live test uses (`toBeCloseTo(1, 1)`). Rounding raises a sum by at most r per value reported as non-zero (a reported 0 was rounded down) and lowers it by at most r per value. |
 | `ε_round` | 0.005 | the chosen option may trail the largest probability by this much |
 | `ε_score` | 0.02 + r·(1 + n(n−1)/2) | `\|score − Σ i·pᵢ\|`: the base allowance plus rounding of each pᵢ and of `score` |
 | `ε_conf` | 0.02 + the change rounding by r can cause in the reference formula | `\|confidence − reference\|` |
@@ -306,9 +308,15 @@ deterministic, so each comparison is statistical. The base request and the varia
 k = 3 times. When the server ignores unknown fields (`request.unknown-fields`), every request
 carries a distinct `x_nonce`, so a response cache cannot make repeats look identical. For every
 number an answer commits to (the `noul` value, each probability), let m and m′ be its means over
-the base and variant sends, and s the largest difference between two sends of the same request,
-over both groups. The comparison fails when |m − m′| > max(0.05, 3·s) for any number. When
-3·s ≥ 0.5 the server is too noisy to judge and the requirement is reported as not tested.
+the base and variant sends and σ its pooled standard deviation over both groups. The number
+differs when |m − m′| > max(0.05, 4·σ·√(2/k)).
+
+- If any of these limits is 0.5 or more, both groups are sent 3 more times, up to k = 9. If a
+  limit is still 0.5 or more, the server is too noisy to judge, and the requirement is reported
+  as not tested.
+- A difference fails the requirement only when a second, fresh round of sends shows a difference
+  for the same number in the same direction. One unlucky round of a sampling server is not a
+  finding.
 
 **semantics.question-id** — MUST. Renaming a question id does not change its answer. `[api]`
 ("The key is not sent to the underlying model and is not used in inference.")

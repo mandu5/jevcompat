@@ -8,7 +8,7 @@ from conftest import run_against, status_of
 
 from jevcompat.mock import MockConfig
 
-SEM = {"semantics-question-id", "semantics-batching", "semantics-question-order"}
+SEM = {"choice-basic", "score-levels", "semantics-question-id", "semantics-batching", "semantics-question-order"}
 REQS = ("semantics.question-id", "semantics.batching", "semantics.question-order")
 
 
@@ -45,3 +45,21 @@ def test_a_cache_cannot_hide_noise():
     bodies = [x.request for x in rep.exchanges if isinstance(x.request, dict) and x.case.startswith("semantics")]
     nonces = [b.get("x_nonce") for b in bodies]
     assert all(nonces) and len(set(nonces)) == len(nonces)
+
+
+def test_a_sampling_server_is_not_failed():
+    """Answers drawn from the distribution (one-hot levels) are legal; one unlucky round is not a finding."""
+    fails = 0
+    for seed in range(40):
+        rep = run_against(MockConfig(sampled=True, rng=random.Random(seed)), only=SEM)
+        fails += sum(status_of(rep, r) == "fail" for r in REQS)
+    assert fails == 0
+
+
+def test_moderately_noisy_servers_are_judged_not_skipped():
+    """Logit noise 0.5 is far noisier than TypeSafe's own published repeat variation (sd ≈ 0.01)."""
+    skipped = 0
+    for seed in range(20):
+        rep = run_against(MockConfig(noise=0.5, rng=random.Random(seed)), only=SEM)
+        skipped += sum(status_of(rep, r) == "skip" for r in REQS)
+    assert skipped <= 3

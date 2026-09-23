@@ -163,8 +163,9 @@ def _distribution(req: str, probs: dict, keys: list[str], where: str) -> tuple[l
     values = [float(probs[k]) for k in keys]
     r = spec.rounding(values)
     total = sum(values)
-    bound = spec.eps_sum(len(values), r)
-    if not _le(abs(total - 1), bound):
+    over, under = spec.eps_sum(values, r)
+    if not (_le(total - 1, over) and _le(1 - total, under)):
+        bound = over if total > 1 else under
         return [Violation(req, f"probabilities sum to {total:.4f}, not 1 ± {bound:g}", where)], values, r
     return [], values, r
 

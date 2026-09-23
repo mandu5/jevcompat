@@ -24,6 +24,9 @@ def serve(post, get=None):
         def do_POST(self):  # noqa: N802
             n = int(self.headers.get("Content-Length") or 0)
             body = json.loads(self.rfile.read(n) or b"{}")
+            if self.path != "/v1/systemone" and not getattr(post, "any_route", False):
+                self._reply(404, {"detail": "Not Found"})
+                return
             self._reply(*post(body))
 
         def do_GET(self):  # noqa: N802
@@ -43,7 +46,7 @@ def test_warming_up_server_is_not_blamed():
         rep = runner.run(url, sdk=False, timeout=5)
     finally:
         srv.shutdown()
-    assert rep.verdict == "not tested" and "not ready" in rep.aborted and failed(rep) == []
+    assert rep.verdict == "not tested" and "busy" in rep.aborted and failed(rep) == []
 
 
 def test_an_unrelated_rejection_is_not_blamed_on_the_model_name():
@@ -64,7 +67,7 @@ def test_an_unrelated_rejection_is_not_blamed_on_the_model_name():
 
 
 def test_missing_route_is_http_endpoint():
-    srv, url = serve(lambda b: (404, {"detail": "Not Found"}))
+    srv, url = serve(lambda b: (404, {"detail": "Not Found"}))  # every route, this one included, is missing
     try:
         rep = runner.run(url, sdk=False, timeout=5)
     finally:
@@ -85,3 +88,32 @@ def test_404_without_the_word_model_still_tries_a_listed_model():
     finally:
         srv.shutdown()
     assert failed(rep) == ["request.model-alias"] and rep.info["model_fallback"] == "local"
+
+
+def test_5xx_for_the_alias_still_tries_a_listed_model():
+    def post(body):
+        if body.get("model") == "jev-latest":
+            return 500, {"detail": {"error_type": "internal", "message": "KeyError: 'jev-latest'"}}
+        return 200, {"model": "local", "answers": {k: {"type": "noul", "noul": 0.5} for k in body["questions"]},
+                     "usage": {"input_tokens": 1, "output_tokens": 1}}
+    get = lambda: (200, {"models": [{"name": "local", "description": "x", "release_date": "2026-09-20"}]})  # noqa: E731
+    srv, url = serve(post, get)
+    try:
+        rep = runner.run(url, sdk=False, timeout=5, only=set())
+    finally:
+        srv.shutdown()
+    assert failed(rep) == ["request.model-alias"]
+
+
+def test_model_lookup_before_validation_is_not_a_missing_route():
+    """404 for jev-latest and for {} but a different 404 for a route that does not exist."""
+    def post(body):
+        if not body:
+            return 404, {"detail": {"error_type": "not_found", "message": "model None not found"}}
+        return 404, {"detail": {"error_type": "not_found", "message": f"model {body.get('model')} not found"}}
+    srv, url = serve(post)
+    try:
+        rep = runner.run(url, sdk=False, timeout=5)
+    finally:
+        srv.shutdown()
+    assert "http.endpoint" not in failed(rep) and rep.verdict == "not tested"

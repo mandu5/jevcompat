@@ -38,6 +38,10 @@ TEXT_FIELDS = ("state", "model", "questions")
 class UpstreamError(Exception):
     """The upstream answered something that cannot be turned into a correct answer."""
 
+    def __init__(self, message: str, error_type: str = "upstream_error"):
+        super().__init__(message)
+        self.error_type = error_type
+
 
 class UpstreamRejected(Exception):
     """The upstream refused the request with a 4xx: the client's problem, passed on in spec shape."""
@@ -117,8 +121,9 @@ def _norm(s: str) -> str:
 def _match_keys(wanted: list[str], got: dict[str, Any], fixes: set[str]) -> dict[str, float]:
     """Map the request's option names onto the upstream's probability keys, one to one.
 
-    Exact matches first; then a name may claim the one unclaimed key equal to it under NFC,
-    case folding and trimming — only if no other name or key normalises the same way."""
+    Exact matches first; then each still-unmatched name may claim an unclaimed key equal to it
+    under NFC, case folding and trimming — only when exactly one unclaimed key and no other
+    unmatched name normalise the same way."""
     claimed: dict[str, str] = {w: w for w in wanted if w in got}
     free = [k for k in got if k not in claimed.values()]
     for w in wanted:
@@ -242,6 +247,9 @@ class Proxy:
             raise RateLimited(r.status, r.headers.get("retry-after"))
         if 400 <= r.status < 500 and r.status not in (401, 403):
             raise UpstreamRejected(r.status, r.data, r.excerpt(300))
+        if r.status in (401, 403):
+            raise UpstreamError(f"upstream refused the proxy's credentials ({r.status}); check --upstream-key",
+                                "upstream_auth_error")
         if r.status != 200:
             raise UpstreamError(f"upstream answered {r.status}: {r.excerpt(300)}")
         if not r.is_json or not isinstance(r.data, dict) or not isinstance(r.data.get("answers"), dict):
@@ -362,7 +370,7 @@ class Handler(BaseHTTPRequestHandler):
             self._rejected(e)
             return
         except UpstreamError as e:
-            self._error(502, "upstream_error", str(e))
+            self._error(502, e.error_type, str(e))
             return
         self._send(200, out, {"x-jevcompat-fixes": ",".join(sorted(fixes)) or "none"})
 

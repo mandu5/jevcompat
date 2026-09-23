@@ -93,10 +93,11 @@ A check has an id, the requirement ids it covers, and a `run(ctx)` that returns 
 | validation | missing fields, `{}` questions, unknown type (`"boolean"`), map-form score criteria, 256 options, 11 levels, `null` state, non-JSON body → 4xx (never 2xx/5xx), 422 body shape | no |
 | semantics | question-id rename does not change answers; batching does not change answers; question order does not matter | yes (repeat calls, noise-aware) |
 | auth | with `--key`: missing key → 401/403 with `authentication_error` | no |
-| drop-in | the official `typesafe-sdk` parses every response type | yes (optional extra) |
+| drop-in | the official `typesafe-sdk` parses every answer type | yes |
 
-Semantic checks compare against measured noise: the request is sent twice first, and a
-difference only fails if it exceeds `max(0.05, 3 × observed repeat difference)`.
+Semantic checks are statistics (SPEC §7): base and variant are each sent several times, means
+are compared against a limit from the pooled spread, a noisy server gets more sends before it is
+called too noisy to judge, and a difference counts only if a second, fresh round repeats it.
 
 ### Scoring
 

@@ -9,7 +9,7 @@ from typing import Any
 
 from . import __version__, spec
 from .checks import CASES, Abort, Ctx, Exchange, Finding, preflight
-from .client import Client, Timeout, TransportError
+from .client import Busy, Client, Timeout, TransportError
 
 
 @dataclass
@@ -86,6 +86,8 @@ def run(url: str, *, key: str | None = None, model: str = "jev-latest", timeout:
         preflight(ctx)
     except Abort as e:
         aborted = str(e)
+    except Busy as e:
+        aborted = f"the server stayed busy (429/503/529) on a minimal request: {e}"
     except Timeout as e:
         aborted = f"no answer to a minimal request: {e}"
     except TransportError as e:

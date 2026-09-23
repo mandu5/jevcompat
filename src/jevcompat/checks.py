@@ -8,13 +8,16 @@ not tested, and the run as incomplete.
 from __future__ import annotations
 
 import json
+import math
+import time
 import uuid
 from collections.abc import Callable
 from dataclasses import dataclass, field
+from importlib.metadata import PackageNotFoundError, version
 from typing import Any
 
 from . import spec
-from .client import Client, Response, Timeout, TransportError
+from .client import Busy, Client, Response, Timeout, TransportError
 from .validate import (
     Violation,
     answer_vector,
@@ -69,6 +72,7 @@ class Finding:
     where: str
     case: str
     exchange: int | None  # index into Ctx.exchanges
+    tag: str = ""
 
 
 @dataclass
@@ -95,6 +99,8 @@ class Ctx:
         return len(self.exchanges) - 1
 
     def _auth(self, auth: Any) -> tuple[Any, dict[str, str]]:
+        if isinstance(auth, str) and self.auth_mode == "x-api-key":
+            return False, {"x-api-key": auth}
         if auth is not True:
             return auth, {}
         if self.auth_mode == "none":
@@ -103,16 +109,28 @@ class Ctx:
             return False, {"x-api-key": self.client.key or ""}
         return True, {}
 
-    def post(self, case: str, payload: Any, *, auth: Any = True) -> tuple[Response, int]:
+    def post(self, case: str, payload: Any, *, auth: Any = True, path: str = "/v1/systemone") -> tuple[Response, int]:
+        """POST, retrying 429/503/529 as the official SDKs do. Still busy after that: raise Busy,
+        which callers treat like a timeout — the server's load is not a conformance finding."""
         a, headers = self._auth(auth)
         shown = payload.decode("utf-8", "replace") if isinstance(payload, bytes) else payload
         body = payload if isinstance(payload, bytes) else json.dumps(payload, ensure_ascii=False).encode("utf-8")
-        try:
-            resp = self.client.request("POST", "/v1/systemone", body, auth=a, headers=headers)
-        except TransportError as e:
-            self._record(case, "POST", "/v1/systemone", shown, None, str(e))
-            raise
-        return resp, self._record(case, "POST", "/v1/systemone", shown, resp)
+        waited = 0.0
+        for attempt in range(spec.BUSY_ATTEMPTS):
+            try:
+                resp = self.client.request("POST", path, body, auth=a, headers=headers)
+            except TransportError as e:
+                self._record(case, "POST", path, shown, None, str(e))
+                raise
+            if resp.status not in (429, 503, 529):
+                return resp, self._record(case, "POST", path, shown, resp)
+            delay = _retry_after(resp, attempt)
+            if attempt == spec.BUSY_ATTEMPTS - 1 or waited + delay > spec.BUSY_BUDGET_S:
+                break
+            time.sleep(delay)
+            waited += delay
+        self._record(case, "POST", path, shown, resp)
+        raise Busy(f"POST {path}: still {resp.status} after {attempt + 1} attempts over {waited:.0f}s")
 
     def get(self, case: str, path: str) -> tuple[Response, int]:
         a, headers = self._auth(True)
@@ -133,7 +151,16 @@ class Ctx:
     def violate(self, case: str, xi: int | None, violations: list[Violation]) -> None:
         for v in violations:
             self.exercise(case, v.req)
-            self.findings.append(Finding(v.req, v.message, v.where, case, xi))
+            self.findings.append(Finding(v.req, v.message, v.where, case, xi, v.tag))
+
+    def supports(self, case: str, types: tuple[str, ...], *reqs: str) -> bool:
+        """Gate a case on question types the server answered on their own, so one unsupported
+        type fails the requirement about that type, not every case that happens to use it."""
+        missing = [t for t in types if t not in self.info.get("types_ok", set())]
+        if missing:
+            self.skip(f"needs {'/'.join(missing)} questions, which the server did not answer on their own", *reqs)
+            return False
+        return True
 
     def skip(self, reason: str, *reqs: str) -> None:
         for r in reqs:
@@ -218,6 +245,22 @@ class Ctx:
             self.violate(case, xi, validate_validation_error(resp))
 
 
+def _retry_after(resp: Response, attempt: int) -> float:
+    for header, scale in (("retry-after-ms", 0.001), ("retry-after", 1.0)):
+        v = resp.headers.get(header)
+        if v is None:
+            continue
+        try:
+            return min(30.0, max(0.0, float(v) * scale))
+        except ValueError:  # an HTTP-date; fall back to backoff
+            continue
+    return _backoff(attempt)
+
+
+def _backoff(attempt: int) -> float:
+    return min(8.0, 0.5 * 2**attempt)
+
+
 @dataclass
 class Case:
     name: str
@@ -242,42 +285,39 @@ def preflight(ctx: Ctx) -> None:
     a requirement only when a second request proves which one."""
     name = "preflight"
     payload = ctx.payload({"q": dict(NOUL)})
-    resp, xi = ctx.post(name, payload)
+    resp, xi = ctx.post(name, payload)  # Busy (still 429/503/529 after retries) aborts the run
 
     if 300 <= resp.status < 400:
         raise Abort(f"the server redirects ({resp.status} → {resp.headers.get('location', '?')}); test that URL instead")
-    if resp.status == 429 or resp.status >= 500:
-        raise Abort(f"the server is not ready: a minimal request got {resp.status}: {resp.excerpt(160)}")
 
     if resp.status in (401, 403):
-        if ctx.key_given:
+        bare, xb = ctx.post(name, payload, auth=False)
+        if bare.status == 200:
+            # No key needed, yet the header SDKs always send is refused.
+            ctx.violate(name, xb, [Violation("auth.ignored-when-off",
+                                             f"a request with `Authorization: Bearer …` got {resp.status}; "
+                                             "the same request without the header got 200")])
+            ctx.auth_mode = "none"
+            resp, xi = bare, xb
+        elif ctx.key_given:
             ctx.auth_mode = "x-api-key"
             alt, xk = ctx.post(name, payload)
-            if alt.status == 200:
-                ctx.violate(name, xk, [Violation("auth.bearer", "the key was refused as `Authorization: Bearer <key>` "
-                                                               "but accepted as `x-api-key: <key>`")])
-                resp, xi = alt, xk
-            else:
+            if alt.status != 200:
                 ctx.auth_mode = "bearer"
                 raise Abort(f"the server refused the key ({resp.status}: {resp.excerpt(120)}); check --key")
+            ctx.violate(name, xk, [Violation("auth.bearer", "the key was refused as `Authorization: Bearer <key>` "
+                                                           "but accepted as `x-api-key: <key>`")])
+            resp, xi = alt, xk
         else:
-            bare, xj = ctx.post(name, payload, auth=False)
-            if bare.status == 200:
-                ctx.violate(name, xj, [Violation("auth.ignored-when-off",
-                                                 f"a request with `Authorization: Bearer …` got {resp.status}; "
-                                                 "the same request without the header got 200")])
-                ctx.auth_mode = "none"
-                resp, xi = bare, xj
-            else:
-                raise Abort(f"the server requires an API key ({resp.status}); pass --key")
-    if ctx.key_given:
-        ctx.exercise(name, "auth.bearer")
-    else:
+            raise Abort(f"the server requires an API key ({resp.status}); pass --key")
+    if ctx.auth_mode == "none" or not ctx.key_given:
         ctx.exercise(name, "auth.ignored-when-off")
+    else:
+        ctx.exercise(name, "auth.bearer")
 
-    if resp.status != 200:
+    if resp.status != 200 and ctx.client.model == "jev-latest":
         # Is it the model name? Retry with a model the server lists; blame the alias only if that works.
-        other = _served_model(ctx) if ctx.client.model == "jev-latest" else None
+        other = _served_model(ctx)
         if other:
             retry, xr = ctx.post(name, {**payload, "model": other})
             if retry.status == 200:
@@ -287,17 +327,31 @@ def preflight(ctx: Ctx) -> None:
                 ctx.info["model_fallback"] = other
                 ctx.client.model = other
                 resp, xi = retry, xr
-        if resp.status != 200:
-            # Does the route exist at all? A missing route answers any body with 404/405.
-            empty, xe = ctx.post(name, {})
-            if resp.status in (404, 405) and empty.status in (404, 405):
+    if resp.status != 200:
+        if resp.status >= 500:
+            raise Abort(f"the server fails a minimal valid request ({resp.status}: {resp.excerpt(200)})")
+        if resp.status in (404, 405):
+            # Does the route exist? Compare with a route that certainly does not.
+            probe, _ = ctx.post(name, payload, path="/v1/jevcompat-no-such-route")
+            if probe.status == resp.status and _same_body(probe, resp):
                 ctx.exercise(name, "http.endpoint")
-                ctx.violate(name, xi, [Violation("http.endpoint", f"POST /v1/systemone got {resp.status} for a valid request "
-                                                                  f"and {empty.status} for an empty one: the route does not exist")])
+                ctx.violate(name, xi, [Violation("http.endpoint", f"POST /v1/systemone answers exactly like a route "
+                                                                  f"that does not exist ({resp.status})")])
                 raise Abort(f"no POST /v1/systemone at {ctx.client.base_url} ({resp.status})")
-            raise Abort(f"the server rejects a minimal valid request ({resp.status}: {resp.excerpt(200)}); "
-                        "if it needs a particular model name, pass --model NAME")
+        raise Abort(f"the server rejects a minimal valid request ({resp.status}: {resp.excerpt(200)}); "
+                    "if it needs a particular model name, pass --model NAME")
     ctx.info["model_reported"] = resp.data.get("model") if isinstance(resp.data, dict) else None
+    ctx.info["types_ok"] = {"noul"}
+    try:
+        ctx.info["typesafe_sdk"] = version("typesafe-sdk")
+    except PackageNotFoundError:
+        ctx.info["typesafe_sdk"] = None
+
+
+def _same_body(a: Response, b: Response) -> bool:
+    def norm(r: Response) -> bytes:
+        return r.body.replace(b"/v1/jevcompat-no-such-route", b"/ROUTE").replace(b"/v1/systemone", b"/ROUTE")
+    return norm(a) == norm(b)
 
 
 def _served_model(ctx: Ctx) -> str | None:
@@ -379,12 +433,15 @@ def _(ctx: Ctx, name: str) -> None:
 @case("choice-basic")
 def _(ctx: Ctx, name: str) -> None:
     """A three-option choice."""
-    ctx.expect_answer(name, ctx.payload({"team": dict(CHOICE)}))
+    if ctx.expect_answer(name, ctx.payload({"team": dict(CHOICE)}), "choice.options") is not None:
+        ctx.info["types_ok"].add("choice")
 
 
 @case("choice-null-description")
 def _(ctx: Ctx, name: str) -> None:
     """Options with null descriptions."""
+    if not ctx.supports(name, ("choice",), "choice.null-description"):
+        return
     q = {"type": "choice", "instructions": "Which team should handle this ticket?",
          "criteria": {"Billing": None, "Technical": None, "Sales": None}}
     ctx.expect_answer(name, ctx.payload({"team": q}), "choice.null-description")
@@ -420,6 +477,7 @@ def _(ctx: Ctx, name: str) -> None:
                 limits["score levels rejected at"] = n
             break
         limits["score levels accepted up to"] = n
+        ctx.info["types_ok"].add("score")
 
 
 @case("state-types")
@@ -446,12 +504,15 @@ def _(ctx: Ctx, name: str) -> None:
                   "criteria": [{"label": "Calm"}, {"label": "Frustrated"}, {"label": "Very angry", "signals": ["threats"]}]},
     }
     for label, q in qs.items():
-        ctx.expect_answer(f"{name}:{label}", ctx.payload({"q": q}), "request.structured-text")
+        if ctx.supports(f"{name}:{label}", (label,), "request.structured-text"):
+            ctx.expect_answer(f"{name}:{label}", ctx.payload({"q": q}), "request.structured-text")
 
 
 @case("multi-question")
 def _(ctx: Ctx, name: str) -> None:
     """noul, choice and score in one request."""
+    if not ctx.supports(name, ("choice", "score"), "request.multi"):
+        return
     ctx.expect_answer(name, ctx.payload({"refund": dict(NOUL), "team": dict(CHOICE), "anger": dict(SCORE)}), "request.multi",
                       remap={("response.answer-ids", "missing-answer"): "request.multi"})
 
@@ -469,7 +530,8 @@ def _unicode_keys(ctx: Ctx) -> Callable[[list[Violation], Response], list[Violat
     an option is a round-trip failure (request.unicode) — unless the ASCII choice case already showed
     a key problem, in which case it is that problem again and keeps its own id."""
     def transform(violations: list[Violation], resp: Response) -> list[Violation]:
-        ascii_key_problem = any(f.req == "choice.probability-keys" for f in ctx.findings)
+        ascii_key_problem = any(f.req == "choice.probability-keys" or (f.req, f.tag) == ("choice.argmax", "not-an-option")
+                                for f in ctx.findings)
         out = []
         for v in violations:
             if not ascii_key_problem and (v.tag == "option-keys" or (v.req, v.tag) == ("choice.argmax", "not-an-option")):
@@ -485,6 +547,8 @@ UNICODE_OPTIONS = {"환불 요청": "고객이 돈을 돌려받기를 원함", "
 @case("unicode")
 def _(ctx: Ctx, name: str) -> None:
     """Hangul and emoji in state, instructions and option names; names must round-trip exactly."""
+    if not ctx.supports(name, ("choice",), "request.unicode"):
+        return
     q = {"type": "choice", "instructions": "이 문의는 어떤 유형인가요?", "criteria": dict(UNICODE_OPTIONS)}
     ctx.expect_answer(name, ctx.payload({"kind": q}, state="배송이 3일째 안 와요. 그냥 환불해 주세요 😡"), "request.unicode",
                       transform=_unicode_keys(ctx))
@@ -592,16 +656,16 @@ EXTRA_QUESTIONS = {
 }
 
 
-def _samples(ctx: Ctx, name: str, questions: dict) -> list[dict] | str:
+def _samples(ctx: Ctx, name: str, questions: dict, k: int) -> list[dict] | str:
     """k answer maps for the same request, or the reason there are none."""
     out = []
-    for i in range(spec.SEM_REPEATS):
+    for i in range(k):
         extra = {"x_nonce": uuid.uuid4().hex} if ctx.info.get("unknown_fields_ok") else {}
         try:
-            resp, _ = ctx.post(f"{name}:{i + 1}", ctx.payload({k: dict(v) for k, v in questions.items()}, **extra))
+            resp, _ = ctx.post(f"{name}:{i + 1}", ctx.payload({q: dict(v) for q, v in questions.items()}, **extra))
         except Timeout as e:
             ctx.inconclusive.append(f"{name}: {e}")
-            return f"timed out ({e})"
+            return f"timed out or busy ({e})"
         except TransportError as e:
             return f"no complete HTTP response ({e})"
         if resp.status != 200 or not isinstance(resp.data, dict) or not isinstance(resp.data.get("answers"), dict):
@@ -610,46 +674,88 @@ def _samples(ctx: Ctx, name: str, questions: dict) -> list[dict] | str:
     return out
 
 
+@dataclass
+class _Judgement:
+    too_noisy: bool
+    differs: dict[tuple[str, str], tuple[int, float, float]]  # (question, number) -> (sign, |Δmean|, limit)
+    worst_limit: float
+
+
+def _judge(base: list[dict], variant: list[dict], mapping: dict[str, str]) -> _Judgement | None:
+    """SPEC §7: per number, |m − m′| against max(floor, z · pooled sd · √(1/k₁ + 1/k₂))."""
+    differs: dict[tuple[str, str], tuple[int, float, float]] = {}
+    worst = 0.0
+    compared = 0
+    for q, q2 in mapping.items():
+        va = [answer_vector(a.get(q)) for a in base]
+        vb = [answer_vector(a.get(q2)) for a in variant]
+        keys = set(va[0])
+        if not keys or any(set(v) != keys for v in va + vb):
+            continue  # shape problems are other requirements' business
+        for key in keys:
+            xs, ys = [v[key] for v in va], [v[key] for v in vb]
+            ma, mb = sum(xs) / len(xs), sum(ys) / len(ys)
+            ss = sum((x - ma) ** 2 for x in xs) + sum((y - mb) ** 2 for y in ys)
+            sd = math.sqrt(ss / max(1, len(xs) + len(ys) - 2))
+            limit = max(spec.SEM_FLOOR, spec.SEM_Z * sd * math.sqrt(1 / len(xs) + 1 / len(ys)))
+            worst = max(worst, limit)
+            compared += 1
+            if abs(ma - mb) > limit:
+                differs[(q, key)] = (1 if mb > ma else -1, abs(ma - mb), limit)
+    if not compared:
+        return None
+    return _Judgement(worst >= spec.SEM_TOO_NOISY, differs, worst)
+
+
 def _compare(ctx: Ctx, name: str, req: str, questions: dict, mapping: dict[str, str], what: str) -> None:
+    if not ctx.supports(name, ("choice", "score"), req):
+        return
+    k = spec.SEM_REPEATS
     if "baseline" not in ctx.cache:
-        ctx.cache["baseline"] = _samples(ctx, "semantics-baseline", SEM_QUESTIONS)
+        ctx.cache["baseline"] = _samples(ctx, "semantics-baseline", SEM_QUESTIONS, k)
     base = ctx.cache["baseline"]
     if isinstance(base, str):
         ctx.skip(f"the baseline request could not be sampled: {base}", req)
         return
-    variant = _samples(ctx, name, questions)
+    variant = _samples(ctx, name, questions, k)
     if isinstance(variant, str):
         ctx.skip(f"the variant request could not be sampled: {variant}", req)
         return
-    means_a: dict[tuple[str, str], float] = {}
-    means_b: dict[tuple[str, str], float] = {}
-    spread = 0.0
-    for q, q2 in mapping.items():
-        va = [answer_vector(s.get(q)) for s in base]
-        vb = [answer_vector(s.get(q2)) for s in variant]
-        keys = set(va[0])
-        if not keys or any(set(v) != keys for v in va + vb):
-            continue  # shape problems are other requirements' business
-        for k in keys:
-            xs, ys = [v[k] for v in va], [v[k] for v in vb]
-            spread = max(spread, max(xs) - min(xs), max(ys) - min(ys))
-            means_a[(q, k)], means_b[(q, k)] = sum(xs) / len(xs), sum(ys) / len(ys)
-    if not means_a:
+    judged = _judge(base, variant, mapping)
+    while judged is not None and judged.too_noisy and len(variant) < spec.SEM_MAX_REPEATS:
+        more_base = _samples(ctx, "semantics-baseline+", SEM_QUESTIONS, spec.SEM_REPEATS) if len(base) <= len(variant) else []
+        more_var = _samples(ctx, f"{name}+", questions, spec.SEM_REPEATS)
+        if isinstance(more_base, str) or isinstance(more_var, str):
+            break
+        base = ctx.cache["baseline"] = base + more_base
+        variant = variant + more_var
+        judged = _judge(base, variant, mapping)
+    if judged is None:
         ctx.skip("no comparable answers", req)
         return
-    limit = max(spec.SEM_FLOOR, spec.SEM_NOISE_K * spread)
-    ctx.info.setdefault("repeat_spread", round(spread, 4))
-    if spec.SEM_NOISE_K * spread >= spec.SEM_TOO_NOISY:
-        ctx.skip(f"too noisy to judge: repeats of one request differ by up to {spread:.3f}", req)
+    if judged.too_noisy:
+        ctx.skip(f"too noisy to judge: after {len(variant)} sends the limit is still {judged.worst_limit:.2f}", req)
         return
     ctx.exercise(name, req)
-    worst = max(means_a, key=lambda key: abs(means_a[key] - means_b[key]))
-    d = abs(means_a[worst] - means_b[worst])
-    if d > limit:
-        q, k = worst
-        what_moved = f"{q!r}" + ("" if k == "noul" else f" option {k!r}")
-        ctx.violate(name, len(ctx.exchanges) - 1, [Violation(req, f"{what} moved {what_moved} by {d:.3f} on average over "
-                                                             f"{spec.SEM_REPEATS} sends (repeat spread {spread:.3f}, limit {limit:.3f})")])
+    if not judged.differs:
+        return
+    # Confirm on fresh sends: fail only if the same number moves the same way again.
+    fresh_base = _samples(ctx, "semantics-confirm-base", SEM_QUESTIONS, len(variant))
+    fresh_var = _samples(ctx, f"{name}-confirm", questions, len(variant))
+    if isinstance(fresh_base, str) or isinstance(fresh_var, str):
+        ctx.skip("a difference was seen but could not be confirmed (the confirmation sends failed)", req)
+        ctx.exercised.get(req, set()).discard(name)
+        return
+    again = _judge(fresh_base, fresh_var, mapping)
+    confirmed = [key for key, (sign, _, _) in judged.differs.items()
+                 if again is not None and again.differs.get(key, (0,))[0] == sign]
+    if confirmed:
+        q, key = max(confirmed, key=lambda kk: again.differs[kk][1])
+        _, d, limit = again.differs[(q, key)]
+        what_moved = f"{q!r}" + ("" if key == "noul" else f" option {key!r}")
+        ctx.violate(name, len(ctx.exchanges) - 1, [Violation(
+            req, f"{what} moved {what_moved} by {d:.3f} on average (limit {limit:.3f}); "
+                 f"seen in two independent rounds of {len(variant)} sends each")])
 
 
 @case("semantics-question-id")
@@ -689,6 +795,8 @@ def _(ctx: Ctx, name: str) -> None:
         return
     if ctx.auth_mode == "x-api-key":
         ctx.skip("the server does not read Authorization: Bearer, which the SDK sends", "dropin.sdk-python")
+        return
+    if not ctx.supports(name, ("choice", "score"), "dropin.sdk-python"):
         return
     questions = {
         "refund": Noul(instructions=NOUL["instructions"]),

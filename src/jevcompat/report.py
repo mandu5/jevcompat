@@ -54,8 +54,9 @@ def verdict(report: Report) -> str:
 def terminal(report: Report, color: bool = False, evidence: int = 2) -> str:
     lines = [f"jevcompat {report.tool_version} · spec {report.spec_version} · {report.url}"]
     reported = report.info.get("model_reported")
+    sdk = report.info.get("typesafe_sdk")
     lines.append(f"model sent {report.model!r}" + (f", server reports {reported!r}" if reported else "")
-                 + f" · {len(report.exchanges)} requests · {report.seconds}s")
+                 + f" · {len(report.exchanges)} requests · {report.seconds}s" + (f" · typesafe-sdk {sdk}" if sdk else ""))
     if report.aborted:
         lines += ["", _c(f"stopped: {report.aborted}", "31", color)]
     section = None
@@ -98,7 +99,7 @@ def _evidence(report: Report, r: RequirementResult, limit: int, color: bool) -> 
 def to_json(report: Report) -> str:
     data = asdict(report)
     data["summary"] = report.summary()
-    return json.dumps(data, ensure_ascii=False, indent=2)
+    return json.dumps(data, ensure_ascii=False, indent=2, default=lambda o: sorted(o) if isinstance(o, set) else str(o))
 
 
 def badge(report: Report) -> dict[str, Any]:
@@ -125,7 +126,8 @@ def markdown(report: Report, title: str | None = None) -> str:
            f"{badge_markdown(report)}", "",
            f"**{_md(verdict(report), 600)}** — jevcompat {report.tool_version}, {report.started}, "
            f"{len(report.exchanges)} requests in {report.seconds}s, model `{report.model}`"
-           + (f" (server reports `{report.info['model_reported']}`)" if report.info.get("model_reported") else "") + ".", ""]
+           + (f" (server reports `{report.info['model_reported']}`)" if report.info.get("model_reported") else "")
+           + (f", typesafe-sdk {report.info['typesafe_sdk']}" if report.info.get("typesafe_sdk") else "") + ".", ""]
     limits = report.info.get("limits") or {}
     if limits:
         out += ["Observed limits: " + ", ".join(f"{k} {v}" for k, v in limits.items()), ""]

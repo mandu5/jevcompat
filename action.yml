@@ -20,7 +20,7 @@ inputs:
     required: false
     default: "jevcompat==0.1.0"
   fail-on-must:
-    description: Fail the step when a MUST requirement fails
+    description: Fail the step when a MUST fails or the server cannot be tested (an incomplete run only warns)
     required: false
     default: "true"
 outputs:
@@ -72,7 +72,10 @@ runs:
         badge = next((l for l in open("jevcompat-report.md") if l.startswith("[![jevcompat")), "").strip()
         print(f"badge={badge}")
         PY
-    - if: inputs.fail-on-must == 'true' && steps.run.outputs.conformant != 'true'
+    - if: steps.run.outputs.verdict == 'incomplete'
+      shell: bash
+      run: echo "::warning::jevcompat could not judge every MUST (MUST ${{ steps.run.outputs.must }}); see the job summary"
+    - if: inputs.fail-on-must == 'true' && steps.run.outputs.verdict != 'conformant' && steps.run.outputs.verdict != 'incomplete'
       shell: bash
       run: |
         echo "::error::jevcompat verdict is ${{ steps.run.outputs.verdict }} (MUST ${{ steps.run.outputs.must }}); see the job summary"

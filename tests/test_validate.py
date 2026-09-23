@@ -85,7 +85,8 @@ def mutate(path, value):
     (["answers", "c", "choice"], "Z", "choice.argmax"),
     (["answers", "c", "probabilities"], {"a": 0.88, "B": 0.12}, "choice.probability-keys"),
     (["answers", "c", "probabilities"], {"A": 0.93, "B": 0.21}, "choice.distribution"),
-    (["answers", "c", "probabilities"], {"A": 0.9, "B": 0.2}, None),  # one decimal: rounding explains 0.1
+    (["answers", "c", "probabilities"], {"A": 0.9, "B": 0.2}, "choice.distribution"),  # two-decimal r: 1.1 is too far
+    (["answers", "c", "probabilities"], {"A": 1, "B": 1}, "choice.distribution"),  # independent sigmoids
     (["answers", "c", "probabilities"], {"A": 0.88, "B": 0.1}, None),  # sum 0.98: within ε_sum
     (["answers", "c", "probabilities"], {"A": 0.885, "B": 0.125}, None),  # within ε_sum
     (["answers", "c", "confidence"], 0.88, "confidence.formula"),
@@ -106,6 +107,12 @@ def test_each_violation_is_attributed(path, value, expected):
 def test_missing_answer():
     data = mutate(["answers", "s"], KeyError)
     assert reqs(validate_success(REQ, resp(data))) == ["response.answer-ids"]
+
+
+def test_hard_labels_are_still_checked():
+    one_hot = {"type": "score", "score": 2.0, "legend": {"0": "lo", "1": "mid", "2": "hi"},
+               "probabilities": {"0": 0, "1": 1, "2": 0}, "confidence": 1.0}
+    assert reqs(validate_success(REQ, resp(mutate(["answers", "s"], one_hot)))) == ["score.expectation"]
 
 
 def test_nan_is_caught_although_python_json_accepts_it():
