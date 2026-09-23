@@ -230,10 +230,15 @@ def _validate_score(question: dict, answer: dict, where: str) -> list[Violation]
         elif sorted(legend, key=_intish) != keys:
             out.append(Violation("score.legend", f"legend keys are {sorted(legend, key=_intish)}, expected {keys}", where))
         else:
-            wrong = [k for k in keys if legend[k] != levels[int(k)]]
-            if wrong:
-                k = wrong[0]
-                out.append(Violation("score.legend", f"legend[{k!r}] is {fmt(legend[k])}, the request's level {k} is {fmt(levels[int(k)])}", where))
+            for k in keys:
+                level, got = levels[int(k)], legend[k]
+                if isinstance(level, str):
+                    ok = got == level
+                else:  # structured (or out-of-range null) level: unchanged, or rendered as a string
+                    ok = isinstance(got, str) or (got == level and got is not None)
+                if not ok:
+                    out.append(Violation("score.legend", f"legend[{k!r}] is {fmt(got)}, the request's level {k} is {fmt(level)}", where))
+                    break
     probs = answer.get("probabilities")
     values, dv, r = None, [], 0.0
     if "probabilities" in answer and not isinstance(probs, dict):
@@ -257,10 +262,12 @@ def _validate_score(question: dict, answer: dict, where: str) -> list[Violation]
         elif values is not None and not dv and n > 1:
             top = max(values)
             modes = [i for i, p in enumerate(values) if _le(top - p, spec.EPS_ROUND)]
-            refs = [score_confidence(values, k) for k in modes]
-            bounds = [spec.EPS_CONF + r * sum(abs(i - k) for i in range(n)) / _uniform_spread(n) for k in modes]
+            refs = [score_confidence(values, k) for k in modes] + [choice_confidence(values)]
+            bounds = [spec.EPS_CONF + r * sum(abs(i - k) for i in range(n)) / _uniform_spread(n) for k in modes] + \
+                [spec.EPS_CONF + r / (1 - 1 / n)]
             if not any(_le(abs(c - ref), b) for ref, b in zip(refs, bounds, strict=True)):
-                out.append(Violation("confidence.formula", f"confidence is {c:.3f}; the reference formula gives {refs[0]:.3f}", where))
+                out.append(Violation("confidence.formula", f"confidence is {c:.3f}; the reference formulas give "
+                                                           f"{refs[0]:.3f} (distance) or {refs[-1]:.3f} (top probability)", where))
     return out
 
 

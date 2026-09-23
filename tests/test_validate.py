@@ -200,3 +200,38 @@ def test_max_difference():
     assert abs(max_difference(a, b) - 0.1) < 1e-9
     assert max_difference({"type": "noul", "noul": 0.2}, {"type": "noul", "noul": 0.25}) == pytest.approx(0.05)
     assert max_difference(a, {"type": "choice", "probabilities": {"A": 1.0}}) is None
+
+
+def test_structured_levels_may_come_back_as_strings():
+    req = {"questions": {"s": {"type": "score", "criteria": [{"label": "Calm"}, {"label": "Angry"}]}}}
+    base = {"model": "m", "usage": {"input_tokens": 1, "output_tokens": 1}, "answers": {"s": {
+        "type": "score", "score": 0.5, "probabilities": {"0": 0.5, "1": 0.5}, "confidence": 0.0}}}
+    for legend in ({"0": {"label": "Calm"}, "1": {"label": "Angry"}}, {"0": "label: Calm", "1": '{"label": "Angry"}'}):
+        base["answers"]["s"]["legend"] = legend
+        assert validate_success(req, resp(base)) == []
+    base["answers"]["s"]["legend"] = {"0": {"label": "Calm"}, "1": {"label": "Sad"}}
+    assert reqs(validate_success(req, resp(base))) == ["score.legend"]
+
+
+def test_a_null_legend_value_is_never_right():
+    req = {"questions": {"s": {"type": "score", "criteria": ["Calm", None]}}}
+    body = {"model": "m", "usage": {"input_tokens": 1, "output_tokens": 1}, "answers": {"s": {
+        "type": "score", "score": 0.5, "legend": {"0": "Calm", "1": None}, "probabilities": {"0": 0.5, "1": 0.5}, "confidence": 0.0}}}
+    assert reqs(validate_success(req, resp(body))) == ["score.legend"]
+    body["answers"]["s"]["legend"]["1"] = ""
+    assert validate_success(req, resp(body)) == []
+
+
+def test_score_confidence_accepts_either_documented_formula():
+    import copy
+    req = {"questions": {"s": {"type": "score", "criteria": [str(i) for i in range(5)]}}}
+    p = [0.1, 0.5, 0.2, 0.1, 0.1]
+    body = {"model": "m", "usage": {"input_tokens": 1, "output_tokens": 1}, "answers": {"s": {
+        "type": "score", "score": sum(i * x for i, x in enumerate(p)), "legend": {str(i): str(i) for i in range(5)},
+        "probabilities": {str(i): x for i, x in enumerate(p)}, "confidence": 0.0}}}
+    for c in (score_confidence(p), choice_confidence(p)):
+        b = copy.deepcopy(body)
+        b["answers"]["s"]["confidence"] = round(c, 4)
+        assert validate_success(req, resp(b)) == [], c
+    body["answers"]["s"]["confidence"] = max(p)  # top probability: neither
+    assert reqs(validate_success(req, resp(body))) == ["confidence.formula"]

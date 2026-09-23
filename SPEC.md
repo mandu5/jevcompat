@@ -147,7 +147,7 @@ two levels; the API accepts up to 10.")
 
 ### 3.5 Limits
 
-Beyond the ranges above — a choice with 0, 1 or 256+ options, a score with 1 or 11+ levels — the
+Beyond the ranges above — a choice with 1 or 256+ options, a score with 1 or 11+ levels — the
 official behaviour is not documented. A server MAY accept such requests; if it rejects them it
 does so with a 4xx status (**errors.no-5xx**, §6).
 
@@ -221,7 +221,11 @@ the request, byte-for-byte. `[api]` ("covers every option")
 (object) and `confidence` (number). `[api]` `[oas]`
 
 **score.legend** — MUST. `legend` maps `"0"` … `"n-1"` (decimal strings) to the request's level
-descriptions, in order, unchanged. `[api]`
+descriptions, in order. A level sent as a string comes back as that string, unchanged. A level
+sent as an object or array comes back either unchanged or as a string rendering of it: the API
+reference types legend values as strings `[api]`, the SDK accepts both `[sdk-py]`, and no
+official source shows which one the official server returns (A.9). A legend value is never
+`null`: the SDK rejects it.
 
 **score.probability-keys** — MUST. The keys of `probabilities` are `"0"` … `"n-1"`. `[api]`
 
@@ -235,17 +239,20 @@ both `score` and `probabilities` must not see two different answers.
 
 **confidence.range** — MUST. `confidence` is a number in [0, 1]. `[api]` `[oas]`
 
-**confidence.formula** — SHOULD. `confidence` equals the reference formula below within
+**confidence.formula** — SHOULD. `confidence` equals a reference formula below within
 `ε_conf` (§5). TypeSafe says confidence is "derived from the probabilities", that "all of it on
 one option gives 1.0; the more evenly it spreads, the lower the confidence", and uses
-`(3 × largest − 1) / 2` for three options `[docs]` (confidence). The reference formulas reproduce
-the documentation's worked examples and are the ones in TypeSafe's own adapter library
-(`system-one-adapter-python`, `confidence_metrics.py`):
+`(3 × largest − 1) / 2` for three options `[docs]` (confidence).
 
-- choice with n options and largest probability m: `(m − 1/n) / (1 − 1/n)`; 1 when n = 1.
-- score with n levels, probabilities pᵢ and most likely level k:
-  `max(0, 1 − Σ pᵢ·|i − k| / D)` where `D = (1/n)·Σ |i − (n−1)/2|` is the same quantity for a
-  uniform distribution; 1 when n = 1.
+- choice with n options and largest probability m: `(m − 1/n) / (1 − 1/n)`, i.e.
+  `(n·m − 1) / (n − 1)`; 1 when n = 1. This generalises the documented three-option formula,
+  reproduces the documented choice examples, and is what TypeSafe's own adapter library
+  (`system-one-adapter-python`, `confidence_metrics.py`) computes.
+- score with n levels: either of two formulas, because both reproduce every documented score
+  example and no official source separates them (A.10). The adapter library's:
+  `max(0, 1 − Σ pᵢ·|i − k| / D)` with k the most likely level and `D = (1/n)·Σ |i − (n−1)/2|`
+  the same quantity for a uniform distribution; or the choice formula above applied to the
+  level probabilities. 1 when n = 1.
 
 This is SHOULD, not MUST, because TypeSafe says clients are "never locked into our definition".
 It matters because clients pick thresholds on `confidence`: across open servers today the field
@@ -346,6 +353,8 @@ end-to-end form of §4 and catches anything the field-level requirements miss.
 | A.6 | `null` score level | `[sdk-js]` type allows it · `[oas]`: not allowed | not required; accept or 4xx |
 | A.7 | choice confidence example | `[api]` example: 0.81 · reference formula on the same probabilities: 0.82 | within `ε_conf` either way |
 | A.8 | error body | `[live]`: `{"detail": {"error_type", "message"}}` · Vercel's gateway: top-level `{"message", "error_type"}` | `detail` form (errors.shape) |
+| A.9 | structured score levels in `legend` | `[api]`: legend values are strings · `[oas]` `[sdk-py]`: string, object or array | either the level unchanged or a string (score.legend) |
+| A.10 | score confidence | adapter library: distance from the most likely level · the confidence page's formula applied to levels · every documented score example has 3 levels with the mode in the middle, where the two agree | either (confidence.formula) |
 
 ## Appendix B. Changes
 
