@@ -1,0 +1,47 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+name = "jevcompat"
+version = "0.1.0"
+description = "A testable spec and conformance suite for Jev-compatible (TypeSafe System One) API servers."
+readme = "README.md"
+license = "MIT"
+requires-python = ">=3.10"
+authors = [{ name = "Youngmin Ko" }]
+keywords = ["jev", "typesafe", "system-one", "conformance", "api", "specification", "testing"]
+classifiers = [
+  "Environment :: Console",
+  "Intended Audience :: Developers",
+  "Programming Language :: Python :: 3",
+  "Topic :: Software Development :: Testing",
+  "Topic :: Scientific/Engineering :: Artificial Intelligence",
+]
+dependencies = []
+
+[project.urls]
+Homepage = "https://github.com/mandu5/jevcompat"
+Specification = "https://github.com/mandu5/jevcompat/blob/main/SPEC.md"
+Issues = "https://github.com/mandu5/jevcompat/issues"
+
+[project.scripts]
+jevcompat = "jevcompat.cli:main"
+
+[project.optional-dependencies]
+sdk = ["typesafe-sdk>=0.7"]
+dev = ["pytest>=8", "ruff>=0.5"]
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/jevcompat"]
+
+[tool.ruff]
+line-length = 120
+target-version = "py310"
+
+[tool.ruff.lint]
+select = ["E", "F", "W", "I", "B", "UP"]
+ignore = ["E501"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]

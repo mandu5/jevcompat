@@ -1,0 +1,128 @@
+"""jevcompat command line."""
+from __future__ import annotations
+
+import argparse
+import os
+import sys
+from pathlib import Path
+
+from . import __version__, spec
+
+
+def _eprint(*a: object) -> None:
+    print(*a, file=sys.stderr)
+
+
+def cmd_test(args: argparse.Namespace) -> int:
+    from . import report, runner
+
+    color = sys.stdout.isatty() and not os.environ.get("NO_COLOR")
+    seen = []
+
+    def progress(name: str) -> None:
+        if sys.stderr.isatty():
+            seen.append(name)
+            sys.stderr.write(f"\r\033[K  testing {name} ({len(seen)})")
+            sys.stderr.flush()
+
+    key = args.key or os.environ.get(args.key_env or "", "") or None
+    rep = runner.run(args.url, key=key, model=args.model, timeout=args.timeout, sdk=not args.no_sdk, progress=progress)
+    if sys.stderr.isatty():
+        sys.stderr.write("\r\033[K")
+    print(report.terminal(rep, color=color, evidence=args.evidence))
+    if args.json:
+        Path(args.json).write_text(report.to_json(rep) + "\n", encoding="utf-8")
+        _eprint(f"  wrote {args.json}")
+    if args.markdown:
+        Path(args.markdown).write_text(report.markdown(rep, title=args.title) + "\n", encoding="utf-8")
+        _eprint(f"  wrote {args.markdown}")
+    if args.badge:
+        print("\nREADME badge:\n" + report.badge_markdown(rep))
+    if rep.aborted:
+        return 2
+    return 0 if rep.conformant else 1
+
+
+def cmd_mock(args: argparse.Namespace) -> int:
+    from .mock import FAULTS, MockConfig, make_server
+
+    if args.list_faults:
+        for name, (req, what) in FAULTS.items():
+            print(f"{name:<26} breaks {req:<26} {what}")
+        return 0
+    cfg = MockConfig(key=args.key, faults=frozenset(args.fault or ()), noise=args.noise)
+    srv = make_server(cfg, host=args.host, port=args.port, verbose=args.verbose)
+    host, port = srv.server_address[:2]
+    _eprint(f"  jevcompat mock on http://{host}:{port}/v1/systemone"
+            + (f"  faults: {', '.join(sorted(cfg.faults))}" if cfg.faults else "")
+            + ("  (key required)" if cfg.key else ""))
+    try:
+        srv.serve_forever()
+    except KeyboardInterrupt:
+        pass
+    finally:
+        srv.server_close()
+    return 0
+
+
+def cmd_spec(args: argparse.Namespace) -> int:
+    section = None
+    for r in spec.REQUIREMENTS.values():
+        if r.section != section:
+            section = r.section
+            print(f"\n§{section} {spec.SECTIONS[section]}")
+        print(f"  {r.level:<6} {r.id:<26} {r.title}")
+    print(f"\n{sum(r.level == 'MUST' for r in spec.REQUIREMENTS.values())} MUST, "
+          f"{sum(r.level == 'SHOULD' for r in spec.REQUIREMENTS.values())} SHOULD — spec {spec.SPEC_VERSION}: "
+          "https://github.com/mandu5/jevcompat/blob/main/SPEC.md")
+    return 0
+
+
+def build_parser() -> argparse.ArgumentParser:
+    p = argparse.ArgumentParser(prog="jevcompat",
+                                description="Check a Jev-compatible (TypeSafe System One) server against a written spec.")
+    p.add_argument("--version", action="version", version=f"jevcompat {__version__} (spec {spec.SPEC_VERSION})")
+    sub = p.add_subparsers(dest="cmd", required=True)
+
+    t = sub.add_parser("test", help="run the conformance suite against a server")
+    t.add_argument("url", help="server root, e.g. http://localhost:8000 (the suite calls /v1/systemone and /v1/models)")
+    t.add_argument("--key", help="API key, sent as Authorization: Bearer (also enables the auth checks)")
+    t.add_argument("--key-env", metavar="VAR", help="read the API key from this environment variable")
+    t.add_argument("--model", default="jev-latest", help="model name to send (default: jev-latest, the SDKs' default)")
+    t.add_argument("--timeout", type=float, default=60.0, help="seconds per request (default 60)")
+    t.add_argument("--json", metavar="PATH", help="write the full report as JSON")
+    t.add_argument("--markdown", metavar="PATH", help="write the report as Markdown")
+    t.add_argument("--title", help="title for the Markdown report")
+    t.add_argument("--badge", action="store_true", help="print a README badge")
+    t.add_argument("--evidence", type=int, default=2, metavar="N", help="failures shown per requirement (default 2)")
+    t.add_argument("--no-sdk", action="store_true", help="skip the official-SDK drop-in check")
+    t.set_defaults(fn=cmd_test)
+
+    m = sub.add_parser("mock", help="run the reference server (a spec-exact stand-in for Jev)")
+    m.add_argument("--host", default="127.0.0.1")
+    m.add_argument("--port", type=int, default=8787)
+    m.add_argument("--key", help="require this API key")
+    m.add_argument("--fault", action="append", metavar="NAME", help="break one requirement on purpose (repeatable)")
+    m.add_argument("--list-faults", action="store_true", help="list the faults and exit")
+    m.add_argument("--noise", type=float, default=0.0, help="random logit noise, to imitate a non-deterministic model")
+    m.add_argument("-v", "--verbose", action="store_true", help="log requests")
+    m.set_defaults(fn=cmd_mock)
+
+    s = sub.add_parser("spec", help="list the requirements")
+    s.set_defaults(fn=cmd_spec)
+    return p
+
+
+def main(argv: list[str] | None = None) -> int:
+    args = build_parser().parse_args(argv)
+    try:
+        return args.fn(args)
+    except (ValueError, OSError) as e:
+        _eprint(f"jevcompat: {e}")
+        return 2
+    except KeyboardInterrupt:
+        return 130
+
+
+if __name__ == "__main__":
+    raise SystemExit(main())
