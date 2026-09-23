@@ -36,14 +36,21 @@ every official client parses.
 `[oas]` is generated from the server's own request models, so it is the best evidence of what the
 official server *accepts*; the SDKs are the best evidence of what clients *require*.
 
+A server is **conformant** to this version when every MUST that applies to it was tested and
+passed. Two MUSTs are conditional (`auth.ignored-when-off` applies only without authentication,
+`auth.bearer` only with it). A run in which an applicable MUST could not be tested — the server
+timed out, the connection dropped — is **incomplete**, not conformant.
+
 ## 1. Transport
 
 **http.endpoint** — MUST. The server accepts `POST /v1/systemone` with a JSON request body
 (`Content-Type: application/json`) and answers valid requests with status `200`. `[api]` `[oas]`
 
-**http.json** — MUST. Every response to `/v1/systemone`, success or error, has a JSON body and
-`Content-Type: application/json`. The SDKs parse error bodies to build their exceptions. `[sdk-py]`
-`[live]`
+**http.json** — MUST. The body of every `200` response is JSON. `[api]` `[oas]`
+
+**http.content-type** — SHOULD. Every response, success or error, declares a JSON media type
+(`application/json`, or a `+json` type). The official server does `[live]`; the Python SDK does
+not depend on it `[sdk-py]`.
 
 **http.models** — SHOULD. `GET /v1/models` returns `200` and
 `{"models": [{"name": str, "description": str, "release_date": "YYYY-MM-DD"}, …]}` with at least one
@@ -248,16 +255,28 @@ A noul answer has no `confidence`. `[docs]` (confidence)
 
 ## 5. Numeric tolerances
 
-Official examples give probabilities to two decimals, so comparisons allow for that rounding.
+Servers may round the numbers they report, and official examples give probabilities to two
+decimals, so every comparison allows for the rounding the response actually shows. For an
+answer's probabilities, let d be the smallest number of decimal places (up to 6) at which every
+probability is exact, and r = ½·10⁻ᵈ the largest rounding error per value; unrounded values have
+r = 0. For n options or levels:
 
-| name | value | used by |
+| name | bound | used by |
 |---|---|---|
-| `ε_sum` | 0.05 | `\|Σp − 1\| ≤ ε_sum`. The official JS SDK's live test uses the same bound (`toBeCloseTo(1, 1)`). |
-| `ε_round` | 0.005 | half a unit in the second decimal place |
-| `ε_score` | 0.02 + 0.005·(n − 1) | `\|score − Σ i·pᵢ\|`; allows two-decimal rounding of each pᵢ |
-| `ε_conf` | 0.02 | `\|confidence − reference\|` |
+| `ε_sum` | max(0.05, n·r) | `\|Σp − 1\| ≤ ε_sum`. 0.05 is the bound the official JS SDK's live test uses (`toBeCloseTo(1, 1)`); n·r is the most that rounding n values can move a sum. |
+| `ε_round` | 0.005 | the chosen option may trail the largest probability by this much |
+| `ε_score` | 0.02 + r·(1 + n(n−1)/2) | `\|score − Σ i·pᵢ\|`: the base allowance plus rounding of each pᵢ and of `score` |
+| `ε_conf` | 0.02 + the change rounding by r can cause in the reference formula | `\|confidence − reference\|` |
+
+Every bound is compared with a slack of 10⁻⁹ so that exact boundary values pass. Where several
+options or levels tie for the largest probability within `ε_round`, the reference confidence may
+use any of them.
 
 ## 6. Errors
+
+**errors.json** — SHOULD. Error responses have JSON bodies. The SDKs read the message from them
+and fall back to the raw text when they are not JSON, so a plain-text or HTML error page degrades
+error messages but breaks nothing. `[sdk-py]` `[live]`
 
 **errors.no-5xx** — MUST. A request that is malformed or outside the documented ranges never
 produces a `5xx` status. The SDKs retry `5xx` (and `408`, `429`), so a server that answers a bad
@@ -282,9 +301,14 @@ and retry both. `[api]`
 
 ## 7. Semantics
 
-These are observable only by comparing responses. A comparison fails only when the difference
-exceeds `max(0.05, 3 × d)`, where d is the largest difference between two identical requests sent
-back to back; servers are not required to be deterministic.
+These are observable only by comparing responses, and servers are not required to be
+deterministic, so each comparison is statistical. The base request and the variant are each sent
+k = 3 times. When the server ignores unknown fields (`request.unknown-fields`), every request
+carries a distinct `x_nonce`, so a response cache cannot make repeats look identical. For every
+number an answer commits to (the `noul` value, each probability), let m and m′ be its means over
+the base and variant sends, and s the largest difference between two sends of the same request,
+over both groups. The comparison fails when |m − m′| > max(0.05, 3·s) for any number. When
+3·s ≥ 0.5 the server is too noisy to judge and the requirement is reported as not tested.
 
 **semantics.question-id** — MUST. Renaming a question id does not change its answer. `[api]`
 ("The key is not sent to the underlying model and is not used in inference.")

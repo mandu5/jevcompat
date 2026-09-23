@@ -1,21 +1,24 @@
 """The conformance cases. Each one sends real requests and records which requirements it
 exercised and which it found violated, with the exchange that shows it.
 
-A requirement passes when at least one case exercised it and no case found a violation.
+A requirement passes when at least one case exercised it and no case found a violation. A request
+that timed out proves nothing either way: the requirements it would have tested are reported as
+not tested, and the run as incomplete.
 """
 from __future__ import annotations
 
 import json
+import uuid
 from collections.abc import Callable
 from dataclasses import dataclass, field
 from typing import Any
 
 from . import spec
-from .client import Client, Response, TransportError
+from .client import Client, Response, Timeout, TransportError
 from .validate import (
     Violation,
+    answer_vector,
     check_json,
-    max_difference,
     validate_error_shape,
     validate_success,
     validate_validation_error,
@@ -31,8 +34,8 @@ CHOICE = {"type": "choice", "instructions": "Which team should handle this ticke
 SCORE = {"type": "score", "instructions": "How frustrated is the customer?",
          "criteria": ["Calm", "Frustrated", "Very angry"]}
 
-RESPONSE_REQS = ("http.endpoint", "http.json", "response.envelope", "response.usage", "response.answer-ids",
-                 "response.answer-type", "response.finite", "response.extensions")
+RESPONSE_REQS = ("http.endpoint", "http.json", "http.content-type", "response.envelope", "response.usage",
+                 "response.answer-ids", "response.answer-type", "response.finite", "response.extensions")
 TYPE_REQS = {
     "noul": ("noul.answer",),
     "choice": ("choice.answer", "choice.probability-keys", "choice.distribution", "choice.argmax",
@@ -40,10 +43,11 @@ TYPE_REQS = {
     "score": ("score.answer", "score.legend", "score.probability-keys", "score.distribution", "score.expectation",
               "confidence.range", "confidence.formula"),
 }
+ERROR_JSON_REQS = ("http.content-type", "errors.json")
 
 
 class Abort(Exception):
-    """Nothing further can be tested (no endpoint, auth needed, no usable model)."""
+    """Nothing further can be tested (no endpoint, a key is needed, the server is not ready)."""
 
 
 @dataclass
@@ -55,6 +59,7 @@ class Exchange:
     status: int | None
     response: str
     ms: float | None
+    via: str = "http"  # "http", or "typesafe-sdk" when the official SDK made the call
 
 
 @dataclass
@@ -71,35 +76,48 @@ class Ctx:
     client: Client
     key_given: bool
     sdk: bool = True
-    progress: Callable[[str], None] | None = None
     exchanges: list[Exchange] = field(default_factory=list)
     findings: list[Finding] = field(default_factory=list)
     exercised: dict[str, set[str]] = field(default_factory=dict)
     skipped: dict[str, str] = field(default_factory=dict)
+    inconclusive: list[str] = field(default_factory=list)  # cases that timed out or could not finish
     info: dict[str, Any] = field(default_factory=dict)
-    send_auth: bool = True
+    auth_mode: str = "bearer"  # "bearer" | "none" | "x-api-key"
     cache: dict[str, Any] = field(default_factory=dict)
 
     # -- plumbing
-    def _record(self, case: str, method: str, path: str, request: Any, resp: Response | None, err: str = "") -> int:
-        self.exchanges.append(Exchange(case, method, path, request, resp.status if resp else None,
-                                       resp.excerpt(600) if resp else err, round(resp.ms, 1) if resp else None))
+    def _record(self, case: str, method: str, path: str, request: Any, resp: Response | None, err: str = "",
+                via: str = "http", status: int | None = None) -> int:
+        self.exchanges.append(Exchange(case, method, path, request,
+                                       resp.status if resp else status,
+                                       resp.excerpt(4000) if resp else err,
+                                       round(resp.ms, 1) if resp else None, via))
         return len(self.exchanges) - 1
 
-    def post(self, case: str, payload: Any, *, auth: Any = True, path: str = "/v1/systemone") -> tuple[Response, int]:
-        if auth is True and not self.send_auth:
-            auth = False
+    def _auth(self, auth: Any) -> tuple[Any, dict[str, str]]:
+        if auth is not True:
+            return auth, {}
+        if self.auth_mode == "none":
+            return False, {}
+        if self.auth_mode == "x-api-key":
+            return False, {"x-api-key": self.client.key or ""}
+        return True, {}
+
+    def post(self, case: str, payload: Any, *, auth: Any = True) -> tuple[Response, int]:
+        a, headers = self._auth(auth)
         shown = payload.decode("utf-8", "replace") if isinstance(payload, bytes) else payload
+        body = payload if isinstance(payload, bytes) else json.dumps(payload, ensure_ascii=False).encode("utf-8")
         try:
-            resp = self.client.post_json(path, payload, auth=auth)
+            resp = self.client.request("POST", "/v1/systemone", body, auth=a, headers=headers)
         except TransportError as e:
-            self._record(case, "POST", path, shown, None, str(e))
+            self._record(case, "POST", "/v1/systemone", shown, None, str(e))
             raise
-        return resp, self._record(case, "POST", path, shown, resp)
+        return resp, self._record(case, "POST", "/v1/systemone", shown, resp)
 
     def get(self, case: str, path: str) -> tuple[Response, int]:
+        a, headers = self._auth(True)
         try:
-            resp = self.client.request("GET", path, auth=False if not self.send_auth else True)
+            resp = self.client.request("GET", path, auth=a, headers=headers)
         except TransportError as e:
             self._record(case, "GET", path, None, None, str(e))
             raise
@@ -112,74 +130,91 @@ class Ctx:
         for r in reqs:
             self.exercised.setdefault(r, set()).add(case)
 
-    def violate(self, case: str, xi: int | None, violations: list[Violation], remap: dict[str, str] | None = None) -> None:
+    def violate(self, case: str, xi: int | None, violations: list[Violation]) -> None:
         for v in violations:
-            req = (remap or {}).get(v.req, v.req)
-            self.exercise(case, req)
-            self.findings.append(Finding(req, v.message, v.where, case, xi))
+            self.exercise(case, v.req)
+            self.findings.append(Finding(v.req, v.message, v.where, case, xi))
 
     def skip(self, reason: str, *reqs: str) -> None:
         for r in reqs:
             self.skipped.setdefault(r, reason)
 
-    def _post_or_record(self, case: str, payload: Any, reqs: tuple[str, ...]) -> tuple[Response, int] | None:
-        """POST; a request that gets no HTTP response at all is a finding against `reqs`."""
+    def timed_out(self, case: str, err: Timeout, reqs: tuple[str, ...]) -> None:
+        self.inconclusive.append(f"{case}: {err}")
+        self.skip(f"timed out ({err}); rerun with a longer --timeout", *reqs)
+
+    def _send(self, case: str, payload: Any, reqs: tuple[str, ...]) -> tuple[Response, int] | None:
+        """POST. A timeout is inconclusive; a request that gets no complete response at all is a
+        finding against `reqs` (the server dropped the connection)."""
         try:
             return self.post(case, payload)
+        except Timeout as e:
+            self.timed_out(case, e, reqs)
         except TransportError as e:
-            self.violate(case, len(self.exchanges) - 1, [Violation(r, f"no HTTP response: {e}") for r in reqs])
-            return None
+            self.violate(case, len(self.exchanges) - 1, [Violation(r, f"no complete HTTP response: {e}") for r in reqs])
+        return None
 
     # -- the three shapes of case
-    def expect_answer(self, case: str, payload: dict, *accept_reqs: str, remap: dict[str, str] | None = None) -> Response | None:
-        """A valid request: must be answered with 200 and a response meeting §4."""
-        self.exercise(case, *accept_reqs)
-        got = self._post_or_record(case, payload, accept_reqs or ("http.endpoint",))
+    def expect_answer(self, case: str, payload: dict, *accept_reqs: str,
+                      remap: dict[tuple[str, str], str] | None = None,
+                      transform: Callable[[list[Violation], Response], list[Violation]] | None = None) -> Response | None:
+        """A valid request: must be answered with 200 and a response meeting §4.
+
+        `remap` re-attributes violations by (requirement, tag): a case that exists to test one thing
+        claims exactly the violations that show that thing failing, and nothing else."""
+        got = self._send(case, payload, accept_reqs or ("http.endpoint",))
         if got is None:
             return None
         resp, xi = got
+        self.exercise(case, *accept_reqs)
         if resp.status != 200:
             why = f"valid request got {resp.status}: {resp.excerpt(200)}"
             self.violate(case, xi, [Violation(r, why) for r in accept_reqs])
-            if resp.status >= 500:
-                self.violate(case, xi, [Violation("errors.no-5xx", why)])
             return None
         types = {q.get("type") for q in payload["questions"].values() if isinstance(q, dict)}
         self.exercise(case, *RESPONSE_REQS, *(r for t in types if t in TYPE_REQS for r in TYPE_REQS[t]))
-        self.violate(case, xi, validate_success(payload, resp), remap)
+        violations = validate_success(payload, resp)
+        if remap:
+            violations = [Violation(remap.get((v.req, v.tag), v.req), v.message, v.where, v.tag) for v in violations]
+        if transform:
+            violations = transform(violations, resp)
+        self.violate(case, xi, violations)
         return resp
 
     def expect_reject(self, case: str, payload: Any, *reqs: str) -> None:
         """An invalid request: must get a 4xx (SHOULD) and never a 5xx (MUST)."""
-        self.exercise(case, "errors.no-5xx", "errors.reject-invalid", *reqs)
-        got = self._post_or_record(case, payload, ("errors.no-5xx",))
+        got = self._send(case, payload, ("errors.no-5xx",))
         if got is None:
             return
         resp, xi = got
+        self.exercise(case, "errors.no-5xx", "errors.reject-invalid", *reqs)
         if resp.status >= 500:
             self.violate(case, xi, [Violation("errors.no-5xx", f"invalid request got {resp.status}: {resp.excerpt(160)}")])
         elif resp.status < 400:
             why = f"invalid request was answered with {resp.status}"
             self.violate(case, xi, [Violation(r, why) for r in ("errors.reject-invalid", *reqs)])
         else:
-            self.exercise(case, "http.json", "errors.validation-shape")
+            self.exercise(case, *ERROR_JSON_REQS, "errors.validation-shape")
             self.violate(case, xi, validate_validation_error(resp))
 
     def expect_answer_or_4xx(self, case: str, payload: dict) -> None:
         """Outside the documented ranges: answering and rejecting are both fine; 5xx is not."""
-        self.exercise(case, "errors.no-5xx")
-        got = self._post_or_record(case, payload, ("errors.no-5xx",))
+        got = self._send(case, payload, ("errors.no-5xx",))
         if got is None:
             return
         resp, xi = got
+        self.exercise(case, "errors.no-5xx")
         if resp.status >= 500:
             self.violate(case, xi, [Violation("errors.no-5xx", f"got {resp.status}: {resp.excerpt(160)}")])
         elif resp.status == 200:
             types = {q.get("type") for q in payload["questions"].values() if isinstance(q, dict)}
             self.exercise(case, *RESPONSE_REQS, *(r for t in types if t in TYPE_REQS for r in TYPE_REQS[t]))
             self.violate(case, xi, validate_success(payload, resp))
+        elif resp.status == 413:  # SPEC §3.5 allows 413 for an over-budget request
+            self.exercise(case, *ERROR_JSON_REQS)
+            self.violate(case, xi, check_json(resp, error=True))
         elif resp.status >= 400:
-            self.exercise(case, "http.json", "errors.validation-shape")
+            self.exercise(case, *ERROR_JSON_REQS, "errors.validation-shape")
             self.violate(case, xi, validate_validation_error(resp))
 
 
@@ -203,48 +238,66 @@ def case(name: str) -> Callable[[Callable[[Ctx, str], None]], Callable[[Ctx, str
 # ---------------------------------------------------------------- preflight
 
 def preflight(ctx: Ctx) -> None:
-    """One plain noul question. Settles the endpoint, auth and model before anything else."""
+    """One plain noul question. Settles the route, auth and model before anything else, and blames
+    a requirement only when a second request proves which one."""
     name = "preflight"
     payload = ctx.payload({"q": dict(NOUL)})
     resp, xi = ctx.post(name, payload)
+
+    if 300 <= resp.status < 400:
+        raise Abort(f"the server redirects ({resp.status} → {resp.headers.get('location', '?')}); test that URL instead")
+    if resp.status == 429 or resp.status >= 500:
+        raise Abort(f"the server is not ready: a minimal request got {resp.status}: {resp.excerpt(160)}")
+
     if resp.status in (401, 403):
         if ctx.key_given:
-            ctx.violate(name, xi, [Violation("auth.bearer", f"the key sent as Authorization: Bearer was refused: {resp.status} {resp.excerpt(160)}")])
-            raise Abort("the server refused the key sent as `Authorization: Bearer <key>`")
-        bare, xj = ctx.post(name, payload, auth=False)
-        if bare.status == 200:
-            ctx.violate(name, xj, [Violation("auth.ignored-when-off",
-                                             f"a request with `Authorization: Bearer …` got {resp.status}; the same request without the header got 200")])
-            ctx.send_auth = False
-            resp, xi = bare, xj
+            ctx.auth_mode = "x-api-key"
+            alt, xk = ctx.post(name, payload)
+            if alt.status == 200:
+                ctx.violate(name, xk, [Violation("auth.bearer", "the key was refused as `Authorization: Bearer <key>` "
+                                                               "but accepted as `x-api-key: <key>`")])
+                resp, xi = alt, xk
+            else:
+                ctx.auth_mode = "bearer"
+                raise Abort(f"the server refused the key ({resp.status}: {resp.excerpt(120)}); check --key")
         else:
-            raise Abort(f"the server requires an API key ({resp.status}); pass --key")
-    elif not ctx.key_given:
-        ctx.exercise(name, "auth.ignored-when-off")
+            bare, xj = ctx.post(name, payload, auth=False)
+            if bare.status == 200:
+                ctx.violate(name, xj, [Violation("auth.ignored-when-off",
+                                                 f"a request with `Authorization: Bearer …` got {resp.status}; "
+                                                 "the same request without the header got 200")])
+                ctx.auth_mode = "none"
+                resp, xi = bare, xj
+            else:
+                raise Abort(f"the server requires an API key ({resp.status}); pass --key")
     if ctx.key_given:
         ctx.exercise(name, "auth.bearer")
-    if resp.status in (404, 405) and not _mentions_model(resp):
-        ctx.violate(name, xi, [Violation("http.endpoint", f"POST /v1/systemone got {resp.status}: {resp.excerpt(160)}")])
-        raise Abort(f"no POST /v1/systemone at {ctx.client.base_url} ({resp.status})")
-    if resp.status != 200 and ctx.client.model == "jev-latest":
-        ctx.exercise(name, "request.model-alias")
-        ctx.violate(name, xi, [Violation("request.model-alias", f"model \"jev-latest\" got {resp.status}: {resp.excerpt(200)}")])
-        other = _served_model(ctx)
-        if not other:
-            raise Abort("the server rejects model \"jev-latest\" and lists no other model; pass --model NAME")
-        ctx.info["model_fallback"] = other
-        ctx.client.model = other
-        payload = ctx.payload({"q": dict(NOUL)})
-        resp, xi = ctx.post(name, payload)
+    else:
+        ctx.exercise(name, "auth.ignored-when-off")
+
     if resp.status != 200:
-        ctx.exercise(name, "http.endpoint")
-        ctx.violate(name, xi, [Violation("http.endpoint", f"a minimal valid request got {resp.status}: {resp.excerpt(200)}")])
-        raise Abort(f"a minimal valid request got {resp.status}; nothing else can be tested")
+        # Is it the model name? Retry with a model the server lists; blame the alias only if that works.
+        other = _served_model(ctx) if ctx.client.model == "jev-latest" else None
+        if other:
+            retry, xr = ctx.post(name, {**payload, "model": other})
+            if retry.status == 200:
+                ctx.exercise(name, "request.model-alias")
+                ctx.violate(name, xi, [Violation("request.model-alias", f"model \"jev-latest\" got {resp.status}: "
+                                                 f"{resp.excerpt(200)}; model {other!r} is accepted")])
+                ctx.info["model_fallback"] = other
+                ctx.client.model = other
+                resp, xi = retry, xr
+        if resp.status != 200:
+            # Does the route exist at all? A missing route answers any body with 404/405.
+            empty, xe = ctx.post(name, {})
+            if resp.status in (404, 405) and empty.status in (404, 405):
+                ctx.exercise(name, "http.endpoint")
+                ctx.violate(name, xi, [Violation("http.endpoint", f"POST /v1/systemone got {resp.status} for a valid request "
+                                                                  f"and {empty.status} for an empty one: the route does not exist")])
+                raise Abort(f"no POST /v1/systemone at {ctx.client.base_url} ({resp.status})")
+            raise Abort(f"the server rejects a minimal valid request ({resp.status}: {resp.excerpt(200)}); "
+                        "if it needs a particular model name, pass --model NAME")
     ctx.info["model_reported"] = resp.data.get("model") if isinstance(resp.data, dict) else None
-
-
-def _mentions_model(resp: Response) -> bool:
-    return b"model" in resp.body.lower()
 
 
 def _served_model(ctx: Ctx) -> str | None:
@@ -253,8 +306,10 @@ def _served_model(ctx: Ctx) -> str | None:
     except TransportError:
         return None
     models = resp.data.get("models") if resp.status == 200 and isinstance(resp.data, dict) else None
-    for m in models or []:
-        if isinstance(m, dict) and isinstance(m.get("name"), str) and m["name"] != "jev-latest":
+    if not isinstance(models, list):
+        return None
+    for m in models:
+        if isinstance(m, dict) and isinstance(m.get("name"), str) and m["name"] not in ("", "jev-latest"):
             return m["name"]
     return None
 
@@ -264,14 +319,19 @@ def _served_model(ctx: Ctx) -> str | None:
 @case("models-endpoint")
 def _(ctx: Ctx, name: str) -> None:
     """GET /v1/models lists at least one model with name, description and release_date."""
-    resp, xi = ctx.get(name, "/v1/models")
+    try:
+        resp, xi = ctx.get(name, "/v1/models")
+    except Timeout as e:
+        ctx.timed_out(name, e, ("http.models",))
+        return
+    except TransportError as e:
+        ctx.violate(name, len(ctx.exchanges) - 1, [Violation("http.models", f"no complete HTTP response: {e}")])
+        return
     ctx.exercise(name, "http.models")
     if resp.status != 200:
         ctx.violate(name, xi, [Violation("http.models", f"GET /v1/models got {resp.status}")])
         return
-    ctx.violate(name, xi, [v for v in check_json(resp) if v.req != "http.json"] +
-                ([] if resp.is_json else [Violation("http.models", resp.json_error or "")]))
-    models = resp.data.get("models") if isinstance(resp.data, dict) else None
+    models = resp.data.get("models") if resp.is_json and isinstance(resp.data, dict) else None
     ok = isinstance(models, list) and models and all(
         isinstance(m, dict) and all(isinstance(m.get(k), str) for k in ("name", "description", "release_date")) for m in models)
     if not ok:
@@ -284,7 +344,7 @@ def _(ctx: Ctx, name: str) -> None:
 def _(ctx: Ctx, name: str) -> None:
     """model "jev-latest" is accepted (the SDKs' default)."""
     if "model_fallback" in ctx.info or ctx.client.model == "jev-latest":
-        ctx.exercise(name, "request.model-alias")  # preflight already sent it; a failure was recorded there
+        ctx.exercise(name, "request.model-alias")  # the preflight sent it; a failure was recorded there
         return
     payload = {"model": "jev-latest", "state": TICKET, "questions": {"q": dict(NOUL)}}
     ctx.expect_answer(name, payload, "request.model-alias")
@@ -301,8 +361,8 @@ def _(ctx: Ctx, name: str) -> None:
     """Noul criteria: two-sided, true-only, false-only, null."""
     variants = {
         "both": {"true": "They want a refund or chargeback", "false": "They want anything else"},
-        "true_only": {"true": "They want a refund or chargeback"},
-        "false_only": {"false": "They are only asking a question"},
+        "true-only": {"true": "They want a refund or chargeback"},
+        "false-only": {"false": "They are only asking a question"},
         "null": None,
     }
     for label, crit in variants.items():
@@ -333,83 +393,108 @@ def _(ctx: Ctx, name: str) -> None:
 @case("choice-options")
 def _(ctx: Ctx, name: str) -> None:
     """2 options, 26, 64, 128 and 255 — the caps servers actually use, and the documented maximum."""
+    limits = ctx.info.setdefault("limits", {})
     for n in (2, 26, 64, 128, 255):
         options = {"Billing": "Payments, invoices, refunds", "Technical": "Bugs and outages"} if n == 2 else \
-            {"Billing": "Payments, invoices, refunds", **{f"Queue {i:03d}": None for i in range(1, n)}}
+            {"Billing": "Payments, invoices, refunds", **{f"Queue {i:03d}": f"Tickets routed to queue {i}" for i in range(1, n)}}
         q = {"type": "choice", "instructions": "Which queue should this ticket go to?", "criteria": options}
+        before = len(ctx.inconclusive)
         if ctx.expect_answer(f"{name}:{n}", ctx.payload({"queue": q}), "choice.options") is None:
-            ctx.info.setdefault("limits", {})["choice_options_failed_at"] = n
+            if len(ctx.inconclusive) == before:
+                limits["choice options rejected at"] = n
             break
-        ctx.info.setdefault("limits", {})["choice_options_ok"] = n
+        limits["choice options accepted up to"] = n
 
 
 @case("score-levels")
 def _(ctx: Ctx, name: str) -> None:
     """2, 3, 5 and 10 levels."""
+    limits = ctx.info.setdefault("limits", {})
     for n in (2, 3, 5, 10):
-        levels = ["Calm", "Very angry"] if n == 2 else SCORE["criteria"] if n == 3 else [f"Level {i}: {'calm' if i == 0 else 'angrier'}" for i in range(n)]
+        levels = ["Calm", "Very angry"] if n == 2 else SCORE["criteria"] if n == 3 else \
+            [f"Level {i}: {'calm' if i == 0 else 'angrier'}" for i in range(n)]
         q = {"type": "score", "instructions": "How frustrated is the customer?", "criteria": levels}
+        before = len(ctx.inconclusive)
         if ctx.expect_answer(f"{name}:{n}", ctx.payload({"anger": q}), "score.levels") is None:
-            ctx.info.setdefault("limits", {})["score_levels_failed_at"] = n
+            if len(ctx.inconclusive) == before:
+                limits["score levels rejected at"] = n
             break
-        ctx.info.setdefault("limits", {})["score_levels_ok"] = n
+        limits["score levels accepted up to"] = n
 
 
 @case("state-types")
 def _(ctx: Ctx, name: str) -> None:
-    """state as a string, an object and an array."""
+    """state as a string, an object and an array (with the noul question the preflight proved works)."""
     states = {
         "string": TICKET,
         "object": {"subject": "Charged twice", "body": TICKET, "customer": {"plan": "pro", "tickets": 3}},
         "array": ["Charged twice for March.", "Refund promised last week, not received.", "Will dispute the charge."],
     }
     for label, state in states.items():
-        ctx.expect_answer(f"{name}:{label}", ctx.payload({"refund": dict(NOUL), "team": dict(CHOICE)}, state=state), "request.state")
+        ctx.expect_answer(f"{name}:{label}", ctx.payload({"refund": dict(NOUL)}, state=state), "request.state")
 
 
 @case("structured-text")
 def _(ctx: Ctx, name: str) -> None:
-    """instructions and descriptions as objects and arrays."""
+    """instructions and descriptions as objects and arrays, one question type at a time."""
     qs = {
-        "refund": {"type": "noul", "instructions": {"task": "Decide whether the customer wants money back", "include": ["refunds", "chargebacks"]},
-                   "criteria": {"true": {"examples": ["refund me", "I'll dispute this"]}, "false": ["questions", "complaints without a request"]}},
-        "team": {"type": "choice", "instructions": ["Route the ticket.", "Pick exactly one team."],
-                 "criteria": {"Billing": {"owns": ["invoices", "refunds"]}, "Technical": ["bugs", "outages"], "Sales": "Pricing"}},
-        "anger": {"type": "score", "instructions": {"scale": "frustration"},
+        "noul": {"type": "noul", "instructions": {"task": "Decide whether the customer wants money back", "include": ["refunds", "chargebacks"]},
+                 "criteria": {"true": {"examples": ["refund me", "I'll dispute this"]}, "false": ["questions", "complaints without a request"]}},
+        "choice": {"type": "choice", "instructions": ["Route the ticket.", "Pick exactly one team."],
+                   "criteria": {"Billing": {"owns": ["invoices", "refunds"]}, "Technical": ["bugs", "outages"], "Sales": "Pricing"}},
+        "score": {"type": "score", "instructions": {"scale": "frustration"},
                   "criteria": [{"label": "Calm"}, {"label": "Frustrated"}, {"label": "Very angry", "signals": ["threats"]}]},
     }
-    ctx.expect_answer(name, ctx.payload(qs), "request.structured-text")
+    for label, q in qs.items():
+        ctx.expect_answer(f"{name}:{label}", ctx.payload({"q": q}), "request.structured-text")
 
 
 @case("multi-question")
 def _(ctx: Ctx, name: str) -> None:
     """noul, choice and score in one request."""
     ctx.expect_answer(name, ctx.payload({"refund": dict(NOUL), "team": dict(CHOICE), "anger": dict(SCORE)}), "request.multi",
-                      remap={"response.answer-ids": "request.multi"})
+                      remap={("response.answer-ids", "missing-answer"): "request.multi"})
 
 
 @case("question-ids")
 def _(ctx: Ctx, name: str) -> None:
-    """Question ids with -, ., spaces, Hangul and emoji."""
-    ids = ["ticket-1", "q.2", "with space", "질문", "🎯"]
-    ctx.expect_answer(name, ctx.payload({i: dict(NOUL) for i in ids}), "request.question-ids",
-                      remap={"response.answer-ids": "request.question-ids"})
+    """Question ids with -, ., spaces, Hangul and emoji, each in its own request."""
+    for qid in ["ticket-1", "q.2", "with space", "질문", "🎯"]:
+        ctx.expect_answer(f"{name}:{qid}", ctx.payload({qid: dict(NOUL)}), "request.question-ids",
+                          remap={("response.answer-ids", "missing-answer"): "request.question-ids"})
+
+
+def _unicode_keys(ctx: Ctx) -> Callable[[list[Violation], Response], list[Violation]]:
+    """In the unicode case every option name is non-ASCII. A key mismatch or a `choice` that is not
+    an option is a round-trip failure (request.unicode) — unless the ASCII choice case already showed
+    a key problem, in which case it is that problem again and keeps its own id."""
+    def transform(violations: list[Violation], resp: Response) -> list[Violation]:
+        ascii_key_problem = any(f.req == "choice.probability-keys" for f in ctx.findings)
+        out = []
+        for v in violations:
+            if not ascii_key_problem and (v.tag == "option-keys" or (v.req, v.tag) == ("choice.argmax", "not-an-option")):
+                v = Violation("request.unicode", v.message + " (non-ASCII option names did not round-trip)", v.where, v.tag)
+            out.append(v)
+        return out
+    return transform
+
+
+UNICODE_OPTIONS = {"환불 요청": "고객이 돈을 돌려받기를 원함", "배송 문의": "배송 상태를 물음", "🙂 기타": "그 외"}  # no ASCII letters
 
 
 @case("unicode")
 def _(ctx: Ctx, name: str) -> None:
     """Hangul and emoji in state, instructions and option names; names must round-trip exactly."""
-    q = {"type": "choice", "instructions": "이 문의는 어떤 유형인가요?",
-         "criteria": {"환불 요청": "고객이 돈을 돌려받기를 원함", "배송 문의": None, "🙂 Other": "그 외"}}
-    state = "배송이 3일째 안 와요. 그냥 환불해 주세요 😡"
-    remap = {"choice.probability-keys": "request.unicode", "choice.argmax": "request.unicode"}
-    ctx.expect_answer(name, ctx.payload({"유형": q}, state=state), "request.unicode", remap=remap)
+    q = {"type": "choice", "instructions": "이 문의는 어떤 유형인가요?", "criteria": dict(UNICODE_OPTIONS)}
+    ctx.expect_answer(name, ctx.payload({"kind": q}, state="배송이 3일째 안 와요. 그냥 환불해 주세요 😡"), "request.unicode",
+                      transform=_unicode_keys(ctx))
 
 
 @case("unknown-fields")
 def _(ctx: Ctx, name: str) -> None:
     """Unknown top-level fields are ignored."""
-    ctx.expect_answer(name, ctx.payload({"refund": dict(NOUL)}, x_trace_id="jevcompat", seed=7), "request.unknown-fields")
+    resp = ctx.expect_answer(name, ctx.payload({"refund": dict(NOUL)}, x_trace_id="jevcompat", seed=7), "request.unknown-fields")
+    ctx.info["unknown_fields_ok"] = resp is not None
 
 
 # ---------------------------------------------------------------- invalid and out-of-range requests
@@ -455,15 +540,18 @@ def _(ctx: Ctx, name: str) -> None:
 def _(ctx: Ctx, name: str) -> None:
     """An unknown model name: answer, or a 4xx with the error shape."""
     payload = {**ctx.payload({"refund": dict(NOUL)}), "model": "jevcompat-no-such-model"}
-    resp, xi = ctx.post(name, payload)
+    got = ctx._send(name, payload, ("errors.no-5xx",))
+    if got is None:
+        return
+    resp, xi = got
     ctx.exercise(name, "errors.no-5xx")
     if resp.status >= 500:
         ctx.violate(name, xi, [Violation("errors.no-5xx", f"got {resp.status}: {resp.excerpt(160)}")])
     elif resp.status == 422:
-        ctx.exercise(name, "errors.validation-shape")
+        ctx.exercise(name, *ERROR_JSON_REQS, "errors.validation-shape")
         ctx.violate(name, xi, validate_validation_error(resp))
     elif resp.status >= 400:
-        ctx.exercise(name, "errors.shape", "http.json")
+        ctx.exercise(name, *ERROR_JSON_REQS, "errors.shape")
         ctx.violate(name, xi, validate_error_shape(resp))
 
 
@@ -474,11 +562,19 @@ def _(ctx: Ctx, name: str) -> None:
     """With --key: a missing key and a wrong key are refused with authentication_error."""
     reqs = ("auth.missing", "auth.invalid")
     if not ctx.key_given:
-        ctx.skip("auth is off or no --key was given", *reqs, "auth.bearer")
+        ctx.skip("no --key given (auth is off, or untested)", *reqs, "auth.bearer")
         return
     payload = ctx.payload({"refund": dict(NOUL)})
-    for req, auth, allowed in (("auth.missing", False, (401, 403)), ("auth.invalid", "jevcompat-wrong-key", (401,))):
-        resp, xi = ctx.post(f"{name}:{req.split('.')[1]}", payload, auth=auth)
+    try:
+        missing, xm = ctx.post(f"{name}:missing", payload, auth=False)
+        wrong, xw = ctx.post(f"{name}:wrong", payload, auth="jevcompat-wrong-key")
+    except Timeout as e:
+        ctx.timed_out(name, e, reqs)
+        return
+    if missing.status == 200 and wrong.status == 200:
+        ctx.skip("auth appears to be off: requests without a key and with a wrong key were both answered", *reqs)
+        return
+    for req, resp, xi, allowed in (("auth.missing", missing, xm, (401, 403)), ("auth.invalid", wrong, xw, (401,))):
         ctx.exercise(name, req)
         if resp.status not in allowed:
             ctx.violate(name, xi, [Violation(req, f"got {resp.status}, expected {' or '.join(map(str, allowed))}")])
@@ -486,7 +582,7 @@ def _(ctx: Ctx, name: str) -> None:
             ctx.violate(name, xi, validate_error_shape(resp, req, "authentication_error"))
 
 
-# ---------------------------------------------------------------- semantics
+# ---------------------------------------------------------------- semantics (SPEC §7)
 
 SEM_QUESTIONS = {"refund": NOUL, "team": CHOICE, "anger": SCORE}
 EXTRA_QUESTIONS = {
@@ -496,62 +592,86 @@ EXTRA_QUESTIONS = {
 }
 
 
-def _baseline(ctx: Ctx, name: str) -> tuple[dict, float] | None:
-    """Send the same request twice; return the first answers and the noise between the two."""
-    if "baseline" not in ctx.cache:
-        payload = ctx.payload({k: dict(v) for k, v in SEM_QUESTIONS.items()})
-        first, xi = ctx.post(f"{name}:baseline", payload)
-        second, _ = ctx.post(f"{name}:baseline-repeat", payload)
-        if first.status != 200 or second.status != 200 or not all(
-                isinstance(r.data, dict) and isinstance(r.data.get("answers"), dict) for r in (first, second)):
-            ctx.cache["baseline"] = None
-        else:
-            a, b = first.data["answers"], second.data["answers"]
-            diffs = [max_difference(a.get(q), b.get(q)) for q in SEM_QUESTIONS]
-            noise = max((d for d in diffs if d is not None), default=0.0)
-            ctx.cache["baseline"] = (a, noise)
-            ctx.info["repeat_noise"] = round(noise, 4)
-    return ctx.cache["baseline"]
+def _samples(ctx: Ctx, name: str, questions: dict) -> list[dict] | str:
+    """k answer maps for the same request, or the reason there are none."""
+    out = []
+    for i in range(spec.SEM_REPEATS):
+        extra = {"x_nonce": uuid.uuid4().hex} if ctx.info.get("unknown_fields_ok") else {}
+        try:
+            resp, _ = ctx.post(f"{name}:{i + 1}", ctx.payload({k: dict(v) for k, v in questions.items()}, **extra))
+        except Timeout as e:
+            ctx.inconclusive.append(f"{name}: {e}")
+            return f"timed out ({e})"
+        except TransportError as e:
+            return f"no complete HTTP response ({e})"
+        if resp.status != 200 or not isinstance(resp.data, dict) or not isinstance(resp.data.get("answers"), dict):
+            return f"the request got {resp.status}"
+        out.append(resp.data["answers"])
+    return out
 
 
 def _compare(ctx: Ctx, name: str, req: str, questions: dict, mapping: dict[str, str], what: str) -> None:
-    base = _baseline(ctx, name)
-    if base is None:
-        ctx.skip("the baseline request was not answered", req)
+    if "baseline" not in ctx.cache:
+        ctx.cache["baseline"] = _samples(ctx, "semantics-baseline", SEM_QUESTIONS)
+    base = ctx.cache["baseline"]
+    if isinstance(base, str):
+        ctx.skip(f"the baseline request could not be sampled: {base}", req)
         return
-    answers, noise = base
-    resp, xi = ctx.post(name, ctx.payload(questions))
-    if resp.status != 200 or not isinstance(resp.data, dict) or not isinstance(resp.data.get("answers"), dict):
-        ctx.skip(f"the variant request got {resp.status}", req)
+    variant = _samples(ctx, name, questions)
+    if isinstance(variant, str):
+        ctx.skip(f"the variant request could not be sampled: {variant}", req)
+        return
+    means_a: dict[tuple[str, str], float] = {}
+    means_b: dict[tuple[str, str], float] = {}
+    spread = 0.0
+    for q, q2 in mapping.items():
+        va = [answer_vector(s.get(q)) for s in base]
+        vb = [answer_vector(s.get(q2)) for s in variant]
+        keys = set(va[0])
+        if not keys or any(set(v) != keys for v in va + vb):
+            continue  # shape problems are other requirements' business
+        for k in keys:
+            xs, ys = [v[k] for v in va], [v[k] for v in vb]
+            spread = max(spread, max(xs) - min(xs), max(ys) - min(ys))
+            means_a[(q, k)], means_b[(q, k)] = sum(xs) / len(xs), sum(ys) / len(ys)
+    if not means_a:
+        ctx.skip("no comparable answers", req)
+        return
+    limit = max(spec.SEM_FLOOR, spec.SEM_NOISE_K * spread)
+    ctx.info.setdefault("repeat_spread", round(spread, 4))
+    if spec.SEM_NOISE_K * spread >= spec.SEM_TOO_NOISY:
+        ctx.skip(f"too noisy to judge: repeats of one request differ by up to {spread:.3f}", req)
         return
     ctx.exercise(name, req)
-    limit = max(spec.SEM_FLOOR, spec.SEM_NOISE_K * noise)
-    for q, q2 in mapping.items():
-        d = max_difference(answers.get(q), resp.data["answers"].get(q2))
-        if d is not None and d > limit:
-            ctx.violate(name, xi, [Violation(req, f"{what} moved {q!r} by {d:.3f} (repeat noise {noise:.3f}, limit {limit:.3f})")])
+    worst = max(means_a, key=lambda key: abs(means_a[key] - means_b[key]))
+    d = abs(means_a[worst] - means_b[worst])
+    if d > limit:
+        q, k = worst
+        what_moved = f"{q!r}" + ("" if k == "noul" else f" option {k!r}")
+        ctx.violate(name, len(ctx.exchanges) - 1, [Violation(req, f"{what} moved {what_moved} by {d:.3f} on average over "
+                                                             f"{spec.SEM_REPEATS} sends (repeat spread {spread:.3f}, limit {limit:.3f})")])
 
 
 @case("semantics-question-id")
 def _(ctx: Ctx, name: str) -> None:
     """Renaming question ids does not change the answers."""
     mapping = {"refund": "zz-renamed.1", "team": "Q 🙂", "anger": "x_y_z"}
-    qs = {mapping[k]: dict(v) for k, v in SEM_QUESTIONS.items()}
-    _compare(ctx, name, "semantics.question-id", qs, mapping, "renaming the question ids")
+    _compare(ctx, name, "semantics.question-id", {mapping[k]: v for k, v in SEM_QUESTIONS.items()}, mapping,
+             "renaming the question ids")
 
 
 @case("semantics-batching")
 def _(ctx: Ctx, name: str) -> None:
     """Adding other questions does not change the answers."""
-    qs = {**{k: dict(v) for k, v in SEM_QUESTIONS.items()}, **{k: dict(v) for k, v in EXTRA_QUESTIONS.items()}}
-    _compare(ctx, name, "semantics.batching", qs, {k: k for k in SEM_QUESTIONS}, "adding three other questions")
+    _compare(ctx, name, "semantics.batching", {**SEM_QUESTIONS, **EXTRA_QUESTIONS}, {k: k for k in SEM_QUESTIONS},
+             "adding three other questions")
 
 
 @case("semantics-question-order")
 def _(ctx: Ctx, name: str) -> None:
     """Reversing the question order does not change the answers."""
-    qs = {k: dict(SEM_QUESTIONS[k]) for k in reversed(list(SEM_QUESTIONS))}
-    _compare(ctx, name, "semantics.question-order", qs, {k: k for k in SEM_QUESTIONS}, "reversing the question order")
+    _compare(ctx, name, "semantics.question-order", {k: SEM_QUESTIONS[k] for k in reversed(list(SEM_QUESTIONS))},
+             {k: k for k in SEM_QUESTIONS}, "reversing the question order")
 
 
 # ---------------------------------------------------------------- drop-in
@@ -565,21 +685,36 @@ def _(ctx: Ctx, name: str) -> None:
     try:
         from typesafe_sdk import Choice, Noul, Score, TypeSafeClient
     except ImportError:
-        ctx.skip("typesafe-sdk is not installed (pip install 'jevcompat[sdk]')", "dropin.sdk-python")
+        ctx.skip("typesafe-sdk is not importable", "dropin.sdk-python")
         return
-    ctx.exercise(name, "dropin.sdk-python")
+    if ctx.auth_mode == "x-api-key":
+        ctx.skip("the server does not read Authorization: Bearer, which the SDK sends", "dropin.sdk-python")
+        return
     questions = {
         "refund": Noul(instructions=NOUL["instructions"]),
         "team": Choice(instructions=CHOICE["instructions"], criteria=CHOICE["criteria"]),
         "anger": Score(instructions=SCORE["instructions"], criteria=SCORE["criteria"]),
     }
-    key = ctx.client.key or "jevcompat-no-key"
-    shown = {"model": ctx.client.model, "state": TICKET, "questions": {k: "(typesafe_sdk question)" for k in questions}}
+    shown = {"model": ctx.client.model, "questions": {"refund": NOUL, "team": CHOICE, "anger": SCORE}, "state": TICKET}
+    path = "/v1/systemone"
     try:
-        with TypeSafeClient(api_key=key, base_url=ctx.client.base_url, timeout=ctx.client.timeout) as client:
+        with TypeSafeClient(api_key=ctx.client.key or "jevcompat-no-key", base_url=ctx.client.base_url,
+                            timeout=ctx.client.timeout) as client:
             r = client.system_one(state=TICKET, questions=questions, model=ctx.client.model)
-            got = (r.nouls["refund"].noul, r.choices["team"].choice, r.scores["anger"].score)
-        xi = ctx._record(name, "POST", "/v1/systemone (typesafe-sdk)", shown, None, json.dumps(got, ensure_ascii=False, default=str))
-    except Exception as e:  # noqa: BLE001 — any exception is the finding
-        xi = ctx._record(name, "POST", "/v1/systemone (typesafe-sdk)", shown, None, f"{type(e).__name__}: {e}")
+    except Exception as e:  # noqa: BLE001 — any exception from the SDK is the finding
+        if "timeout" in type(e).__name__.lower():
+            ctx.timed_out(name, Timeout(f"typesafe-sdk: {e}"), ("dropin.sdk-python",))
+            return
+        xi = ctx._record(name, "POST", path, shown, None, f"{type(e).__name__}: {e}", via="typesafe-sdk")
+        ctx.exercise(name, "dropin.sdk-python")
         ctx.violate(name, xi, [Violation("dropin.sdk-python", f"typesafe-sdk raised {type(e).__name__}: {str(e)[:300]}")])
+        return
+    ctx.exercise(name, "dropin.sdk-python")
+    got = {"refund": r.nouls.get("refund"), "team": r.choices.get("team"), "anger": r.scores.get("anger")}
+    missing = [k for k, v in got.items() if v is None]
+    summary = {k: (getattr(v, "noul", None) or getattr(v, "choice", None) or getattr(v, "score", None)) for k, v in got.items() if v}
+    xi = ctx._record(name, "POST", path, shown, None, json.dumps(summary, ensure_ascii=False, default=str),
+                     via="typesafe-sdk", status=200)
+    if missing:
+        ctx.violate(name, xi, [Violation("dropin.sdk-python", f"typesafe-sdk parsed the response but found no "
+                                                              f"{'/'.join(missing)} answer of the expected type")])

@@ -9,19 +9,35 @@ from dataclasses import dataclass
 
 SPEC_VERSION = "0.1"
 
-# Numeric tolerances, SPEC.md §5.
+# Numeric tolerances, SPEC.md §5. r is the rounding the response shows (0 for unrounded values).
 EPS_SUM = 0.05
 EPS_ROUND = 0.005
 EPS_CONF = 0.02
+SLACK = 1e-9
 
 
-def eps_score(levels: int) -> float:
-    return 0.02 + 0.005 * max(0, levels - 1)
+def rounding(values: list[float], max_decimals: int = 6) -> float:
+    """½·10⁻ᵈ for the smallest d ≤ max_decimals at which every value is exact; 0 if none is."""
+    for d in range(max_decimals + 1):
+        scale = 10**d
+        if all(abs(v * scale - round(v * scale)) < 1e-6 for v in values):
+            return 0.5 / scale
+    return 0.0
 
 
-# Semantic comparisons, SPEC.md §7: a difference fails only above max(SEM_FLOOR, SEM_NOISE_K × noise).
+def eps_sum(n: int, r: float) -> float:
+    return max(EPS_SUM, n * r)
+
+
+def eps_score(n: int, r: float) -> float:
+    return 0.02 + r * (1 + n * (n - 1) / 2)
+
+
+# Semantic comparisons, SPEC.md §7.
+SEM_REPEATS = 3
 SEM_FLOOR = 0.05
 SEM_NOISE_K = 3.0
+SEM_TOO_NOISY = 0.5
 
 MAX_CHOICE_OPTIONS = 255
 MAX_SCORE_LEVELS = 10
@@ -37,7 +53,8 @@ class Requirement:
 
 _R = [
     ("http.endpoint", "MUST", "1", "POST /v1/systemone answers valid requests with 200"),
-    ("http.json", "MUST", "1", "every response is JSON with a JSON content type"),
+    ("http.json", "MUST", "1", "200 bodies are JSON"),
+    ("http.content-type", "SHOULD", "1", "responses declare a JSON media type"),
     ("http.models", "SHOULD", "1", "GET /v1/models lists models"),
     ("auth.ignored-when-off", "MUST", "2", "without auth, an Authorization header is accepted"),
     ("auth.bearer", "MUST", "2", "the key is read from Authorization: Bearer"),
@@ -74,6 +91,7 @@ _R = [
     ("score.expectation", "MUST", "4.4", "score is the expectation of the probabilities"),
     ("confidence.range", "MUST", "4.5", "confidence is in [0, 1]"),
     ("confidence.formula", "SHOULD", "4.5", "confidence follows the reference formula"),
+    ("errors.json", "SHOULD", "6", "error bodies are JSON"),
     ("errors.no-5xx", "MUST", "6", "bad requests never get a 5xx"),
     ("errors.reject-invalid", "SHOULD", "6", "invalid requests get a 4xx, not an answer"),
     ("errors.validation-shape", "SHOULD", "6", "validation errors are 422 with detail[]"),

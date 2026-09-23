@@ -17,7 +17,7 @@ jobs:
         with:
           python-version: ${{ matrix.python }}
       - run: uv run --extra dev ruff check .
-      - run: uv run --extra dev --extra sdk pytest -q
+      - run: uv run --extra dev pytest -q
   action:
     runs-on: ubuntu-latest
     steps:
@@ -27,5 +27,20 @@ jobs:
         run: |
           uv run jevcompat mock --port 8787 &
           for i in $(seq 30); do curl -s localhost:8787/v1/models && break; sleep 1; done
-      - name: run the suite from source against it
-        run: uv run --extra sdk jevcompat test http://localhost:8787 --badge
+      - id: conformant
+        uses: ./
+        with:
+          url: http://localhost:8787
+          package: .
+      - run: test "${{ steps.conformant.outputs.verdict }}" = conformant
+      - name: start a broken mock
+        run: |
+          uv run jevcompat mock --port 8788 --fault choice-second &
+          for i in $(seq 30); do curl -s localhost:8788/v1/models && break; sleep 1; done
+      - id: broken
+        uses: ./
+        with:
+          url: http://localhost:8788
+          package: .
+          fail-on-must: "false"
+      - run: test "${{ steps.broken.outputs.verdict }}" = "not conformant"

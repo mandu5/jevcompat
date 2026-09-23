@@ -11,8 +11,10 @@ def run_against(cfg: MockConfig | None = None, **kw):
         return runner.run(m.url, **{"sdk": False, "timeout": 10, **kw})
 
 
+def status_of(report, req):
+    return next(r for r in report.results if r.id == req).status
+
+
 @pytest.fixture
 def status():
-    def get(report, req):
-        return next(r for r in report.results if r.id == req).status
-    return get
+    return status_of

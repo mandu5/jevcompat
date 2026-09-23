@@ -12,10 +12,10 @@ def test_conformant_server_exits_0(tmp_path, capsys):
     out = tmp_path / "r.json"
     md = tmp_path / "r.md"
     with Running() as m:
-        code = cli.main(["test", m.url, "--no-sdk", "--json", str(out), "--markdown", str(md), "--badge"])
+        code = cli.main(["test", m.url, "--json", str(out), "--markdown", str(md), "--badge"])
     assert code == 0
     data = json.loads(out.read_text())
-    assert data["summary"]["conformant"] is True
+    assert data["summary"]["verdict"] == "conformant"
     assert "img.shields.io/badge/jevcompat" in capsys.readouterr().out
     assert "| ✓ | MUST |" in md.read_text()
 
@@ -30,13 +30,18 @@ def test_nonconformant_server_exits_1(tmp_path):
 
 
 def test_unreachable_exits_2():
-    assert cli.main(["test", "http://127.0.0.1:9", "--no-sdk", "--timeout", "2"]) == 2
+    assert cli.main(["test", "http://127.0.0.1:9", "--timeout", "2"]) == 2
+
+
+def test_incomplete_exits_3():
+    with Running() as m:
+        assert cli.main(["test", m.url, "--no-sdk"]) == 3
 
 
 def test_key_from_environment(monkeypatch):
     monkeypatch.setenv("MY_KEY", "s3")
     with Running(MockConfig(key="s3")) as m:
-        assert cli.main(["test", m.url, "--no-sdk", "--key-env", "MY_KEY"]) == 0
+        assert cli.main(["test", m.url, "--key-env", "MY_KEY"]) == 0
 
 
 def test_spec_and_faults_listing(capsys):

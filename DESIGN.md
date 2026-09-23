@@ -57,8 +57,9 @@ SDKs, and they disagree with each other in eight places (401 vs 403 for a missin
   response bytes that violated the requirement, so a server author can reproduce it with curl.
 - **Tolerances are stated, not tuned.** Float comparisons allow for two-decimal rounding
   (the precision TypeSafe's own examples use); the allowances are in SPEC.md §5.
-- **No runtime dependencies.** `uvx jevcompat test URL` should start instantly; stdlib HTTP only.
-  The official SDK is an optional extra used for the "drop-in" check.
+- **One runtime dependency: the official SDK.** HTTP is stdlib only, so the suite sees exactly
+  what the server sent. `typesafe-sdk` is installed because "does the official client work?" is
+  the most useful single question the suite answers (`dropin.sdk-python`).
 
 ## Architecture
 
@@ -105,6 +106,7 @@ passes. The badge shows `spec 0.1 | 38/40 MUST`.
 
 ## Release plan
 
-- v0.1: SPEC.md 0.1, test, mock, JSON/Markdown/badge reports, measured results for 8 servers,
-  GitHub Action for server authors.
-- v0.2: proxy; JS port of the validators if server authors ask for it.
+- v0.1: SPEC.md 0.1, test, mock, proxy, JSON/Markdown/badge reports, measured results for the
+  most-starred open servers, GitHub Action for server authors.
+- v0.2: whatever server authors and the spec's issue tracker ask for first; a JS port of the
+  validators only if asked.

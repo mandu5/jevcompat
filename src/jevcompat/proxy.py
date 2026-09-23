@@ -2,14 +2,18 @@
 
 What it fixes is whatever can be recomputed or re-labelled without inventing an answer:
 derived fields (`choice`, `score`, `legend`, `confidence`), probability keys that differ only by
-Unicode normalisation, case or a 1-based index, distributions that do not sum to 1, integer
-token counts, unprefixed extra fields, error shapes, the model alias, and — because the upstream
-only ever sees canonical question ids in a canonical order — answers that leak the id or the
-order. With `split`, each question goes upstream alone, so answers cannot depend on each other.
+Unicode normalisation, case or a 1-based index (when the match is unambiguous), distributions
+that sum to within 0.1 of 1, integer token counts, unprefixed extra fields, error shapes, the
+model alias, and answers that depend on the question id: the upstream only ever sees ids derived
+from each question's content. Questions also go upstream in a content-derived order, so
+reordering a request changes nothing; adding questions can still shift positions, which only
+`split` (one upstream request per question) rules out, together with any other cross-question
+effect.
 
 What it cannot fix it refuses loudly (502 with `error_type: upstream_error`) rather than
-passing a wrong answer through: a missing option, a probability outside [0, 1], a NaN.
-Every response says what was changed in the `x-jevcompat-fixes` header.
+passing a wrong answer through: a missing or ambiguous option, probability mass on options that
+were not asked, a probability outside [0, 1], a NaN. Every response says what was changed in
+the `x-jevcompat-fixes` header.
 """
 from __future__ import annotations
 
@@ -25,7 +29,7 @@ from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from typing import Any
 
 from .client import Client, TransportError
-from .mock import MockConfig, validate_request
+from .mock import MockConfig, read_body, validate_request
 from .validate import choice_confidence, is_num, score_confidence
 
 TEXT_FIELDS = ("state", "model", "questions")
@@ -41,6 +45,15 @@ class UpstreamRejected(Exception):
     def __init__(self, status: int, data: Any, text: str):
         super().__init__(text)
         self.status, self.data, self.text = status, data, text
+
+    def with_ids(self, upstream_to_client: dict[str, str]) -> UpstreamRejected:
+        """Replace the proxy's question ids with the client's in validation-error locations."""
+        detail = self.data.get("detail") if isinstance(self.data, dict) else None
+        if isinstance(detail, list):
+            for d in detail:
+                if isinstance(d, dict) and isinstance(d.get("loc"), list):
+                    d["loc"] = [upstream_to_client.get(x, x) if isinstance(x, str) else x for x in d["loc"]]
+        return self
 
 
 class RateLimited(Exception):
@@ -58,6 +71,7 @@ class ProxyConfig:
     upstream_key_header: str | None = None  # e.g. "x-api-key"; default Authorization: Bearer
     key: str | None = None                 # require this key from clients
     split: bool = False                    # one upstream request per question
+    renormalize: bool = False              # renormalise any positive sum, not only sums within 0.1 of 1
     timeout: float = 120.0
 
 
@@ -66,9 +80,17 @@ def _canon(v: Any) -> str:
 
 
 def canonical_ids(questions: dict[str, Any]) -> list[tuple[str, str]]:
-    """(client id, upstream id) in an order that depends only on the questions' content."""
-    order = sorted(questions, key=lambda q: (hashlib.sha256(_canon(questions[q]).encode()).hexdigest(), q))
-    return [(qid, f"q{i}") for i, qid in enumerate(order)]
+    """(client id, upstream id), both the ids and their order derived from each question's content,
+    so neither depends on the client's ids, their order, or the other questions."""
+    digests = {q: hashlib.sha256(_canon(questions[q]).encode()).hexdigest() for q in questions}
+    seen: dict[str, int] = {}
+    out = []
+    for qid in sorted(questions, key=lambda q: (digests[q], q)):
+        base = "q" + digests[qid][:12]
+        n = seen.get(base, 0)
+        seen[base] = n + 1
+        out.append((qid, base if n == 0 else f"{base}_{n}"))
+    return out
 
 
 # ---------------------------------------------------------------- answer normalisation
@@ -88,39 +110,52 @@ def _prefix_extras(obj: dict, known: set[str], fixes: set[str]) -> dict:
     return out
 
 
+def _norm(s: str) -> str:
+    return unicodedata.normalize("NFC", s).casefold().strip()
+
+
 def _match_keys(wanted: list[str], got: dict[str, Any], fixes: set[str]) -> dict[str, float]:
-    """Map the request's option names onto the upstream's probability keys."""
-    def norm(s: str) -> str:
-        return unicodedata.normalize("NFC", s).casefold().strip()
-    index: dict[str, str] = {}
-    for k in got:
-        index.setdefault(norm(str(k)), k)
+    """Map the request's option names onto the upstream's probability keys, one to one.
+
+    Exact matches first; then a name may claim the one unclaimed key equal to it under NFC,
+    case folding and trimming — only if no other name or key normalises the same way."""
+    claimed: dict[str, str] = {w: w for w in wanted if w in got}
+    free = [k for k in got if k not in claimed.values()]
+    for w in wanted:
+        if w in claimed:
+            continue
+        rivals = [x for x in wanted if x not in claimed and _norm(x) == _norm(w)]
+        candidates = [k for k in free if _norm(str(k)) == _norm(w)]
+        if len(rivals) != 1 or len(candidates) != 1:
+            raise UpstreamError(f"upstream gave no unambiguous probability for option {w!r}")
+        claimed[w] = candidates[0]
+        free.remove(candidates[0])
+        fixes.add("option-names")
+    leftover = sum(v for k, v in got.items() if k in free and is_num(v))
+    if leftover > 0.01:
+        raise UpstreamError(f"upstream put {leftover:.3f} probability on options that were not asked: "
+                            f"{', '.join(map(repr, free[:3]))}")
     out = {}
     for w in wanted:
-        if w in got:
-            key = w
-        elif norm(w) in index:
-            key = index[norm(w)]
-            fixes.add("option-names")
-        else:
-            raise UpstreamError(f"upstream gave no probability for option {w!r}")
-        v = got[key]
+        v = got[claimed[w]]
         if not (is_num(v) and -1e-9 <= v <= 1 + 1e-9):
             raise UpstreamError(f"upstream probability for {w!r} is {v!r}")
         out[w] = min(1.0, max(0.0, float(v)))
     return out
 
 
-def _renormalise(values: list[float], fixes: set[str]) -> list[float]:
+def _renormalise(values: list[float], fixes: set[str], any_sum: bool) -> list[float]:
     total = sum(values)
     if total <= 0:
         raise UpstreamError("upstream probabilities sum to 0")
+    if abs(total - 1) > 0.1 and not any_sum:
+        raise UpstreamError(f"upstream probabilities sum to {total:.3f}; pass --renormalize to accept that")
     if abs(total - 1) > 1e-6:
         fixes.add("renormalised")
     return [v / total for v in values]
 
 
-def normalise_answer(question: dict, ans: Any, fixes: set[str]) -> dict:
+def normalise_answer(question: dict, ans: Any, fixes: set[str], any_sum: bool = False) -> dict:
     if not isinstance(ans, dict):
         raise UpstreamError(f"upstream answer is {type(ans).__name__}")
     qtype = question["type"]
@@ -142,7 +177,7 @@ def normalise_answer(question: dict, ans: Any, fixes: set[str]) -> dict:
     extras = _prefix_extras(ans, known, fixes)
     if qtype == "choice":
         names = list(question["criteria"])
-        values = _renormalise(list(_match_keys(names, probs, fixes).values()), fixes)
+        values = _renormalise(list(_match_keys(names, probs, fixes).values()), fixes, any_sum)
         best = max(range(len(names)), key=lambda i: values[i])
         conf = choice_confidence(values)
         _note(fixes, "choice", ans.get("choice") != names[best])
@@ -156,7 +191,7 @@ def normalise_answer(question: dict, ans: Any, fixes: set[str]) -> dict:
     if set(got) == {str(i) for i in range(1, n + 1)}:
         got = {str(int(k) - 1): v for k, v in got.items()}
         fixes.add("probability-keys")
-    values = _renormalise(list(_match_keys(keys, got, fixes).values()), fixes)
+    values = _renormalise(list(_match_keys(keys, got, fixes).values()), fixes, any_sum)
     score = sum(i * p for i, p in enumerate(values))
     conf = score_confidence(values)
     legend = {str(i): lv for i, lv in enumerate(levels)}
@@ -228,7 +263,10 @@ class Proxy:
             batches = [ids]
         payloads = [{"model": model, "state": body["state"], "questions": {up: questions[cid] for cid, up in batch}}
                     for batch in batches]
-        replies = list(self.pool.map(self._upstream, payloads)) if len(payloads) > 1 else [self._upstream(payloads[0])]
+        try:
+            replies = list(self.pool.map(self._upstream, payloads)) if len(payloads) > 1 else [self._upstream(payloads[0])]
+        except UpstreamRejected as e:
+            raise e.with_ids({up: cid for cid, up in ids}) from None
         answers: dict[str, Any] = {}
         usage = {"input_tokens": 0, "output_tokens": 0}
         reported = None
@@ -240,7 +278,7 @@ class Proxy:
             for cid, up in batch:
                 if up not in got:
                     raise UpstreamError(f"upstream returned no answer for question {cid!r}")
-                answers[cid] = normalise_answer(questions[cid], got[up], fixes)
+                answers[cid] = normalise_answer(questions[cid], got[up], fixes, self.cfg.renormalize)
             u = _usage(reply.get("usage"), fixes)
             usage = {k: usage[k] + u[k] for k in usage}
             reported = reported or reply.get("model")
@@ -258,7 +296,12 @@ class Handler(BaseHTTPRequestHandler):
             super().log_message(fmt, *args)
 
     def _send(self, status: int, payload: Any, headers: dict[str, str] | None = None) -> None:
-        raw = json.dumps(payload, ensure_ascii=False).encode("utf-8")
+        try:
+            raw = json.dumps(payload, ensure_ascii=False, allow_nan=False).encode("utf-8")
+        except ValueError:  # a NaN or Infinity somewhere in an upstream extra field
+            status, headers = 502, None
+            raw = json.dumps({"detail": {"error_type": "upstream_error",
+                                         "message": "upstream response contains NaN or Infinity"}}).encode()
         self.send_response(status)
         self.send_header("Content-Type", "application/json")
         self.send_header("Content-Length", str(len(raw)))
@@ -299,7 +342,7 @@ class Handler(BaseHTTPRequestHandler):
             return
         if not self._authorised():
             return
-        raw = self.rfile.read(int(self.headers.get("Content-Length") or 0))
+        raw = read_body(self)
         try:
             body = json.loads(raw.decode("utf-8"))
         except (UnicodeDecodeError, json.JSONDecodeError) as e:
@@ -327,7 +370,9 @@ class Handler(BaseHTTPRequestHandler):
     def _rejected(self, e: UpstreamRejected) -> None:
         detail = e.data.get("detail") if isinstance(e.data, dict) else None
         if e.status == 422:
-            ok = isinstance(detail, list) and all(isinstance(d, dict) and isinstance(d.get("loc"), list) for d in detail)
+            ok = isinstance(detail, list) and detail and all(
+                isinstance(d, dict) and isinstance(d.get("loc"), list) and d["loc"][:1] == ["body"]
+                and isinstance(d.get("msg"), str) and isinstance(d.get("type"), str) for d in detail)
             self._send(422, {"detail": detail if ok else [{"loc": ["body"], "msg": e.text, "type": "upstream_validation"}]})
         elif isinstance(detail, dict) and isinstance(detail.get("error_type"), str) and isinstance(detail.get("message"), str):
             self._send(e.status, {"detail": detail})

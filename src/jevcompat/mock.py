@@ -10,6 +10,7 @@ the other questions or their order, which is what the spec promises about the re
 from __future__ import annotations
 
 import hashlib
+import hmac
 import json
 import math
 import random
@@ -29,7 +30,9 @@ TEXT = (str, dict, list)
 # fault -> (requirement it breaks, what it does)
 FAULTS: dict[str, tuple[str, str]] = {
     "wrong-route": ("http.endpoint", "serve /v1/evaluate instead of /v1/systemone"),
-    "text-errors": ("http.json", "error bodies are text/plain"),
+    "xssi-200": ("http.json", "prefix 200 bodies with )]}' so they are not JSON"),
+    "plain-content-type": ("http.content-type", "declare Content-Type text/plain on JSON bodies"),
+    "text-errors": ("errors.json", "error bodies are plain text"),
     "models-404": ("http.models", "no GET /v1/models"),
     "auth-rejects-header": ("auth.ignored-when-off", "with auth off, reject requests that carry Authorization"),
     "auth-x-api-key": ("auth.bearer", "read the key from x-api-key, not Authorization"),
@@ -82,6 +85,7 @@ class MockConfig:
     faults: frozenset[str] = frozenset()
     noise: float = 0.0
     rng: random.Random = field(default_factory=lambda: random.Random(0))
+    lock: threading.Lock = field(default_factory=threading.Lock)
 
     def __post_init__(self) -> None:
         unknown = set(self.faults) - set(FAULTS)
@@ -195,7 +199,8 @@ def _logit(cfg: MockConfig, *parts: Any) -> float:
     h = hashlib.sha256(_canon(parts).encode("utf-8")).digest()
     x = (int.from_bytes(h[:8], "big") / 2**64 * 2 - 1) * 3
     if cfg.noise:
-        x += cfg.rng.gauss(0, cfg.noise)
+        with cfg.lock:
+            x += cfg.rng.gauss(0, cfg.noise)
     return x
 
 
@@ -295,11 +300,14 @@ class Handler(BaseHTTPRequestHandler):
 
     def _send(self, status: int, payload: Any, text: bool = False) -> None:
         if text or (status >= 400 and self.cfg.has("text-errors")):
-            raw = (payload if isinstance(payload, str) else json.dumps(payload)).encode()
+            message = payload if isinstance(payload, str) else _plain(payload)
+            raw = message.encode()
             ctype = "text/plain; charset=utf-8"
         else:
             raw = json.dumps(payload, ensure_ascii=False, allow_nan=True).encode("utf-8")
-            ctype = "application/json"
+            ctype = "text/plain" if self.cfg.has("plain-content-type") else "application/json"
+            if status == 200 and self.cfg.has("xssi-200"):
+                raw = b")]}'\n" + raw
         self.send_response(status)
         self.send_header("Content-Type", ctype)
         self.send_header("Content-Length", str(len(raw)))
@@ -323,7 +331,7 @@ class Handler(BaseHTTPRequestHandler):
             else:
                 self._send(403, {"detail": {"error_type": "authentication_error", "message": "Must supply an API key!"}})
             return True
-        if given != cfg.key:
+        if not hmac.compare_digest(given.encode(), cfg.key.encode()):
             if cfg.has("auth-invalid-403-text"):
                 self._send(401, {"error": "bad key"})
             else:
@@ -345,7 +353,7 @@ class Handler(BaseHTTPRequestHandler):
             return
         if self._auth_error():
             return
-        raw = self.rfile.read(int(self.headers.get("Content-Length") or 0))
+        raw = read_body(self)
         try:
             body = json.loads(raw.decode("utf-8"))
         except (UnicodeDecodeError, json.JSONDecodeError) as e:
@@ -375,6 +383,33 @@ class Handler(BaseHTTPRequestHandler):
             self._send(400, {"error": errs[0]["msg"]})
         else:
             self._send(422, {"detail": errs})
+
+
+def _plain(payload: Any) -> str:
+    detail = payload.get("detail") if isinstance(payload, dict) else None
+    if isinstance(detail, dict):
+        return str(detail.get("message", detail))
+    if isinstance(detail, list) and detail:
+        return "; ".join(str(d.get("msg")) for d in detail if isinstance(d, dict))
+    return str(payload)
+
+
+def read_body(handler: BaseHTTPRequestHandler, limit: int = 32 * 1024 * 1024) -> bytes:
+    """The request body, with Content-Length or chunked transfer encoding."""
+    if "chunked" in (handler.headers.get("Transfer-Encoding") or "").lower():
+        parts, total = [], 0
+        while True:
+            size = int(handler.rfile.readline().split(b";")[0].strip() or b"0", 16)
+            if size == 0:
+                handler.rfile.readline()
+                break
+            total += size
+            if total > limit:
+                raise ValueError("request body too large")
+            parts.append(handler.rfile.read(size))
+            handler.rfile.readline()
+        return b"".join(parts)
+    return handler.rfile.read(min(int(handler.headers.get("Content-Length") or 0), limit))
 
 
 def make_server(cfg: MockConfig, host: str = "127.0.0.1", port: int = 0, verbose: bool = False) -> ThreadingHTTPServer:

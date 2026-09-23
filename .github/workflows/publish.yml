@@ -9,7 +9,7 @@ jobs:
       - uses: actions/checkout@v4
       - uses: astral-sh/setup-uv@v6
       - run: uv run --extra dev ruff check .
-      - run: uv run --extra dev --extra sdk pytest -q
+      - run: uv run --extra dev pytest -q
   pypi:
     needs: test
     runs-on: ubuntu-latest

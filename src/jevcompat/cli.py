@@ -38,9 +38,7 @@ def cmd_test(args: argparse.Namespace) -> int:
         _eprint(f"  wrote {args.markdown}")
     if args.badge:
         print("\nREADME badge:\n" + report.badge_markdown(rep))
-    if rep.aborted:
-        return 2
-    return 0 if rep.conformant else 1
+    return {"conformant": 0, "not conformant": 1, "incomplete": 3, "not tested": 2}[rep.verdict]
 
 
 def cmd_mock(args: argparse.Namespace) -> int:
@@ -71,7 +69,7 @@ def cmd_proxy(args: argparse.Namespace) -> int:
     upstream_key = args.upstream_key or (os.environ.get(args.upstream_key_env) if args.upstream_key_env else None)
     cfg = ProxyConfig(upstream=args.upstream, upstream_key=upstream_key, upstream_model=args.upstream_model,
                       upstream_path=args.upstream_path, upstream_key_header=args.upstream_key_header,
-                      key=args.key, split=args.split, timeout=args.timeout)
+                      key=args.key, split=args.split, renormalize=args.renormalize, timeout=args.timeout)
     srv = make_server(cfg, host=args.host, port=args.port, verbose=args.verbose)
     host, port = srv.server_address[:2]
     _eprint(f"  jevcompat proxy http://{host}:{port}/v1/systemone → {cfg.upstream}{cfg.upstream_path}"
@@ -109,13 +107,13 @@ def build_parser() -> argparse.ArgumentParser:
     t.add_argument("--key", help="API key, sent as Authorization: Bearer (also enables the auth checks)")
     t.add_argument("--key-env", metavar="VAR", help="read the API key from this environment variable")
     t.add_argument("--model", default="jev-latest", help="model name to send (default: jev-latest, the SDKs' default)")
-    t.add_argument("--timeout", type=float, default=60.0, help="seconds per request (default 60)")
+    t.add_argument("--timeout", type=float, default=120.0, help="seconds per request (default 120); a timeout marks the run incomplete, never failed")
     t.add_argument("--json", metavar="PATH", help="write the full report as JSON")
     t.add_argument("--markdown", metavar="PATH", help="write the report as Markdown")
     t.add_argument("--title", help="title for the Markdown report")
     t.add_argument("--badge", action="store_true", help="print a README badge")
     t.add_argument("--evidence", type=int, default=2, metavar="N", help="failures shown per requirement (default 2)")
-    t.add_argument("--no-sdk", action="store_true", help="skip the official-SDK drop-in check")
+    t.add_argument("--no-sdk", action="store_true", help="skip the official-SDK drop-in check (the run is then incomplete)")
     t.set_defaults(fn=cmd_test)
 
     m = sub.add_parser("mock", help="run the reference server (a spec-exact stand-in for Jev)")
@@ -139,6 +137,7 @@ def build_parser() -> argparse.ArgumentParser:
     x.add_argument("--upstream-model", metavar="NAME", help="model name to send upstream (e.g. when it rejects jev-latest)")
     x.add_argument("--upstream-path", default="/v1/systemone", help="upstream route (default /v1/systemone)")
     x.add_argument("--split", action="store_true", help="send each question upstream on its own, so answers cannot affect each other")
+    x.add_argument("--renormalize", action="store_true", help="renormalise probabilities whatever they sum to (default: only within 0.1 of 1)")
     x.add_argument("--timeout", type=float, default=120.0)
     x.add_argument("-v", "--verbose", action="store_true")
     x.set_defaults(fn=cmd_proxy)

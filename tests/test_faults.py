@@ -7,7 +7,7 @@ mutation test.
 from __future__ import annotations
 
 import pytest
-from conftest import run_against
+from conftest import run_against, status_of
 
 from jevcompat import spec
 from jevcompat.mock import FAULTS, MockConfig
@@ -15,66 +15,91 @@ from jevcompat.mock import FAULTS, MockConfig
 AUTH_FAULTS = {"auth-x-api-key", "auth-plain", "auth-invalid-403-text"}
 
 
+def failures(rep):
+    return [(r.id, r.findings[0].message) for r in rep.results if r.status == "fail"]
+
+
 def test_clean_mock_is_conformant():
-    rep = run_against()
-    assert rep.conformant, [(r.id, r.findings[:1]) for r in rep.results if r.status == "fail"]
-    assert rep.count("SHOULD", "fail") == 0
+    rep = run_against(sdk=True)
+    assert rep.verdict == "conformant", failures(rep)
+    assert rep.count("SHOULD", "fail") == 0 and rep.count("SHOULD", "skip") == 2  # auth.missing/invalid need --key
 
 
-def test_clean_mock_with_key_passes_auth(status):
-    rep = run_against(MockConfig(key="secret"), key="secret")
-    assert rep.conformant
+def test_clean_mock_with_key_passes_auth():
+    rep = run_against(MockConfig(key="secret"), key="secret", sdk=True)
+    assert rep.verdict == "conformant", failures(rep)
     for req in ("auth.bearer", "auth.missing", "auth.invalid"):
-        assert status(rep, req) == "pass"
-    assert status(rep, "auth.ignored-when-off") == "skip"
+        assert status_of(rep, req) == "pass"
+    assert status_of(rep, "auth.ignored-when-off") == "skip"
 
 
-@pytest.mark.parametrize("noise", [0.05, 0.2])
-def test_noisy_mock_is_still_conformant(noise):
-    rep = run_against(MockConfig(noise=noise))
-    assert rep.conformant, [(r.id, r.findings[:1]) for r in rep.results if r.status == "fail"]
-    assert rep.count("SHOULD", "fail") == 0
+def test_without_sdk_the_run_is_incomplete_not_conformant():
+    rep = run_against()
+    assert rep.verdict == "incomplete" and rep.untested_musts == ["dropin.sdk-python"]
 
 
 def test_every_testable_requirement_has_a_fault():
-    targeted = {req for req, _ in FAULTS.values()}
-    untestable_by_fault = {"dropin.sdk-python"}  # end-to-end: covered by the SDK itself
-    assert set(spec.REQUIREMENTS) - targeted == untestable_by_fault
+    assert set(spec.REQUIREMENTS) - {req for req, _ in FAULTS.values()} == {"dropin.sdk-python"}
 
 
 @pytest.mark.parametrize("fault", sorted(FAULTS))
-def test_fault_is_detected(fault, status):
+def test_fault_is_detected(fault):
     target = FAULTS[fault][0]
     key = "secret" if fault in AUTH_FAULTS else None
     rep = run_against(MockConfig(key=key, faults=frozenset({fault})), key=key)
-    assert status(rep, target) == "fail", f"{fault} should break {target}"
+    assert status_of(rep, target) == "fail", f"{fault} should break {target}"
     failed = next(r for r in rep.results if r.id == target)
     assert failed.findings and all(f.message for f in failed.findings)
 
 
-def test_rejected_alias_falls_back_to_a_listed_model(status):
+# Faults whose one defect legitimately shows under more than one requirement.
+KNOWN_SPILLOVER = {
+    "wrong-route": None,          # nothing else can be tested
+    "xssi-200": None,             # no response parses
+    "first-question-only": {"response.answer-ids", "semantics.batching", "semantics.question-id", "semantics.question-order"},
+    "no-usage": set(), "float-usage": set(),
+}
+
+
+@pytest.mark.parametrize("fault", sorted(FAULTS))
+def test_one_defect_fails_few_musts(fault):
+    """A single fault must not smear MUST failures across unrelated requirements."""
+    if fault in KNOWN_SPILLOVER and KNOWN_SPILLOVER[fault] is None:
+        pytest.skip("the fault makes the rest untestable")
+    key = "secret" if fault in AUTH_FAULTS else None
+    rep = run_against(MockConfig(key=key, faults=frozenset({fault})), key=key)
+    target = FAULTS[fault][0]
+    allowed = {target} | (KNOWN_SPILLOVER.get(fault) or set())
+    extra = [(r.id, r.findings[0].message) for r in rep.results
+             if r.status == "fail" and r.level == "MUST" and r.id not in allowed]
+    assert not extra, extra
+
+
+def test_rejected_alias_falls_back_to_a_listed_model():
     rep = run_against(MockConfig(faults=frozenset({"reject-jev-latest"})))
-    assert status(rep, "request.model-alias") == "fail"
+    assert status_of(rep, "request.model-alias") == "fail"
     assert rep.info["model_fallback"] == "mock"
-    assert status(rep, "choice.argmax") == "pass"  # the rest of the suite still ran
+    assert status_of(rep, "choice.argmax") == "pass"
 
 
-def test_header_rejection_without_auth_is_worked_around(status):
+def test_header_rejection_without_auth_is_worked_around():
     rep = run_against(MockConfig(faults=frozenset({"auth-rejects-header"})))
-    assert status(rep, "auth.ignored-when-off") == "fail"
-    assert status(rep, "choice.argmax") == "pass"
+    assert status_of(rep, "auth.ignored-when-off") == "fail"
+    assert status_of(rep, "choice.argmax") == "pass"
 
 
-def test_unreachable_server_aborts():
+def test_key_given_to_a_server_without_auth_skips_the_auth_shoulds():
+    rep = run_against(MockConfig(), key="whatever", sdk=True)
+    assert status_of(rep, "auth.missing") == "skip" and status_of(rep, "auth.invalid") == "skip"
+    assert rep.verdict == "conformant"
+
+
+def test_unreachable_server_is_not_tested():
     from jevcompat import runner
     rep = runner.run("http://127.0.0.1:9", sdk=False, timeout=2)
-    assert rep.aborted and "cannot reach" in rep.aborted
+    assert rep.verdict == "not tested" and "cannot reach" in rep.aborted
     assert all(r.status == "skip" for r in rep.results)
 
 
-def test_sdk_drop_in_detects_what_breaks_the_official_client(status):
-    pytest.importorskip("typesafe_sdk")
-    clean = run_against(MockConfig(), sdk=True)
-    assert status(clean, "dropin.sdk-python") == "pass"
-    broken = run_against(MockConfig(faults=frozenset({"float-usage"})), sdk=True)
-    assert status(broken, "dropin.sdk-python") == "fail"
+def test_sdk_drop_in_detects_what_breaks_the_official_client():
+    assert status_of(run_against(MockConfig(faults=frozenset({"float-usage"})), sdk=True), "dropin.sdk-python") == "fail"

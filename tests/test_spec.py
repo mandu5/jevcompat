@@ -44,7 +44,15 @@ def test_version_matches_title():
 
 def test_tolerances_match_the_table():
     text = SPEC.read_text(encoding="utf-8")
-    assert f"| `ε_sum` | {spec.EPS_SUM} |" in text
+    assert "| `ε_sum` | max(0.05, n·r) |" in text and spec.EPS_SUM == 0.05
     assert f"| `ε_round` | {spec.EPS_ROUND} |" in text
-    assert f"| `ε_conf` | {spec.EPS_CONF} |" in text
-    assert spec.eps_score(1) == 0.02 and abs(spec.eps_score(10) - 0.065) < 1e-12
+    assert "| `ε_score` | 0.02 + r·(1 + n(n−1)/2) |" in text
+    assert abs(spec.eps_sum(255, 0.005) - 1.275) < 1e-12 and spec.eps_sum(3, 0.0) == 0.05
+    assert abs(spec.eps_score(10, 0.005) - (0.02 + 0.005 * 46)) < 1e-12
+
+
+def test_rounding_detection():
+    assert spec.rounding([0.88, 0.12]) == 0.005
+    assert spec.rounding([0.5, 0.5]) == 0.05
+    assert spec.rounding([1.0, 0.0]) == 0.5
+    assert spec.rounding([0.123456789, 0.876543211]) == 0.0

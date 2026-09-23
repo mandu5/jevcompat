@@ -15,15 +15,18 @@ inputs:
     description: Model name to send
     required: false
     default: jev-latest
-  version:
-    description: jevcompat version to run
+  package:
+    description: What to install, as a uv/pip requirement or a path (e.g. "jevcompat==0.1.0", or "." in this repo's CI)
     required: false
-    default: "0.1.0"
+    default: "jevcompat==0.1.0"
   fail-on-must:
     description: Fail the step when a MUST requirement fails
     required: false
     default: "true"
 outputs:
+  verdict:
+    description: conformant, not conformant, incomplete, not tested, or error
+    value: ${{ steps.run.outputs.verdict }}
   conformant:
     description: "true if every MUST requirement passed"
     value: ${{ steps.run.outputs.conformant }}
@@ -43,25 +46,34 @@ runs:
         JEVCOMPAT_KEY: ${{ inputs.key }}
         URL: ${{ inputs.url }}
         MODEL: ${{ inputs.model }}
-        VERSION: ${{ inputs.version }}
+        PACKAGE: ${{ inputs.package }}
       run: |
         set +e
+        rm -f jevcompat-report.json jevcompat-report.md
         args=(test "$URL" --model "$MODEL" --json jevcompat-report.json --markdown jevcompat-report.md)
         if [ -n "$JEVCOMPAT_KEY" ]; then args+=(--key-env JEVCOMPAT_KEY); fi
-        uvx --from "jevcompat[sdk]==$VERSION" jevcompat "${args[@]}"
+        uvx --from "$PACKAGE" jevcompat "${args[@]}"
         code=$?
         set -e
+        echo "exit=$code" >> "$GITHUB_OUTPUT"
+        if [ ! -s jevcompat-report.json ]; then
+          echo "jevcompat did not produce a report (exit $code)" >> "$GITHUB_STEP_SUMMARY"
+          echo "conformant=false" >> "$GITHUB_OUTPUT"
+          echo "verdict=error" >> "$GITHUB_OUTPUT"
+          exit 0
+        fi
         cat jevcompat-report.md >> "$GITHUB_STEP_SUMMARY"
         python3 - <<'PY' >> "$GITHUB_OUTPUT"
         import json
-        r = json.load(open("jevcompat-report.json"))
-        s = r["summary"]
+        s = json.load(open("jevcompat-report.json"))["summary"]
         print(f"conformant={str(s['conformant']).lower()}")
+        print(f"verdict={s['verdict']}")
         print(f"must={s['MUST']['passed']}/{s['MUST']['tested']}")
-        badge = next(l for l in open("jevcompat-report.md") if l.startswith("[![jevcompat")).strip()
+        badge = next((l for l in open("jevcompat-report.md") if l.startswith("[![jevcompat")), "").strip()
         print(f"badge={badge}")
         PY
-        echo "exit=$code" >> "$GITHUB_OUTPUT"
     - if: inputs.fail-on-must == 'true' && steps.run.outputs.conformant != 'true'
       shell: bash
-      run: echo "::error::not conformant to the jevcompat spec (MUST ${{ steps.run.outputs.must }}); see the job summary" && exit 1
+      run: |
+        echo "::error::jevcompat verdict is ${{ steps.run.outputs.verdict }} (MUST ${{ steps.run.outputs.must }}); see the job summary"
+        exit 1

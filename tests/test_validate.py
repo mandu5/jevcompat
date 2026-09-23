@@ -84,13 +84,15 @@ def mutate(path, value):
     (["answers", "c", "choice"], "B", "choice.argmax"),
     (["answers", "c", "choice"], "Z", "choice.argmax"),
     (["answers", "c", "probabilities"], {"a": 0.88, "B": 0.12}, "choice.probability-keys"),
-    (["answers", "c", "probabilities"], {"A": 0.9, "B": 0.2}, "choice.distribution"),
+    (["answers", "c", "probabilities"], {"A": 0.93, "B": 0.21}, "choice.distribution"),
+    (["answers", "c", "probabilities"], {"A": 0.9, "B": 0.2}, None),  # one decimal: rounding explains 0.1
+    (["answers", "c", "probabilities"], {"A": 0.88, "B": 0.1}, None),  # sum 0.98: within ε_sum
     (["answers", "c", "probabilities"], {"A": 0.885, "B": 0.125}, None),  # within ε_sum
     (["answers", "c", "confidence"], 0.88, "confidence.formula"),
     (["answers", "c", "confidence"], 1.2, "confidence.range"),
     (["answers", "c", "confidence"], KeyError, "choice.answer"),
     (["answers", "s", "score"], 1.0, "score.expectation"),
-    (["answers", "s", "score"], 1.075, None),  # within ε_score for 3 levels (0.03)
+    (["answers", "s", "score"], 1.085, None),  # within ε_score for 3 two-decimal levels (0.04)
     (["answers", "s", "legend"], {"1": "lo", "2": "mid", "3": "hi"}, "score.legend"),
     (["answers", "s", "legend"], {"0": "lo", "1": "MID", "2": "hi"}, "score.legend"),
     (["answers", "s", "probabilities"], {"1": 0.0, "2": 0.95, "3": 0.05}, "score.probability-keys"),
@@ -115,7 +117,58 @@ def test_nan_is_caught_although_python_json_accepts_it():
 
 def test_not_json():
     r = resp(None, raw=b"Internal Server Error", ctype="text/plain")
-    assert reqs(validate_success(REQ, r)) == ["http.json"]
+    assert reqs(validate_success(REQ, r)) == ["http.content-type", "http.json"]
+
+
+def test_content_type_is_a_should_and_accepts_plus_json():
+    assert reqs(validate_success(REQ, resp(GOOD, ctype="text/plain"))) == ["http.content-type"]
+    assert validate_success(REQ, resp(GOOD, ctype="application/json; charset=utf-8")) == []
+    assert validate_success(REQ, resp(GOOD, ctype="application/vnd.jev+json")) == []
+
+
+def test_exact_boundaries_pass():
+    import copy
+    data = copy.deepcopy(GOOD)
+    data["answers"]["c"] = {"type": "choice", "choice": "A", "probabilities": {"A": 0.55, "B": 0.5}, "confidence": 0.1}
+    assert "choice.distribution" not in reqs(validate_success(REQ, resp(data)))
+
+
+def _rounded(values, d=2):
+    return [round(v, d) for v in values]
+
+
+def test_two_decimal_rounding_is_allowed_for_many_options():
+    import math
+    import random
+    rng = random.Random(3)
+    for n in (64, 255):
+        logits = [rng.gauss(0, 2) for _ in range(n)]
+        m = max(logits)
+        ex = [math.exp(x - m) for x in logits]
+        p = _rounded([e / sum(ex) for e in ex])
+        names = [f"o{i}" for i in range(n)]
+        best = names[max(range(n), key=lambda i: p[i])]
+        req = {"questions": {"c": {"type": "choice", "criteria": {k: None for k in names}}}}
+        body = {"model": "m", "usage": {"input_tokens": 1, "output_tokens": 1}, "answers": {"c": {
+            "type": "choice", "choice": best, "probabilities": dict(zip(names, p, strict=True)),
+            "confidence": round((max(p) - 1 / n) / (1 - 1 / n), 2)}}}
+        assert validate_success(req, resp(body)) == []
+
+
+def test_two_decimal_rounding_is_allowed_for_ten_levels():
+    import random
+    rng = random.Random(5)
+    for _ in range(200):
+        raw = [rng.random() for _ in range(10)]
+        exact = [x / sum(raw) for x in raw]
+        p = _rounded(exact)
+        score = round(sum(i * q for i, q in enumerate(exact)), 2)
+        req = {"questions": {"s": {"type": "score", "criteria": [str(i) for i in range(10)]}}}
+        from jevcompat.validate import score_confidence
+        body = {"model": "m", "usage": {"input_tokens": 1, "output_tokens": 1}, "answers": {"s": {
+            "type": "score", "score": score, "legend": {str(i): str(i) for i in range(10)},
+            "probabilities": {str(i): q for i, q in enumerate(p)}, "confidence": round(score_confidence(exact), 2)}}}
+        assert validate_success(req, resp(body)) == [], p
 
 
 def test_validation_error_shapes():
@@ -131,7 +184,7 @@ def test_error_shape():
     wrong_type = resp({"detail": {"error_type": "auth", "message": "no"}}, status=401)
     assert reqs(validate_error_shape(wrong_type, "auth.missing", "authentication_error")) == ["auth.missing"]
     text = resp(None, status=401, raw=b"Unauthorized", ctype="text/plain")
-    assert reqs(validate_error_shape(text, "auth.missing")) == ["auth.missing", "http.json"]
+    assert reqs(validate_error_shape(text, "auth.missing")) == ["auth.missing", "errors.json", "http.content-type"]
 
 
 def test_max_difference():

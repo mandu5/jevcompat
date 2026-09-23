@@ -18,7 +18,7 @@ classifiers = [
   "Topic :: Software Development :: Testing",
   "Topic :: Scientific/Engineering :: Artificial Intelligence",
 ]
-dependencies = []
+dependencies = ["typesafe-sdk>=0.7,<0.9"]
 
 [project.urls]
 Homepage = "https://github.com/mandu5/jevcompat"
@@ -29,7 +29,6 @@ Issues = "https://github.com/mandu5/jevcompat/issues"
 jevcompat = "jevcompat.cli:main"
 
 [project.optional-dependencies]
-sdk = ["typesafe-sdk>=0.7"]
 dev = ["pytest>=8", "ruff>=0.5"]
 
 [tool.hatch.build.targets.wheel]
