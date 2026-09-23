@@ -108,3 +108,15 @@ def test_sdk_drop_in_detects_what_breaks_the_official_client():
 def test_rate_limiting_is_not_a_finding():
     rep = run_against(MockConfig(busy_every=3), sdk=True)
     assert rep.verdict == "conformant", failures(rep)
+
+
+def test_every_case_runs_against_a_conformant_server():
+    """No case may be skipped by its own gating on a server that supports everything: a case that
+    never runs is a check that can never fail."""
+    from jevcompat.checks import CASES
+    rep = run_against(MockConfig(key="k"), key="k", sdk=True)
+    ran = {x.case.split(":")[0].rstrip("+") for x in rep.exchanges}
+    ran = {c.replace("-confirm", "").replace("semantics-baseline", "") for c in ran}
+    missing = [c.name for c in CASES if c.name not in ran and c.name != "model-alias"]  # model-alias rides on the preflight
+    assert not missing, missing
+    assert not [r.id for r in rep.results if r.status == "skip" and r.id != "auth.ignored-when-off"]

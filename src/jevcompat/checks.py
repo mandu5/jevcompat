@@ -443,20 +443,6 @@ def _(ctx: Ctx, name: str) -> None:
         ctx.info["types_ok"].add("choice")
 
 
-@case("choice-ambiguous")
-def _(ctx: Ctx, name: str) -> None:
-    """A question the state cannot settle, so the probabilities spread and the confidence formula
-    is actually tested (on a clear-cut question most formulas agree near 1)."""
-    if not ctx.supports(name, ("choice", "score"), "confidence.formula"):
-        return
-    state = "Hello."
-    qs = {"team": {"type": "choice", "instructions": "Which of these colours is the writer's favourite?",
-                   "criteria": {"Red": None, "Green": None, "Blue": None, "Yellow": None, "Purple": None}},
-          "mood": {"type": "score", "instructions": "How much does the writer enjoy jazz?",
-                   "criteria": ["Not at all", "A little", "Somewhat", "A lot", "More than anything"]}}
-    ctx.expect_answer(name, ctx.payload(qs, state=state))
-
-
 @case("choice-null-description")
 def _(ctx: Ctx, name: str) -> None:
     """Options with null descriptions."""
@@ -498,6 +484,20 @@ def _(ctx: Ctx, name: str) -> None:
             break
         limits["score levels accepted up to"] = n
         ctx.info["types_ok"].add("score")
+
+
+@case("choice-ambiguous")
+def _(ctx: Ctx, name: str) -> None:
+    """A question the state cannot settle, so the probabilities spread and the confidence formula
+    is actually tested (on a clear-cut question most formulas agree near 1)."""
+    if not ctx.supports(name, ("choice", "score"), "confidence.formula"):
+        return
+    state = "Hello."
+    qs = {"team": {"type": "choice", "instructions": "Which of these colours is the writer's favourite?",
+                   "criteria": {"Red": None, "Green": None, "Blue": None, "Yellow": None, "Purple": None}},
+          "mood": {"type": "score", "instructions": "How much does the writer enjoy jazz?",
+                   "criteria": ["Not at all", "A little", "Somewhat", "A lot", "More than anything"]}}
+    ctx.expect_answer(name, ctx.payload(qs, state=state))
 
 
 @case("state-types")
