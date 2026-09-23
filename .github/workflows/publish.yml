@@ -1,0 +1,25 @@
+name: publish
+on:
+  push:
+    tags: ["v*"]
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v6
+      - run: uv run --extra dev ruff check .
+      - run: uv run --extra dev --extra sdk pytest -q
+  pypi:
+    needs: test
+    runs-on: ubuntu-latest
+    environment: pypi
+    permissions:
+      id-token: write
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v6
+      - name: tag matches version
+        run: test "v$(grep -m1 '^version' pyproject.toml | cut -d'"' -f2)" = "${GITHUB_REF_NAME}"
+      - run: uv build
+      - uses: pypa/gh-action-pypi-publish@release/v1

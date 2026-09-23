@@ -1,0 +1,31 @@
+name: test
+on:
+  push:
+    branches: [main]
+  pull_request:
+jobs:
+  test:
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, macos-latest]
+        python: ["3.10", "3.13"]
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v6
+        with:
+          python-version: ${{ matrix.python }}
+      - run: uv run --extra dev ruff check .
+      - run: uv run --extra dev --extra sdk pytest -q
+  action:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v6
+      - name: start the reference mock
+        run: |
+          uv run jevcompat mock --port 8787 &
+          for i in $(seq 30); do curl -s localhost:8787/v1/models && break; sleep 1; done
+      - name: run the suite from source against it
+        run: uv run --extra sdk jevcompat test http://localhost:8787 --badge
