@@ -18,6 +18,24 @@ uvx jevcompat test http://localhost:8000
 
 <p align="center"><img src="https://raw.githubusercontent.com/mandu5/jevcompat/main/docs/cover.png" width="720" alt="jevcompat results: of the eight most-starred Jev-compatible servers, kev and decider pass every MUST; six do not"></p>
 
+## The finding that matters most: `confidence` is not portable
+
+Jev's pitch is calibrated confidence: tune a threshold, automate what clears it, and send the
+rest to a person. The open servers compute `confidence` four different ways. We applied each
+definition to the same 204 answers recorded in the runs below. At a 0.9 threshold:
+
+- TypeSafe's formula auto-accepts 58% of them.
+- Laya's definition accepts 30%. It rejects 56 of the 118 answers TypeSafe's formula accepts.
+- decider's definition accepts 10 answers that TypeSafe's formula would send for review.
+
+<p align="center"><img src="https://raw.githubusercontent.com/mandu5/jevcompat/main/docs/confidence.png" width="720" alt="Same 204 answers, same 0.9 threshold: 58% auto-accepted under TypeSafe's formula, 63% under top probability (decider, simple-jev), 57% under top-two margin (von), 30% under 1 minus normalised entropy (laya)"></p>
+
+So a threshold tuned against Jev silently changes its automation rate when the same code points
+at a "compatible" server. Probabilities are comparable across servers; `confidence` is not. The
+spec pins the formula (`confidence.formula`), and the proxy recomputes it.
+[`docs/confidence_study.py`](https://github.com/mandu5/jevcompat/blob/main/docs/confidence_study.py)
+reproduces these numbers from the recorded reports.
+
 ## Results: the eight most-starred open servers
 
 Measured on 2026-09-24 on an M1 Pro (16 GB), jevcompat `6a8a543`, each server at a pinned commit
