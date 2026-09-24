@@ -25,7 +25,8 @@ jobs:
       - uses: astral-sh/setup-uv@v6
       - name: start the reference mock
         run: |
-          uv run jevcompat mock --port 8787 &
+          uv sync
+          .venv/bin/jevcompat mock --port 8787 &
           for i in $(seq 30); do curl -s localhost:8787/v1/models && break; sleep 1; done
       - id: conformant
         uses: ./
@@ -35,7 +36,7 @@ jobs:
       - run: test "${{ steps.conformant.outputs.verdict }}" = conformant
       - name: start a broken mock
         run: |
-          uv run jevcompat mock --port 8788 --fault choice-second &
+          .venv/bin/jevcompat mock --port 8788 --fault choice-second &
           for i in $(seq 30); do curl -s localhost:8788/v1/models && break; sleep 1; done
       - id: broken
         uses: ./
@@ -44,3 +45,6 @@ jobs:
           package: .
           fail-on-must: "false"
       - run: test "${{ steps.broken.outputs.verdict }}" = "not conformant"
+      - name: stop the mocks
+        if: always()
+        run: pkill -f "jevcompat mock" || true

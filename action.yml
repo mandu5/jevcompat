@@ -40,6 +40,8 @@ runs:
   using: composite
   steps:
     - uses: astral-sh/setup-uv@v6
+      with:
+        enable-cache: false  # no post-job cache prune: it would wait on a uv process still serving the tested server
     - id: run
       shell: bash
       env:
