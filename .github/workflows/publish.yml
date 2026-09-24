@@ -1,7 +1,7 @@
 name: publish
 on:
   push:
-    tags: ["v*"]
+    tags: ["v*.*.*"]
 jobs:
   test:
     runs-on: ubuntu-latest
