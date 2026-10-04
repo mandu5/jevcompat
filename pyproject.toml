@@ -4,7 +4,7 @@ build-backend = "hatchling.build"
 
 [project]
 name = "jevcompat"
-version = "0.1.0"
+version = "0.1.1"
 description = "A testable spec and conformance suite for Jev-compatible (TypeSafe System One) API servers."
 readme = "README.md"
 license = "MIT"
