@@ -2,11 +2,11 @@
 
 [![jevcompat 0.1: 31/32 MUST](https://img.shields.io/badge/jevcompat%200.1-31%2F32%20MUST-orange)](https://github.com/mandu5/jevcompat/blob/main/SPEC.md)
 
-**not conformant to spec 0.1: MUST 31/32, SHOULD 8/12** — jevcompat 0.1.0, 2026-09-23T23:06:44+00:00, 62 requests in 9.8s, model `jev-latest` (server reports `von-1.1.0`), typesafe-sdk 0.7.1.
+**not conformant to spec 0.1: MUST 31/32, SHOULD 8/12**. jevcompat 0.1.0, 2026-09-23T23:06:44+00:00, 62 requests in 9.8s, model `jev-latest` (server reports `von-1.1.0`), typesafe-sdk 0.7.1.
 
 Observed limits: choice options accepted up to 255, score levels accepted up to 10
 
-**Failed MUSTs:** [`request.structured-text`](https://github.com/mandu5/jevcompat/blob/main/SPEC.md#request.structured-text) — instructions and descriptions may be objects or arrays
+**Failed MUSTs:** [`request.structured-text`](https://github.com/mandu5/jevcompat/blob/main/SPEC.md#request.structured-text): instructions and descriptions may be objects or arrays
 
 | | level | requirement | result |
 |---|---|---|---|
@@ -15,9 +15,9 @@ Observed limits: choice options accepted up to 255, score levels accepted up to 
 | ✓ | SHOULD | [`http.content-type`](https://github.com/mandu5/jevcompat/blob/main/SPEC.md#http.content-type) responses declare a JSON media type |  |
 | ✓ | SHOULD | [`http.models`](https://github.com/mandu5/jevcompat/blob/main/SPEC.md#http.models) GET /v1/models lists models |  |
 | ✓ | MUST | [`auth.ignored-when-off`](https://github.com/mandu5/jevcompat/blob/main/SPEC.md#auth.ignored-when-off) without auth, an Authorization header is accepted |  |
-| – | MUST | [`auth.bearer`](https://github.com/mandu5/jevcompat/blob/main/SPEC.md#auth.bearer) the key is read from Authorization: Bearer | no --key given (auth is off, or untested) |
-| – | SHOULD | [`auth.missing`](https://github.com/mandu5/jevcompat/blob/main/SPEC.md#auth.missing) a missing key gets 401/403 with authentication_error | no --key given (auth is off, or untested) |
-| – | SHOULD | [`auth.invalid`](https://github.com/mandu5/jevcompat/blob/main/SPEC.md#auth.invalid) a wrong key gets 401 with authentication_error | no --key given (auth is off, or untested) |
+| - | MUST | [`auth.bearer`](https://github.com/mandu5/jevcompat/blob/main/SPEC.md#auth.bearer) the key is read from Authorization: Bearer | no --key given (auth is off, or untested) |
+| - | SHOULD | [`auth.missing`](https://github.com/mandu5/jevcompat/blob/main/SPEC.md#auth.missing) a missing key gets 401/403 with authentication_error | no --key given (auth is off, or untested) |
+| - | SHOULD | [`auth.invalid`](https://github.com/mandu5/jevcompat/blob/main/SPEC.md#auth.invalid) a wrong key gets 401 with authentication_error | no --key given (auth is off, or untested) |
 | ✓ | MUST | [`request.state`](https://github.com/mandu5/jevcompat/blob/main/SPEC.md#request.state) state may be a string, object or array |  |
 | ✓ | MUST | [`request.model-alias`](https://github.com/mandu5/jevcompat/blob/main/SPEC.md#request.model-alias) model "jev-latest" is accepted |  |
 | ✓ | MUST | [`request.multi`](https://github.com/mandu5/jevcompat/blob/main/SPEC.md#request.multi) several questions of mixed types in one request |  |
@@ -53,7 +53,7 @@ Observed limits: choice options accepted up to 255, score levels accepted up to 
 | ✓ | MUST | [`errors.no-5xx`](https://github.com/mandu5/jevcompat/blob/main/SPEC.md#errors.no-5xx) bad requests never get a 5xx |  |
 | ✗ | SHOULD | [`errors.reject-invalid`](https://github.com/mandu5/jevcompat/blob/main/SPEC.md#errors.reject-invalid) invalid requests get a 4xx, not an answer | invalid request was answered with 200 |
 | ✗ | SHOULD | [`errors.validation-shape`](https://github.com/mandu5/jevcompat/blob/main/SPEC.md#errors.validation-shape) validation errors are 422 with detail[] | body is not {"detail": [{"loc": ["body", …], "msg", "type"}]}: {"detail":"1 validation error for Choice\ncriteria\n  Field required [type=missing, input_value={… |
-| – | SHOULD | [`errors.shape`](https://github.com/mandu5/jevcompat/blob/main/SPEC.md#errors.shape) other errors carry detail.error_type and detail.message | not exercised: the server never produced the situation it covers |
+| - | SHOULD | [`errors.shape`](https://github.com/mandu5/jevcompat/blob/main/SPEC.md#errors.shape) other errors carry detail.error_type and detail.message | not exercised: the server never produced the situation it covers |
 | ✓ | MUST | [`semantics.question-id`](https://github.com/mandu5/jevcompat/blob/main/SPEC.md#semantics.question-id) renaming a question id does not change its answer |  |
 | ✓ | SHOULD | [`semantics.batching`](https://github.com/mandu5/jevcompat/blob/main/SPEC.md#semantics.batching) other questions in the request do not change an answer |  |
 | ✓ | SHOULD | [`semantics.question-order`](https://github.com/mandu5/jevcompat/blob/main/SPEC.md#semantics.question-order) question order does not change answers |  |
@@ -61,7 +61,7 @@ Observed limits: choice options accepted up to 255, score levels accepted up to 
 
 ## Failures
 
-### [`request.structured-text`](https://github.com/mandu5/jevcompat/blob/main/SPEC.md#request.structured-text) (MUST) — instructions and descriptions may be objects or arrays
+### [`request.structured-text`](https://github.com/mandu5/jevcompat/blob/main/SPEC.md#request.structured-text) (MUST): instructions and descriptions may be objects or arrays
 
 - **structured-text:noul**: valid request got 422: {"detail":"3 validation errors for Noul\ninstructions\n  Input should be a valid string [type=string_type, input_value={'task': 'Decide whether ...efunds', 'chargebacks']}, input_type=dict]\n    For f… (731 bytes)
 
@@ -100,7 +100,7 @@ Observed limits: choice options accepted up to 255, score levels accepted up to 
   </details>
 
 
-### [`noul.no-instructions`](https://github.com/mandu5/jevcompat/blob/main/SPEC.md#noul.no-instructions) (SHOULD) — a noul without instructions is accepted
+### [`noul.no-instructions`](https://github.com/mandu5/jevcompat/blob/main/SPEC.md#noul.no-instructions) (SHOULD): a noul without instructions is accepted
 
 - **noul-no-instructions**: valid request got 422: {"detail":"1 validation error for Noul\ninstructions\n  Field required [type=missing, input_value={'type': 'noul', 'criteri..., 'false': 'No threat'}}, input_type=dict]\n    For further information vi… (248 bytes)
 
@@ -115,7 +115,7 @@ Observed limits: choice options accepted up to 255, score levels accepted up to 
   </details>
 
 
-### [`confidence.formula`](https://github.com/mandu5/jevcompat/blob/main/SPEC.md#confidence.formula) (SHOULD) — confidence follows the reference formula
+### [`confidence.formula`](https://github.com/mandu5/jevcompat/blob/main/SPEC.md#confidence.formula) (SHOULD): confidence follows the reference formula
 
 - **choice-null-description** `answers['team']`: confidence is 0.012; the reference formula gives 0.044
 
@@ -155,7 +155,7 @@ Observed limits: choice options accepted up to 255, score levels accepted up to 
 
 - … and 4 more
 
-### [`errors.reject-invalid`](https://github.com/mandu5/jevcompat/blob/main/SPEC.md#errors.reject-invalid) (SHOULD) — invalid requests get a 4xx, not an answer
+### [`errors.reject-invalid`](https://github.com/mandu5/jevcompat/blob/main/SPEC.md#errors.reject-invalid) (SHOULD): invalid requests get a 4xx, not an answer
 
 - **invalid:empty-questions**: invalid request was answered with 200
 
@@ -182,7 +182,7 @@ Observed limits: choice options accepted up to 255, score levels accepted up to 
   </details>
 
 
-### [`errors.validation-shape`](https://github.com/mandu5/jevcompat/blob/main/SPEC.md#errors.validation-shape) (SHOULD) — validation errors are 422 with detail[]
+### [`errors.validation-shape`](https://github.com/mandu5/jevcompat/blob/main/SPEC.md#errors.validation-shape) (SHOULD): validation errors are 422 with detail[]
 
 - **invalid:missing-type**: body is not {"detail": [{"loc": ["body", …], "msg", "type"}]}: {"detail":"1 validation error for Choice\ncriteria\n  Field required [type=missing, input_value={'instructions': 'Refund?'}, input_type=dict]\n    For further i… (221 bytes)
 

@@ -4,12 +4,12 @@
 
 `jevcompat` is three things for the TypeSafe System One API (`POST /v1/systemone`, the API behind Jev):
 
-1. **[SPEC.md](https://github.com/mandu5/jevcompat/blob/main/SPEC.md)** — a numbered, testable specification: 48 requirements, each with a
+1. **[SPEC.md](https://github.com/mandu5/jevcompat/blob/main/SPEC.md)**: a numbered, testable specification: 48 requirements, each with a
    level (MUST / SHOULD) and the official source it comes from. Where TypeSafe's docs, OpenAPI
    file and SDKs disagree (they do, in eight places), it says which wins and why.
-2. **`jevcompat test URL`** — runs the spec against any server and shows, for every failure, the
+2. **`jevcompat test URL`**: runs the spec against any server and shows, for every failure, the
    request that caused it and the bytes that broke the rule.
-3. **`jevcompat proxy URL`** — puts a spec-conforming API in front of a server that isn't,
+3. **`jevcompat proxy URL`**: puts a spec-conforming API in front of a server that isn't,
    fixing what can be fixed and refusing, loudly, what can't.
 
 ```
@@ -44,8 +44,8 @@ with pinned weights. Stars as of that day. Full reports, exact commands and weig
 
 | server | ★ | MUST | SHOULD | verdict | what breaks for a Jev client |
 |---|---:|---:|---:|---|---|
-| [jaredpalmer/kev](https://github.com/mandu5/jevcompat/blob/main/results/kev/report.md) (0.8B) | 5.8k | 32/32 | 10/12 | **conformant** | — |
-| [Mapika/decider](https://github.com/mandu5/jevcompat/blob/main/results/decider/report.md) (0.8B) | 338 | 32/32 | 6/12 | **conformant** | — |
+| [jaredpalmer/kev](https://github.com/mandu5/jevcompat/blob/main/results/kev/report.md) (0.8B) | 5.8k | 32/32 | 10/12 | **conformant** | - |
+| [Mapika/decider](https://github.com/mandu5/jevcompat/blob/main/results/decider/report.md) (0.8B) | 338 | 32/32 | 6/12 | **conformant** | - |
 | [wfzyx/von](https://github.com/mandu5/jevcompat/blob/main/results/von/report.md) | 571 | 31/32 | 8/12 | not conformant | object or array `instructions` are rejected |
 | [Rizzo-AI-Academy/rizzo-flow](https://github.com/mandu5/jevcompat/blob/main/results/rizzo-flow/report.md) (1.7B) | 389 | 31/32 | 9/12 | not conformant | more than 26 choice options are rejected |
 | [Zefan-Cai/Open-Jev](https://github.com/mandu5/jevcompat/blob/main/results/open-jev/report.md) (2B) | 284 | 31/32 | 9/12 | not conformant | one-sided noul criteria are rejected |
@@ -85,7 +85,7 @@ there were ~100 open-source servers claiming compatibility. Reading the code of 
 - **`confidence` means five different things**: the top probability, the top-two margin,
   1 − normalised entropy, `max(p, 1−p)` on yes/no answers, or undisclosed. A threshold of 0.8
   tuned on one server means something else on the next;
-- the choice limit is 26, 50, 64, 128, 255 or unenforced — the docs promise 255;
+- the choice limit is 26, 50, 64, 128, 255 or unenforced, though the docs promise 255;
 - `"model": "jev-latest"`, the official SDKs' default, is ignored, echoed, rejected with 404, or
   rejected with 422;
 - invalid requests get 400, 404, 413, 422, 500, 502 or 503. The SDKs *retry* 5xx.
@@ -120,7 +120,7 @@ jevcompat mock --fault choice-second --fault legend-1-based
 ```
 
 The test suite runs every check against the clean mock (must pass), against a noisy mock over
-many seeds (must never fail — the semantic checks are statistics, and are tested as statistics),
+many seeds (must never fail; the semantic checks are statistics, and are tested as statistics),
 and against each fault (the targeted requirement must fail, and a single fault must not smear
 failures across unrelated MUSTs). If a check could not catch the thing it exists to catch, or
 blames the wrong requirement, CI goes red.
@@ -135,7 +135,7 @@ jevcompat test URL --json r.json --markdown r.md --badge
 
 The verdict is **conformant** (every applicable MUST tested and passed; exit 0), **not
 conformant** (a MUST failed; exit 1), **not tested** (the server could not be reached or refused
-a minimal request; exit 2) or **incomplete** (nothing failed, but a MUST could not be judged —
+a minimal request; exit 2) or **incomplete** (nothing failed, but a MUST could not be judged,
 usually a timeout, which is never counted against the server; exit 3). The output names the
 requirement, the case, and the exchange:
 
@@ -161,8 +161,8 @@ reconciles option names that differ only by Unicode normalisation or case, renor
 token counts, prefixes extra fields with `x_`, answers `/v1/models`, validates requests itself so
 bad ones get a proper 422, and hides question ids and order from the upstream so answers cannot
 depend on them (`--split` also rules out any effect of one question on another). What it cannot
-fix — a missing or ambiguous option, probability mass on options nobody asked about, a
-probability of 1.3, a sum far from 1 (unless you pass `--renormalize`) — it refuses with
+fix: a missing or ambiguous option, probability mass on options nobody asked about, a
+probability of 1.3, a sum far from 1 (unless you pass `--renormalize`). It refuses with
 `502 upstream_error` rather than pass through. Each response lists what it changed in
 `x-jevcompat-fixes`. Of the mock's 47 faults, the proxy fixes 38 and refuses 9.
 

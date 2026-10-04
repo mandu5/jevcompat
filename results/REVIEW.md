@@ -12,7 +12,7 @@ For every requirement a report marks as failed, the tables below judge it. **rea
   - `response.extensions` (the `x_` prefix) and `confidence.formula` are jevcompat's own SHOULD-level policies. The x_ rule is SPEC's forward-compatibility convention, and no TypeSafe source requires it. The confidence reference formulas come from TypeSafe's docs and adapter library, and TypeSafe says clients are "never locked into our definition". The failures are genuine against SPEC 0.1 as written, not against anything TypeSafe mandates.
   - For an unknown `model`, jevcompat accepts any 4xx and checks 422 bodies against the validation shape. The live API answers `400 {"detail":{"error_type":"api_usage_error","message":"Unknown model: x"}}` (per the research notes: the JS SDK live integration test). The three unknown-model findings filed under `errors.validation-shape` (simple-jev, rizzo-flow, open-jev) are genuine, because their bodies match neither shape, but the check itself is looser than the live behaviour.
 
-## laya — NandhaKishorM/laya @ 1e28ac2 (MUST 30/32, SHOULD 6/12)
+## laya: NandhaKishorM/laya @ 1e28ac2 (MUST 30/32, SHOULD 6/12)
 
 | requirement | level | judgment | reason |
 |---|---|---|---|
@@ -25,14 +25,14 @@ For every requirement a report marks as failed, the tables below judge it. **rea
 | errors.reject-invalid | SHOULD | real | A body with no `state` gets 200 (the OAS lists `state` as required), and `"questions":{}` gets 200 (OAS `minProperties: 1`). |
 | errors.validation-shape | SHOULD | real | Non-JSON bodies and a missing `questions` get 400, not 422. Every rejection body is `{"detail":"<string>"}`, not the FastAPI list form. |
 
-## kev — jaredpalmer/kev @ 2874258, Kev-0.8B (MUST 32/32, SHOULD 10/12)
+## kev: jaredpalmer/kev @ 2874258, Kev-0.8B (MUST 32/32, SHOULD 10/12)
 
 | requirement | level | judgment | reason |
 |---|---|---|---|
 | response.extensions | SHOULD | real | Every response has an unprefixed top-level `latency_ms`. |
 | confidence.formula | SHOULD | real | kev's score confidence is `1 − E\|level − mode\| / (L − 1)` (`kev/api.py:125`, which calls it an approximation). It normalises by L−1, not by the uniform distribution's spread. On TypeSafe's own documented example `{0, 0.57, 0.43}` it gives 0.785 where the docs show 0.35. Measured example: score-levels:3 `{"0":0.0269,"1":0.5069,"2":0.4662}` gives 0.7535; both references give 0.260. Choice confidence passes. |
 
-## decider — Mapika/decider @ b44b4c9, decider-0.8b (MUST 32/32, SHOULD 6/12)
+## decider: Mapika/decider @ b44b4c9, decider-0.8b (MUST 32/32, SHOULD 6/12)
 
 | requirement | level | judgment | reason |
 |---|---|---|---|
@@ -43,7 +43,7 @@ For every requirement a report marks as failed, the tables below judge it. **rea
 | errors.reject-invalid | SHOULD | real | `"questions":{}` gets 200 with `"answers":{}`, and score-map gets 200 (see score.map-rejected). |
 | errors.validation-shape | SHOULD | real | Rejections are 422 but the body is `{"detail":"<string>"}`, e.g. `{"detail":"unknown question type 'boolean'"}`. |
 
-## von — wfzyx/von @ 657f42f (MUST 31/32, SHOULD 8/12)
+## von: wfzyx/von @ 657f42f (MUST 31/32, SHOULD 8/12)
 
 | requirement | level | judgment | reason |
 |---|---|---|---|
@@ -53,7 +53,7 @@ For every requirement a report marks as failed, the tables below judge it. **rea
 | errors.reject-invalid | SHOULD | real | `"questions":{}` gets 200. `"criteria":{}` gets 200 with `{"choice":"","probabilities":{},"confidence":0.0}`, whose `choice` is not an option. Caveat: the OAS sets no `minProperties` on choice criteria, so the reason this is invalid is SPEC §3.3/§4 (no valid answer exists), not the OAS. |
 | errors.validation-shape | SHOULD | real | Rejections are 422 with `{"detail":"<pydantic error text>"}` or `{"detail":"Unknown question type 'boolean'"}`, not the list form. |
 
-## jeff — logan-markewich/jeff @ 34b32f9, run with `JEFF_API_KEYS=devkey` and `--key devkey` (MUST 30/32, SHOULD 11/14)
+## jeff: logan-markewich/jeff @ 34b32f9, run with `JEFF_API_KEYS=devkey` and `--key devkey` (MUST 30/32, SHOULD 11/14)
 
 | requirement | level | judgment | reason |
 |---|---|---|---|
@@ -63,7 +63,7 @@ For every requirement a report marks as failed, the tables below judge it. **rea
 | auth.invalid | SHOULD | real | Same body shape: `{"error":{"type":"authentication_error","message":"Invalid API key"}}`. |
 | semantics.question-order | SHOULD | real | Baseline (refund, team, anger) gives `team` = `{"Billing":0.768,"Technical":0.1423,"Sales":0.0896}`. Reversed order gives `{"Billing":0.3508,"Technical":0.4255,"Sales":0.2236}`, so the answer flips to Technical. All 3+3 sends were identical, so this is not noise. jeff shares one encoder pass across choice and score questions by default (README). |
 
-## simple-jev — featherless-ai/simple-jev @ 8b7b7f9, Qwen3.5-0.8B on CPU, run with `--model Qwen/Qwen3.5-0.8B` (MUST 29/32, SHOULD 7/12)
+## simple-jev: featherless-ai/simple-jev @ 8b7b7f9, Qwen3.5-0.8B on CPU, run with `--model Qwen/Qwen3.5-0.8B` (MUST 29/32, SHOULD 7/12)
 
 The default run without `--model` stopped at preflight with "not tested" (exit 2), because the server rejects `jev-latest` and has no `/v1/models` to fall back to (`results/simple-jev/default/`). The judgments below are for the `--model` run. Leaving `request.model-alias` unblamed in the default run is jevcompat's documented rule: it blames a requirement only when a second request proves which one. The `--model` run then records the failure.
 
@@ -78,7 +78,7 @@ The default run without `--model` stopped at preflight with "not tested" (exit 2
 | errors.validation-shape | SHOULD | real | All 13 rejections are 422 with an OpenAI-style envelope, `{"error":{"message","type":"invalid_request_error","code":422,"param","details"}}`, not `{"detail":[…]}`. |
 | semantics.question-order | SHOULD | real, marginal | `anger` probability of level 1 is 0.8880 in all 3 baseline sends (refund, team, anger) and 0.9478 in all 6 reversed sends (anger, team, refund). The difference is 0.060 against a 0.05 floor, reproduced in a second round. Every send was identical, so this is not sampling noise; the answer does depend on question order. |
 
-## rizzo-flow — Rizzo-AI-Academy/rizzo-flow @ d34665b, Spark-X2.5-1.7B Q8_0 on llama.cpp Metal (MUST 31/32, SHOULD 9/12)
+## rizzo-flow: Rizzo-AI-Academy/rizzo-flow @ d34665b, Spark-X2.5-1.7B Q8_0 on llama.cpp Metal (MUST 31/32, SHOULD 9/12)
 
 | requirement | level | judgment | reason |
 |---|---|---|---|
@@ -87,7 +87,7 @@ The default run without `--model` stopped at preflight with "not tested" (exit 2
 | noul.no-instructions | SHOULD | real | `422 … ["body","questions","threat","noul","instructions"] … "Field required"`. |
 | errors.validation-shape | SHOULD | real | `"model":"jevcompat-no-such-model"` gets `422 {"detail":"Unknown model 'jevcompat-no-such-model'. Use 'rizzo-latest', …"}`, a string `detail` that matches neither the validation shape nor the live API's `400 {"detail":{"error_type":"api_usage_error",…}}`. |
 
-## open-jev — Zefan-Cai/Open-Jev @ 3308a15, Open-Jev-2B on MPS (MUST 31/32, SHOULD 9/12)
+## open-jev: Zefan-Cai/Open-Jev @ 3308a15, Open-Jev-2B on MPS (MUST 31/32, SHOULD 9/12)
 
 | requirement | level | judgment | reason |
 |---|---|---|---|

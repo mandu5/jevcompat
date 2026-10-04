@@ -4,7 +4,7 @@ Nothing here is posted automatically. Every item needs the author's go-ahead.
 
 ## Show HN
 
-**Title:** Show HN: Jevcompat – "Jev-compatible" servers disagree on what confidence means
+**Title:** Show HN: Jevcompat, "Jev-compatible" servers disagree on what confidence means
 
 **URL:** https://github.com/mandu5/jevcompat
 
@@ -39,7 +39,7 @@ terms prohibit security testing.
 
 ## GeekNews (Show GN)
 
-**제목:** jevcompat – "Jev 호환" 서버 8개 측정: 같은 답, 같은 임계값 0.9인데 자동 승인률 30%~63%
+**제목:** jevcompat, "Jev 호환" 서버 8개 측정: 같은 답, 같은 임계값 0.9인데 자동 승인률 30%~63%
 
 **URL:** https://github.com/mandu5/jevcompat
 
@@ -69,7 +69,7 @@ Jev(TypeSafe의 타입 있는 결정 모델)의 핵심은 보정된 confidence�
 ## awesome-jev entry (Evaluation / Benchmarking)
 
 ```
-- [jevcompat](https://github.com/mandu5/jevcompat) — A testable spec (48 requirements, each citing TypeSafe's docs, OpenAPI file or SDKs) and conformance suite for Jev-compatible servers, with a normalising proxy and a GitHub Action. Results for the eight most-starred open servers included.
+- [jevcompat](https://github.com/mandu5/jevcompat): A testable spec (48 requirements, each citing TypeSafe's docs, OpenAPI file or SDKs) and conformance suite for Jev-compatible servers, with a normalising proxy and a GitHub Action. Results for the eight most-starred open servers included.
 ```
 
 ## Replica maintainers

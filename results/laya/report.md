@@ -2,11 +2,11 @@
 
 [![jevcompat 0.1: 30/32 MUST](https://img.shields.io/badge/jevcompat%200.1-30%2F32%20MUST-orange)](https://github.com/mandu5/jevcompat/blob/main/SPEC.md)
 
-**not conformant to spec 0.1: MUST 30/32, SHOULD 6/12** — jevcompat 0.1.0, 2026-09-23T23:05:46+00:00, 61 requests in 4.8s, model `jev-latest` (server reports `laya-rl-agent`), typesafe-sdk 0.7.1.
+**not conformant to spec 0.1: MUST 30/32, SHOULD 6/12**. jevcompat 0.1.0, 2026-09-23T23:05:46+00:00, 61 requests in 4.8s, model `jev-latest` (server reports `laya-rl-agent`), typesafe-sdk 0.7.1.
 
 Observed limits: choice options accepted up to 64, choice options rejected at 128, score levels accepted up to 10
 
-**Failed MUSTs:** [`choice.options`](https://github.com/mandu5/jevcompat/blob/main/SPEC.md#choice.options) — 2 to 255 options are accepted, [`score.legend`](https://github.com/mandu5/jevcompat/blob/main/SPEC.md#score.legend) — legend maps "0".."n-1" to the level descriptions
+**Failed MUSTs:** [`choice.options`](https://github.com/mandu5/jevcompat/blob/main/SPEC.md#choice.options): 2 to 255 options are accepted, [`score.legend`](https://github.com/mandu5/jevcompat/blob/main/SPEC.md#score.legend): legend maps "0".."n-1" to the level descriptions
 
 | | level | requirement | result |
 |---|---|---|---|
@@ -15,9 +15,9 @@ Observed limits: choice options accepted up to 64, choice options rejected at 12
 | ✓ | SHOULD | [`http.content-type`](https://github.com/mandu5/jevcompat/blob/main/SPEC.md#http.content-type) responses declare a JSON media type |  |
 | ✗ | SHOULD | [`http.models`](https://github.com/mandu5/jevcompat/blob/main/SPEC.md#http.models) GET /v1/models lists models | GET /v1/models got 404 |
 | ✓ | MUST | [`auth.ignored-when-off`](https://github.com/mandu5/jevcompat/blob/main/SPEC.md#auth.ignored-when-off) without auth, an Authorization header is accepted |  |
-| – | MUST | [`auth.bearer`](https://github.com/mandu5/jevcompat/blob/main/SPEC.md#auth.bearer) the key is read from Authorization: Bearer | no --key given (auth is off, or untested) |
-| – | SHOULD | [`auth.missing`](https://github.com/mandu5/jevcompat/blob/main/SPEC.md#auth.missing) a missing key gets 401/403 with authentication_error | no --key given (auth is off, or untested) |
-| – | SHOULD | [`auth.invalid`](https://github.com/mandu5/jevcompat/blob/main/SPEC.md#auth.invalid) a wrong key gets 401 with authentication_error | no --key given (auth is off, or untested) |
+| - | MUST | [`auth.bearer`](https://github.com/mandu5/jevcompat/blob/main/SPEC.md#auth.bearer) the key is read from Authorization: Bearer | no --key given (auth is off, or untested) |
+| - | SHOULD | [`auth.missing`](https://github.com/mandu5/jevcompat/blob/main/SPEC.md#auth.missing) a missing key gets 401/403 with authentication_error | no --key given (auth is off, or untested) |
+| - | SHOULD | [`auth.invalid`](https://github.com/mandu5/jevcompat/blob/main/SPEC.md#auth.invalid) a wrong key gets 401 with authentication_error | no --key given (auth is off, or untested) |
 | ✓ | MUST | [`request.state`](https://github.com/mandu5/jevcompat/blob/main/SPEC.md#request.state) state may be a string, object or array |  |
 | ✓ | MUST | [`request.model-alias`](https://github.com/mandu5/jevcompat/blob/main/SPEC.md#request.model-alias) model "jev-latest" is accepted |  |
 | ✓ | MUST | [`request.multi`](https://github.com/mandu5/jevcompat/blob/main/SPEC.md#request.multi) several questions of mixed types in one request |  |
@@ -53,7 +53,7 @@ Observed limits: choice options accepted up to 64, choice options rejected at 12
 | ✓ | MUST | [`errors.no-5xx`](https://github.com/mandu5/jevcompat/blob/main/SPEC.md#errors.no-5xx) bad requests never get a 5xx |  |
 | ✗ | SHOULD | [`errors.reject-invalid`](https://github.com/mandu5/jevcompat/blob/main/SPEC.md#errors.reject-invalid) invalid requests get a 4xx, not an answer | invalid request was answered with 200 |
 | ✗ | SHOULD | [`errors.validation-shape`](https://github.com/mandu5/jevcompat/blob/main/SPEC.md#errors.validation-shape) validation errors are 422 with detail[] | status 400; validation failures use 422 |
-| – | SHOULD | [`errors.shape`](https://github.com/mandu5/jevcompat/blob/main/SPEC.md#errors.shape) other errors carry detail.error_type and detail.message | not exercised: the server never produced the situation it covers |
+| - | SHOULD | [`errors.shape`](https://github.com/mandu5/jevcompat/blob/main/SPEC.md#errors.shape) other errors carry detail.error_type and detail.message | not exercised: the server never produced the situation it covers |
 | ✓ | MUST | [`semantics.question-id`](https://github.com/mandu5/jevcompat/blob/main/SPEC.md#semantics.question-id) renaming a question id does not change its answer |  |
 | ✓ | SHOULD | [`semantics.batching`](https://github.com/mandu5/jevcompat/blob/main/SPEC.md#semantics.batching) other questions in the request do not change an answer |  |
 | ✓ | SHOULD | [`semantics.question-order`](https://github.com/mandu5/jevcompat/blob/main/SPEC.md#semantics.question-order) question order does not change answers |  |
@@ -61,7 +61,7 @@ Observed limits: choice options accepted up to 64, choice options rejected at 12
 
 ## Failures
 
-### [`http.models`](https://github.com/mandu5/jevcompat/blob/main/SPEC.md#http.models) (SHOULD) — GET /v1/models lists models
+### [`http.models`](https://github.com/mandu5/jevcompat/blob/main/SPEC.md#http.models) (SHOULD): GET /v1/models lists models
 
 - **models-endpoint**: GET /v1/models got 404
 
@@ -76,7 +76,7 @@ Observed limits: choice options accepted up to 64, choice options rejected at 12
   </details>
 
 
-### [`noul.no-instructions`](https://github.com/mandu5/jevcompat/blob/main/SPEC.md#noul.no-instructions) (SHOULD) — a noul without instructions is accepted
+### [`noul.no-instructions`](https://github.com/mandu5/jevcompat/blob/main/SPEC.md#noul.no-instructions) (SHOULD): a noul without instructions is accepted
 
 - **noul-no-instructions**: valid request got 422: {"detail":"question 'threat': no 'instructions'; add the text the model should answer"}
 
@@ -91,7 +91,7 @@ Observed limits: choice options accepted up to 64, choice options rejected at 12
   </details>
 
 
-### [`choice.options`](https://github.com/mandu5/jevcompat/blob/main/SPEC.md#choice.options) (MUST) — 2 to 255 options are accepted
+### [`choice.options`](https://github.com/mandu5/jevcompat/blob/main/SPEC.md#choice.options) (MUST): 2 to 255 options are accepted
 
 - **choice-options:128**: valid request got 422: {"detail":"question 'queue' options exceed head_max_len=192"}
 
@@ -106,7 +106,7 @@ Observed limits: choice options accepted up to 64, choice options rejected at 12
   </details>
 
 
-### [`response.extensions`](https://github.com/mandu5/jevcompat/blob/main/SPEC.md#response.extensions) (SHOULD) — extra fields are prefixed x_
+### [`response.extensions`](https://github.com/mandu5/jevcompat/blob/main/SPEC.md#response.extensions) (SHOULD): extra fields are prefixed x_
 
 - **noul-basic**: unprefixed top-level field(s) routing
 
@@ -146,7 +146,7 @@ Observed limits: choice options accepted up to 64, choice options rejected at 12
 
 - … and 68 more
 
-### [`score.legend`](https://github.com/mandu5/jevcompat/blob/main/SPEC.md#score.legend) (MUST) — legend maps "0".."n-1" to the level descriptions
+### [`score.legend`](https://github.com/mandu5/jevcompat/blob/main/SPEC.md#score.legend) (MUST): legend maps "0".."n-1" to the level descriptions
 
 - **out-of-range:score-null-level** `answers['anger']`: legend['1'] is a null legend value, which the official SDK rejects
 
@@ -161,7 +161,7 @@ Observed limits: choice options accepted up to 64, choice options rejected at 12
   </details>
 
 
-### [`confidence.formula`](https://github.com/mandu5/jevcompat/blob/main/SPEC.md#confidence.formula) (SHOULD) — confidence follows the reference formula
+### [`confidence.formula`](https://github.com/mandu5/jevcompat/blob/main/SPEC.md#confidence.formula) (SHOULD): confidence follows the reference formula
 
 - **choice-basic** `answers['team']`: confidence is 0.922; the reference formula gives 0.978
 
@@ -201,7 +201,7 @@ Observed limits: choice options accepted up to 64, choice options rejected at 12
 
 - … and 13 more
 
-### [`errors.reject-invalid`](https://github.com/mandu5/jevcompat/blob/main/SPEC.md#errors.reject-invalid) (SHOULD) — invalid requests get a 4xx, not an answer
+### [`errors.reject-invalid`](https://github.com/mandu5/jevcompat/blob/main/SPEC.md#errors.reject-invalid) (SHOULD): invalid requests get a 4xx, not an answer
 
 - **invalid:missing-state**: invalid request was answered with 200
 
@@ -228,7 +228,7 @@ Observed limits: choice options accepted up to 64, choice options rejected at 12
   </details>
 
 
-### [`errors.validation-shape`](https://github.com/mandu5/jevcompat/blob/main/SPEC.md#errors.validation-shape) (SHOULD) — validation errors are 422 with detail[]
+### [`errors.validation-shape`](https://github.com/mandu5/jevcompat/blob/main/SPEC.md#errors.validation-shape) (SHOULD): validation errors are 422 with detail[]
 
 - **invalid:not-json**: status 400; validation failures use 422
 

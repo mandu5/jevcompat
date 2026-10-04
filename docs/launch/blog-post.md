@@ -1,7 +1,7 @@
 ---
 id: "jevcompat-spec-for-jev-compatible-servers"
-title: "[사이드 프로젝트] 'Jev 호환'이라는 말에 스펙이 없어서 — jevcompat을 만들며 배운 것"
-titleEn: "[Side Project] 'Jev-compatible' had no spec — building jevcompat"
+title: "[사이드 프로젝트] 'Jev 호환'이라는 말에 스펙이 없어서, jevcompat을 만들며 배운 것"
+titleEn: "[Side Project] 'Jev-compatible' had no spec: building jevcompat"
 date: "2026-09-24"
 excerpt: "TypeSafe의 Jev가 나오고 9일 만에 'Jev 호환' 오픈소스 서버가 100개 가까이 생겼는데, 무엇과 호환된다는 건지 확인할 기준이 없었다. 요구사항 48개짜리 스펙과 적합성 테스트를 만들어 스타가 가장 많은 서버 8개를 측정했다. 8개 중 적합한 건 2개였다. 만드는 동안 가장 어려웠던 건 기능이 아니라 남의 프로젝트를 틀리게 채점하지 않는 일이었다."
 excerptEn: "Nine days after TypeSafe's Jev shipped, about a hundred open-source servers claimed to be 'Jev-compatible', with nothing to check the claim against. I wrote a 48-requirement spec and a conformance suite, and measured the eight most-starred servers: two conform. The hard part was not the checks; it was never grading someone else's project wrong."
@@ -46,8 +46,8 @@ author:
 
 | 서버 | ★ | MUST | 판정 | Jev 클라이언트에서 깨지는 것 |
 |---|---:|---:|---|---|
-| kev (0.8B) | 5.8k | 32/32 | 적합 | — |
-| decider (0.8B) | 338 | 32/32 | 적합 | — |
+| kev (0.8B) | 5.8k | 32/32 | 적합 | - |
+| decider (0.8B) | 338 | 32/32 | 적합 | - |
 | von | 571 | 31/32 | 부적합 | 객체·배열 `instructions`를 거부 |
 | rizzo-flow (1.7B) | 389 | 31/32 | 부적합 | 선택지 26개 초과를 거부 |
 | Open-Jev (2B) | 284 | 31/32 | 부적합 | 한쪽만 있는 noul criteria를 거부 |
@@ -108,7 +108,7 @@ I read the code of the 26 most-starred ones:
 - The choice limit was 26, 50, 64 or 128. The docs promise 255.
 - The official SDKs' default, `"model": "jev-latest"`, was handled four different ways.
 
-There was nothing to check the claim against, and the would-be references — TypeSafe's docs, its OpenAPI file and its two SDKs — disagree in eight places.
+There was nothing to check the claim against, and the would-be references, TypeSafe's docs, its OpenAPI file and its two SDKs, disagree in eight places.
 
 I checked what already existed first. There were leaderboards (JevBench), calibration benchmarks (sys1bench), semantic grep tools (17) and SQL integrations (25). The empty slot was the API contract itself: the same situation Markdown was in before CommonMark gave dozens of implementations a spec and a test suite.
 
@@ -116,8 +116,8 @@ I checked what already existed first. There were leaderboards (JevBench), calibr
 
 | server | ★ | MUST | verdict | what breaks for a Jev client |
 |---|---:|---:|---|---|
-| kev (0.8B) | 5.8k | 32/32 | conformant | — |
-| decider (0.8B) | 338 | 32/32 | conformant | — |
+| kev (0.8B) | 5.8k | 32/32 | conformant | - |
+| decider (0.8B) | 338 | 32/32 | conformant | - |
 | von | 571 | 31/32 | not conformant | object or array `instructions` rejected |
 | rizzo-flow (1.7B) | 389 | 31/32 | not conformant | more than 26 options rejected |
 | Open-Jev (2B) | 284 | 31/32 | not conformant | one-sided noul criteria rejected |

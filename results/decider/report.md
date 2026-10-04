@@ -2,7 +2,7 @@
 
 [![jevcompat 0.1: 32/32 MUST](https://img.shields.io/badge/jevcompat%200.1-32%2F32%20MUST-brightgreen)](https://github.com/mandu5/jevcompat/blob/main/SPEC.md)
 
-**conformant to spec 0.1: MUST 32/32, SHOULD 6/12** — jevcompat 0.1.0, 2026-09-23T23:06:17+00:00, 62 requests in 22.0s, model `jev-latest` (server reports `decider-0.8b-v1`), typesafe-sdk 0.7.1.
+**conformant to spec 0.1: MUST 32/32, SHOULD 6/12**. jevcompat 0.1.0, 2026-09-23T23:06:17+00:00, 62 requests in 22.0s, model `jev-latest` (server reports `decider-0.8b-v1`), typesafe-sdk 0.7.1.
 
 Observed limits: choice options accepted up to 255, score levels accepted up to 10
 
@@ -13,9 +13,9 @@ Observed limits: choice options accepted up to 255, score levels accepted up to 
 | ✓ | SHOULD | [`http.content-type`](https://github.com/mandu5/jevcompat/blob/main/SPEC.md#http.content-type) responses declare a JSON media type |  |
 | ✓ | SHOULD | [`http.models`](https://github.com/mandu5/jevcompat/blob/main/SPEC.md#http.models) GET /v1/models lists models |  |
 | ✓ | MUST | [`auth.ignored-when-off`](https://github.com/mandu5/jevcompat/blob/main/SPEC.md#auth.ignored-when-off) without auth, an Authorization header is accepted |  |
-| – | MUST | [`auth.bearer`](https://github.com/mandu5/jevcompat/blob/main/SPEC.md#auth.bearer) the key is read from Authorization: Bearer | no --key given (auth is off, or untested) |
-| – | SHOULD | [`auth.missing`](https://github.com/mandu5/jevcompat/blob/main/SPEC.md#auth.missing) a missing key gets 401/403 with authentication_error | no --key given (auth is off, or untested) |
-| – | SHOULD | [`auth.invalid`](https://github.com/mandu5/jevcompat/blob/main/SPEC.md#auth.invalid) a wrong key gets 401 with authentication_error | no --key given (auth is off, or untested) |
+| - | MUST | [`auth.bearer`](https://github.com/mandu5/jevcompat/blob/main/SPEC.md#auth.bearer) the key is read from Authorization: Bearer | no --key given (auth is off, or untested) |
+| - | SHOULD | [`auth.missing`](https://github.com/mandu5/jevcompat/blob/main/SPEC.md#auth.missing) a missing key gets 401/403 with authentication_error | no --key given (auth is off, or untested) |
+| - | SHOULD | [`auth.invalid`](https://github.com/mandu5/jevcompat/blob/main/SPEC.md#auth.invalid) a wrong key gets 401 with authentication_error | no --key given (auth is off, or untested) |
 | ✓ | MUST | [`request.state`](https://github.com/mandu5/jevcompat/blob/main/SPEC.md#request.state) state may be a string, object or array |  |
 | ✓ | MUST | [`request.model-alias`](https://github.com/mandu5/jevcompat/blob/main/SPEC.md#request.model-alias) model "jev-latest" is accepted |  |
 | ✓ | MUST | [`request.multi`](https://github.com/mandu5/jevcompat/blob/main/SPEC.md#request.multi) several questions of mixed types in one request |  |
@@ -51,7 +51,7 @@ Observed limits: choice options accepted up to 255, score levels accepted up to 
 | ✓ | MUST | [`errors.no-5xx`](https://github.com/mandu5/jevcompat/blob/main/SPEC.md#errors.no-5xx) bad requests never get a 5xx |  |
 | ✗ | SHOULD | [`errors.reject-invalid`](https://github.com/mandu5/jevcompat/blob/main/SPEC.md#errors.reject-invalid) invalid requests get a 4xx, not an answer | invalid request was answered with 200 |
 | ✗ | SHOULD | [`errors.validation-shape`](https://github.com/mandu5/jevcompat/blob/main/SPEC.md#errors.validation-shape) validation errors are 422 with detail[] | body is not {"detail": [{"loc": ["body", …], "msg", "type"}]}: {"detail":"choice criteria: a map of 2..255 options"} |
-| – | SHOULD | [`errors.shape`](https://github.com/mandu5/jevcompat/blob/main/SPEC.md#errors.shape) other errors carry detail.error_type and detail.message | not exercised: the server never produced the situation it covers |
+| - | SHOULD | [`errors.shape`](https://github.com/mandu5/jevcompat/blob/main/SPEC.md#errors.shape) other errors carry detail.error_type and detail.message | not exercised: the server never produced the situation it covers |
 | ✓ | MUST | [`semantics.question-id`](https://github.com/mandu5/jevcompat/blob/main/SPEC.md#semantics.question-id) renaming a question id does not change its answer |  |
 | ✓ | SHOULD | [`semantics.batching`](https://github.com/mandu5/jevcompat/blob/main/SPEC.md#semantics.batching) other questions in the request do not change an answer |  |
 | ✓ | SHOULD | [`semantics.question-order`](https://github.com/mandu5/jevcompat/blob/main/SPEC.md#semantics.question-order) question order does not change answers |  |
@@ -59,7 +59,7 @@ Observed limits: choice options accepted up to 255, score levels accepted up to 
 
 ## Failures
 
-### [`noul.no-instructions`](https://github.com/mandu5/jevcompat/blob/main/SPEC.md#noul.no-instructions) (SHOULD) — a noul without instructions is accepted
+### [`noul.no-instructions`](https://github.com/mandu5/jevcompat/blob/main/SPEC.md#noul.no-instructions) (SHOULD): a noul without instructions is accepted
 
 - **noul-no-instructions**: valid request got 422: {"detail":"question without instructions"}
 
@@ -74,7 +74,7 @@ Observed limits: choice options accepted up to 255, score levels accepted up to 
   </details>
 
 
-### [`score.map-rejected`](https://github.com/mandu5/jevcompat/blob/main/SPEC.md#score.map-rejected) (SHOULD) — map-form score criteria are rejected with 4xx
+### [`score.map-rejected`](https://github.com/mandu5/jevcompat/blob/main/SPEC.md#score.map-rejected) (SHOULD): map-form score criteria are rejected with 4xx
 
 - **invalid:score-map**: invalid request was answered with 200
 
@@ -89,7 +89,7 @@ Observed limits: choice options accepted up to 255, score levels accepted up to 
   </details>
 
 
-### [`response.extensions`](https://github.com/mandu5/jevcompat/blob/main/SPEC.md#response.extensions) (SHOULD) — extra fields are prefixed x_
+### [`response.extensions`](https://github.com/mandu5/jevcompat/blob/main/SPEC.md#response.extensions) (SHOULD): extra fields are prefixed x_
 
 - **choice-basic** `answers['team']`: unprefixed field(s) certainty
 
@@ -129,7 +129,7 @@ Observed limits: choice options accepted up to 255, score levels accepted up to 
 
 - … and 16 more
 
-### [`confidence.formula`](https://github.com/mandu5/jevcompat/blob/main/SPEC.md#confidence.formula) (SHOULD) — confidence follows the reference formula
+### [`confidence.formula`](https://github.com/mandu5/jevcompat/blob/main/SPEC.md#confidence.formula) (SHOULD): confidence follows the reference formula
 
 - **score-levels:3** `answers['anger']`: confidence is 0.576; the reference formulas give 0.364 (distance) or 0.364 (top probability)
 
@@ -169,7 +169,7 @@ Observed limits: choice options accepted up to 255, score levels accepted up to 
 
 - … and 5 more
 
-### [`errors.reject-invalid`](https://github.com/mandu5/jevcompat/blob/main/SPEC.md#errors.reject-invalid) (SHOULD) — invalid requests get a 4xx, not an answer
+### [`errors.reject-invalid`](https://github.com/mandu5/jevcompat/blob/main/SPEC.md#errors.reject-invalid) (SHOULD): invalid requests get a 4xx, not an answer
 
 - **invalid:empty-questions**: invalid request was answered with 200
 
@@ -196,7 +196,7 @@ Observed limits: choice options accepted up to 255, score levels accepted up to 
   </details>
 
 
-### [`errors.validation-shape`](https://github.com/mandu5/jevcompat/blob/main/SPEC.md#errors.validation-shape) (SHOULD) — validation errors are 422 with detail[]
+### [`errors.validation-shape`](https://github.com/mandu5/jevcompat/blob/main/SPEC.md#errors.validation-shape) (SHOULD): validation errors are 422 with detail[]
 
 - **invalid:missing-type**: body is not {"detail": [{"loc": ["body", …], "msg", "type"}]}: {"detail":"choice criteria: a map of 2..255 options"}
 

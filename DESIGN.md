@@ -1,4 +1,4 @@
-# jevcompat — design
+# jevcompat: design
 
 ## Problem
 
@@ -22,16 +22,16 @@ SDKs, and they disagree with each other in eight places (401 vs 403 for a missin
 
 ## What jevcompat is
 
-1. **SPEC.md** — a numbered, testable specification of the wire contract, written from TypeSafe's
+1. **SPEC.md**: a numbered, testable specification of the wire contract, written from TypeSafe's
    public docs, OpenAPI file, SDK source and observed behaviour. Every requirement has an id,
    a level (MUST / SHOULD) and its sources. Where official sources disagree the spec says which
    wins and why (Appendix A). It is unofficial and says so.
-2. **`jevcompat test URL`** — one check per requirement, run against any server. Prints what
+2. **`jevcompat test URL`**: one check per requirement, run against any server. Prints what
    failed with the request and the offending bytes, writes a JSON report, and a badge.
-3. **`jevcompat mock`** — a reference server that implements the spec exactly with a
+3. **`jevcompat mock`**: a reference server that implements the spec exactly with a
    deterministic fake model. It is the suite's own test fixture and doubles as an offline
    stand-in for Jev in application CI.
-4. **`jevcompat proxy`** — sits in front of a non-conforming server and fixes what can be fixed
+4. **`jevcompat proxy`**: sits in front of a non-conforming server and fixes what can be fixed
    (derived fields, error shapes, limits, model aliases), reporting what it changed.
 5. **Measured results** for the most-starred open servers, reproducible from `results/`.
 
@@ -66,7 +66,7 @@ SDKs, and they disagree with each other in eight places (401 vs 403 for a missin
 ```
 spec.py      requirement registry: id, level, section, title, sources  (mirrors SPEC.md)
 client.py    minimal HTTP client: Response(status, headers, body, json, ms)
-validate.py  pure functions: (request, response) -> [Violation]  — the heart, no I/O
+validate.py  pure functions: (request, response) -> [Violation]; the heart, no I/O
 checks.py    the catalog: each Check builds request(s), calls the server, runs validators
 runner.py    runs checks, catches crashes as errors, computes the summary
 report.py    terminal, JSON, Markdown, shields endpoint JSON, SVG badge

@@ -2,11 +2,11 @@
 
 [![jevcompat 0.1: 30/32 MUST](https://img.shields.io/badge/jevcompat%200.1-30%2F32%20MUST-orange)](https://github.com/mandu5/jevcompat/blob/main/SPEC.md)
 
-**not conformant to spec 0.1: MUST 30/32, SHOULD 11/14** — jevcompat 0.1.0, 2026-09-23T23:07:10+00:00, 69 requests in 11.3s, model `jev-latest` (server reports `gliformer-large-v1`), typesafe-sdk 0.7.1.
+**not conformant to spec 0.1: MUST 30/32, SHOULD 11/14**. jevcompat 0.1.0, 2026-09-23T23:07:10+00:00, 69 requests in 11.3s, model `jev-latest` (server reports `gliformer-large-v1`), typesafe-sdk 0.7.1.
 
 Observed limits: choice options accepted up to 64, choice options rejected at 128, score levels accepted up to 10
 
-**Failed MUSTs:** [`choice.options`](https://github.com/mandu5/jevcompat/blob/main/SPEC.md#choice.options) — 2 to 255 options are accepted, [`score.expectation`](https://github.com/mandu5/jevcompat/blob/main/SPEC.md#score.expectation) — score is the expectation of the probabilities
+**Failed MUSTs:** [`choice.options`](https://github.com/mandu5/jevcompat/blob/main/SPEC.md#choice.options): 2 to 255 options are accepted, [`score.expectation`](https://github.com/mandu5/jevcompat/blob/main/SPEC.md#score.expectation): score is the expectation of the probabilities
 
 | | level | requirement | result |
 |---|---|---|---|
@@ -14,7 +14,7 @@ Observed limits: choice options accepted up to 64, choice options rejected at 12
 | ✓ | MUST | [`http.json`](https://github.com/mandu5/jevcompat/blob/main/SPEC.md#http.json) 200 bodies are JSON |  |
 | ✓ | SHOULD | [`http.content-type`](https://github.com/mandu5/jevcompat/blob/main/SPEC.md#http.content-type) responses declare a JSON media type |  |
 | ✓ | SHOULD | [`http.models`](https://github.com/mandu5/jevcompat/blob/main/SPEC.md#http.models) GET /v1/models lists models |  |
-| – | MUST | [`auth.ignored-when-off`](https://github.com/mandu5/jevcompat/blob/main/SPEC.md#auth.ignored-when-off) without auth, an Authorization header is accepted | not exercised: the server never produced the situation it covers |
+| - | MUST | [`auth.ignored-when-off`](https://github.com/mandu5/jevcompat/blob/main/SPEC.md#auth.ignored-when-off) without auth, an Authorization header is accepted | not exercised: the server never produced the situation it covers |
 | ✓ | MUST | [`auth.bearer`](https://github.com/mandu5/jevcompat/blob/main/SPEC.md#auth.bearer) the key is read from Authorization: Bearer |  |
 | ✗ | SHOULD | [`auth.missing`](https://github.com/mandu5/jevcompat/blob/main/SPEC.md#auth.missing) a missing key gets 401/403 with authentication_error | body is not {"detail": {"error_type", "message"}}: {"error":{"type":"authentication_error","message":"Missing bearer token"}} |
 | ✗ | SHOULD | [`auth.invalid`](https://github.com/mandu5/jevcompat/blob/main/SPEC.md#auth.invalid) a wrong key gets 401 with authentication_error | body is not {"detail": {"error_type", "message"}}: {"error":{"type":"authentication_error","message":"Invalid API key"}} |
@@ -53,7 +53,7 @@ Observed limits: choice options accepted up to 64, choice options rejected at 12
 | ✓ | MUST | [`errors.no-5xx`](https://github.com/mandu5/jevcompat/blob/main/SPEC.md#errors.no-5xx) bad requests never get a 5xx |  |
 | ✓ | SHOULD | [`errors.reject-invalid`](https://github.com/mandu5/jevcompat/blob/main/SPEC.md#errors.reject-invalid) invalid requests get a 4xx, not an answer |  |
 | ✓ | SHOULD | [`errors.validation-shape`](https://github.com/mandu5/jevcompat/blob/main/SPEC.md#errors.validation-shape) validation errors are 422 with detail[] |  |
-| – | SHOULD | [`errors.shape`](https://github.com/mandu5/jevcompat/blob/main/SPEC.md#errors.shape) other errors carry detail.error_type and detail.message | not exercised: the server never produced the situation it covers |
+| - | SHOULD | [`errors.shape`](https://github.com/mandu5/jevcompat/blob/main/SPEC.md#errors.shape) other errors carry detail.error_type and detail.message | not exercised: the server never produced the situation it covers |
 | ✓ | MUST | [`semantics.question-id`](https://github.com/mandu5/jevcompat/blob/main/SPEC.md#semantics.question-id) renaming a question id does not change its answer |  |
 | ✓ | SHOULD | [`semantics.batching`](https://github.com/mandu5/jevcompat/blob/main/SPEC.md#semantics.batching) other questions in the request do not change an answer |  |
 | ✗ | SHOULD | [`semantics.question-order`](https://github.com/mandu5/jevcompat/blob/main/SPEC.md#semantics.question-order) question order does not change answers | reversing the question order moved 'team' option 'Billing' by 0.417 on average (limit 0.050); seen in two independent rounds of 3 sends each |
@@ -61,7 +61,7 @@ Observed limits: choice options accepted up to 64, choice options rejected at 12
 
 ## Failures
 
-### [`auth.missing`](https://github.com/mandu5/jevcompat/blob/main/SPEC.md#auth.missing) (SHOULD) — a missing key gets 401/403 with authentication_error
+### [`auth.missing`](https://github.com/mandu5/jevcompat/blob/main/SPEC.md#auth.missing) (SHOULD): a missing key gets 401/403 with authentication_error
 
 - **auth**: body is not {"detail": {"error_type", "message"}}: {"error":{"type":"authentication_error","message":"Missing bearer token"}}
 
@@ -76,7 +76,7 @@ Observed limits: choice options accepted up to 64, choice options rejected at 12
   </details>
 
 
-### [`auth.invalid`](https://github.com/mandu5/jevcompat/blob/main/SPEC.md#auth.invalid) (SHOULD) — a wrong key gets 401 with authentication_error
+### [`auth.invalid`](https://github.com/mandu5/jevcompat/blob/main/SPEC.md#auth.invalid) (SHOULD): a wrong key gets 401 with authentication_error
 
 - **auth**: body is not {"detail": {"error_type", "message"}}: {"error":{"type":"authentication_error","message":"Invalid API key"}}
 
@@ -91,7 +91,7 @@ Observed limits: choice options accepted up to 64, choice options rejected at 12
   </details>
 
 
-### [`choice.options`](https://github.com/mandu5/jevcompat/blob/main/SPEC.md#choice.options) (MUST) — 2 to 255 options are accepted
+### [`choice.options`](https://github.com/mandu5/jevcompat/blob/main/SPEC.md#choice.options) (MUST): 2 to 255 options are accepted
 
 - **choice-options:128**: valid request got 422: {"detail":[{"loc":["body","questions","queue","criteria"],"msg":"At most 64 options/levels","type":"too_long","input":null}]}
 
@@ -106,7 +106,7 @@ Observed limits: choice options accepted up to 64, choice options rejected at 12
   </details>
 
 
-### [`score.expectation`](https://github.com/mandu5/jevcompat/blob/main/SPEC.md#score.expectation) (MUST) — score is the expectation of the probabilities
+### [`score.expectation`](https://github.com/mandu5/jevcompat/blob/main/SPEC.md#score.expectation) (MUST): score is the expectation of the probabilities
 
 - **score-levels:2** `answers['anger']`: score is 0.9973; the probabilities give Σ i·p = 0.8640
 
@@ -146,7 +146,7 @@ Observed limits: choice options accepted up to 64, choice options rejected at 12
 
 - … and 5 more
 
-### [`semantics.question-order`](https://github.com/mandu5/jevcompat/blob/main/SPEC.md#semantics.question-order) (SHOULD) — question order does not change answers
+### [`semantics.question-order`](https://github.com/mandu5/jevcompat/blob/main/SPEC.md#semantics.question-order) (SHOULD): question order does not change answers
 
 - **semantics-question-order**: reversing the question order moved 'team' option 'Billing' by 0.417 on average (limit 0.050); seen in two independent rounds of 3 sends each
 

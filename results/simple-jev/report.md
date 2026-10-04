@@ -2,11 +2,11 @@
 
 [![jevcompat 0.1: 29/32 MUST](https://img.shields.io/badge/jevcompat%200.1-29%2F32%20MUST-orange)](https://github.com/mandu5/jevcompat/blob/main/SPEC.md)
 
-**not conformant to spec 0.1: MUST 29/32, SHOULD 7/12** — jevcompat 0.1.0, 2026-09-23T23:07:29+00:00, 67 requests in 794.2s, model `Qwen/Qwen3.5-0.8B` (server reports `Qwen/Qwen3.5-0.8B`), typesafe-sdk 0.7.1.
+**not conformant to spec 0.1: MUST 29/32, SHOULD 7/12**. jevcompat 0.1.0, 2026-09-23T23:07:29+00:00, 67 requests in 794.2s, model `Qwen/Qwen3.5-0.8B` (server reports `Qwen/Qwen3.5-0.8B`), typesafe-sdk 0.7.1.
 
 Observed limits: choice options accepted up to 26, choice options rejected at 64, score levels accepted up to 10
 
-**Failed MUSTs:** [`request.model-alias`](https://github.com/mandu5/jevcompat/blob/main/SPEC.md#request.model-alias) — model "jev-latest" is accepted, [`choice.options`](https://github.com/mandu5/jevcompat/blob/main/SPEC.md#choice.options) — 2 to 255 options are accepted, [`score.legend`](https://github.com/mandu5/jevcompat/blob/main/SPEC.md#score.legend) — legend maps "0".."n-1" to the level descriptions
+**Failed MUSTs:** [`request.model-alias`](https://github.com/mandu5/jevcompat/blob/main/SPEC.md#request.model-alias): model "jev-latest" is accepted, [`choice.options`](https://github.com/mandu5/jevcompat/blob/main/SPEC.md#choice.options): 2 to 255 options are accepted, [`score.legend`](https://github.com/mandu5/jevcompat/blob/main/SPEC.md#score.legend): legend maps "0".."n-1" to the level descriptions
 
 | | level | requirement | result |
 |---|---|---|---|
@@ -15,9 +15,9 @@ Observed limits: choice options accepted up to 26, choice options rejected at 64
 | ✓ | SHOULD | [`http.content-type`](https://github.com/mandu5/jevcompat/blob/main/SPEC.md#http.content-type) responses declare a JSON media type |  |
 | ✗ | SHOULD | [`http.models`](https://github.com/mandu5/jevcompat/blob/main/SPEC.md#http.models) GET /v1/models lists models | GET /v1/models got 404 |
 | ✓ | MUST | [`auth.ignored-when-off`](https://github.com/mandu5/jevcompat/blob/main/SPEC.md#auth.ignored-when-off) without auth, an Authorization header is accepted |  |
-| – | MUST | [`auth.bearer`](https://github.com/mandu5/jevcompat/blob/main/SPEC.md#auth.bearer) the key is read from Authorization: Bearer | no --key given (auth is off, or untested) |
-| – | SHOULD | [`auth.missing`](https://github.com/mandu5/jevcompat/blob/main/SPEC.md#auth.missing) a missing key gets 401/403 with authentication_error | no --key given (auth is off, or untested) |
-| – | SHOULD | [`auth.invalid`](https://github.com/mandu5/jevcompat/blob/main/SPEC.md#auth.invalid) a wrong key gets 401 with authentication_error | no --key given (auth is off, or untested) |
+| - | MUST | [`auth.bearer`](https://github.com/mandu5/jevcompat/blob/main/SPEC.md#auth.bearer) the key is read from Authorization: Bearer | no --key given (auth is off, or untested) |
+| - | SHOULD | [`auth.missing`](https://github.com/mandu5/jevcompat/blob/main/SPEC.md#auth.missing) a missing key gets 401/403 with authentication_error | no --key given (auth is off, or untested) |
+| - | SHOULD | [`auth.invalid`](https://github.com/mandu5/jevcompat/blob/main/SPEC.md#auth.invalid) a wrong key gets 401 with authentication_error | no --key given (auth is off, or untested) |
 | ✓ | MUST | [`request.state`](https://github.com/mandu5/jevcompat/blob/main/SPEC.md#request.state) state may be a string, object or array |  |
 | ✗ | MUST | [`request.model-alias`](https://github.com/mandu5/jevcompat/blob/main/SPEC.md#request.model-alias) model "jev-latest" is accepted | valid request got 422: {"error":{"message":"Loaded model is 'Qwen/Qwen3.5-0.8B'","type":"invalid_request_error","code":422,"param":null,"details":[]}} |
 | ✓ | MUST | [`request.multi`](https://github.com/mandu5/jevcompat/blob/main/SPEC.md#request.multi) several questions of mixed types in one request |  |
@@ -53,7 +53,7 @@ Observed limits: choice options accepted up to 26, choice options rejected at 64
 | ✓ | MUST | [`errors.no-5xx`](https://github.com/mandu5/jevcompat/blob/main/SPEC.md#errors.no-5xx) bad requests never get a 5xx |  |
 | ✓ | SHOULD | [`errors.reject-invalid`](https://github.com/mandu5/jevcompat/blob/main/SPEC.md#errors.reject-invalid) invalid requests get a 4xx, not an answer |  |
 | ✗ | SHOULD | [`errors.validation-shape`](https://github.com/mandu5/jevcompat/blob/main/SPEC.md#errors.validation-shape) validation errors are 422 with detail[] | body is not {"detail": [{"loc": ["body", …], "msg", "type"}]}: {"error":{"message":"[52]: JSON decode error","type":"invalid_request_error","code":422,"param":"… |
-| – | SHOULD | [`errors.shape`](https://github.com/mandu5/jevcompat/blob/main/SPEC.md#errors.shape) other errors carry detail.error_type and detail.message | not exercised: the server never produced the situation it covers |
+| - | SHOULD | [`errors.shape`](https://github.com/mandu5/jevcompat/blob/main/SPEC.md#errors.shape) other errors carry detail.error_type and detail.message | not exercised: the server never produced the situation it covers |
 | ✓ | MUST | [`semantics.question-id`](https://github.com/mandu5/jevcompat/blob/main/SPEC.md#semantics.question-id) renaming a question id does not change its answer |  |
 | ✓ | SHOULD | [`semantics.batching`](https://github.com/mandu5/jevcompat/blob/main/SPEC.md#semantics.batching) other questions in the request do not change an answer |  |
 | ✗ | SHOULD | [`semantics.question-order`](https://github.com/mandu5/jevcompat/blob/main/SPEC.md#semantics.question-order) question order does not change answers | reversing the question order moved 'anger' option '1' by 0.060 on average (limit 0.050); seen in two independent rounds of 3 sends each |
@@ -61,7 +61,7 @@ Observed limits: choice options accepted up to 26, choice options rejected at 64
 
 ## Failures
 
-### [`http.models`](https://github.com/mandu5/jevcompat/blob/main/SPEC.md#http.models) (SHOULD) — GET /v1/models lists models
+### [`http.models`](https://github.com/mandu5/jevcompat/blob/main/SPEC.md#http.models) (SHOULD): GET /v1/models lists models
 
 - **models-endpoint**: GET /v1/models got 404
 
@@ -76,7 +76,7 @@ Observed limits: choice options accepted up to 26, choice options rejected at 64
   </details>
 
 
-### [`request.model-alias`](https://github.com/mandu5/jevcompat/blob/main/SPEC.md#request.model-alias) (MUST) — model "jev-latest" is accepted
+### [`request.model-alias`](https://github.com/mandu5/jevcompat/blob/main/SPEC.md#request.model-alias) (MUST): model "jev-latest" is accepted
 
 - **model-alias**: valid request got 422: {"error":{"message":"Loaded model is 'Qwen/Qwen3.5-0.8B'","type":"invalid_request_error","code":422,"param":null,"details":[]}}
 
@@ -91,7 +91,7 @@ Observed limits: choice options accepted up to 26, choice options rejected at 64
   </details>
 
 
-### [`noul.no-instructions`](https://github.com/mandu5/jevcompat/blob/main/SPEC.md#noul.no-instructions) (SHOULD) — a noul without instructions is accepted
+### [`noul.no-instructions`](https://github.com/mandu5/jevcompat/blob/main/SPEC.md#noul.no-instructions) (SHOULD): a noul without instructions is accepted
 
 - **noul-no-instructions**: valid request got 422: {"error":{"message":"questions.threat.noul.instructions: Field required","type":"invalid_request_error","code":422,"param":"questions.threat.noul.instructions","details":[{"param":"questions.threat.no… (264 bytes)
 
@@ -106,7 +106,7 @@ Observed limits: choice options accepted up to 26, choice options rejected at 64
   </details>
 
 
-### [`choice.options`](https://github.com/mandu5/jevcompat/blob/main/SPEC.md#choice.options) (MUST) — 2 to 255 options are accepted
+### [`choice.options`](https://github.com/mandu5/jevcompat/blob/main/SPEC.md#choice.options) (MUST): 2 to 255 options are accepted
 
 - **choice-options:64**: valid request got 422: {"error":{"message":"questions.queue.choice.criteria: Dictionary should have at most 50 items after validation, not 64","type":"invalid_request_error","code":422,"param":"questions.queue.choice.criter… (356 bytes)
 
@@ -121,7 +121,7 @@ Observed limits: choice options accepted up to 26, choice options rejected at 64
   </details>
 
 
-### [`score.legend`](https://github.com/mandu5/jevcompat/blob/main/SPEC.md#score.legend) (MUST) — legend maps "0".."n-1" to the level descriptions
+### [`score.legend`](https://github.com/mandu5/jevcompat/blob/main/SPEC.md#score.legend) (MUST): legend maps "0".."n-1" to the level descriptions
 
 - **out-of-range:score-null-level** `answers['anger']`: legend['1'] is a null legend value, which the official SDK rejects
 
@@ -136,7 +136,7 @@ Observed limits: choice options accepted up to 26, choice options rejected at 64
   </details>
 
 
-### [`confidence.formula`](https://github.com/mandu5/jevcompat/blob/main/SPEC.md#confidence.formula) (SHOULD) — confidence follows the reference formula
+### [`confidence.formula`](https://github.com/mandu5/jevcompat/blob/main/SPEC.md#confidence.formula) (SHOULD): confidence follows the reference formula
 
 - **choice-null-description** `answers['team']`: confidence is 0.898; the reference formula gives 0.847
 
@@ -176,7 +176,7 @@ Observed limits: choice options accepted up to 26, choice options rejected at 64
 
 - … and 11 more
 
-### [`errors.validation-shape`](https://github.com/mandu5/jevcompat/blob/main/SPEC.md#errors.validation-shape) (SHOULD) — validation errors are 422 with detail[]
+### [`errors.validation-shape`](https://github.com/mandu5/jevcompat/blob/main/SPEC.md#errors.validation-shape) (SHOULD): validation errors are 422 with detail[]
 
 - **invalid:not-json**: body is not {"detail": [{"loc": ["body", …], "msg", "type"}]}: {"error":{"message":"[52]: JSON decode error","type":"invalid_request_error","code":422,"param":"[52]","details":[{"param":"[52]","message":"JSON decode error",… (185 bytes)
 
@@ -216,7 +216,7 @@ Observed limits: choice options accepted up to 26, choice options rejected at 64
 
 - … and 10 more
 
-### [`semantics.question-order`](https://github.com/mandu5/jevcompat/blob/main/SPEC.md#semantics.question-order) (SHOULD) — question order does not change answers
+### [`semantics.question-order`](https://github.com/mandu5/jevcompat/blob/main/SPEC.md#semantics.question-order) (SHOULD): question order does not change answers
 
 - **semantics-question-order**: reversing the question order moved 'anger' option '1' by 0.060 on average (limit 0.050); seen in two independent rounds of 3 sends each
 
