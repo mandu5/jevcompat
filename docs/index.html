@@ -1,0 +1,93 @@
+<!doctype html>
+<html lang="en" data-theme="dark">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>jevcompat — “Compatible” needs a contract.</title>
+  <meta name="description" content="Explore 48 API requirements across eight Jev-compatible servers using the recorded September 2026 conformance reports.">
+  <link rel="icon" href="data:,">
+  <link rel="stylesheet" href="assets/fonts/fonts.css">
+  <link rel="stylesheet" href="assets/site.css">
+  <script src="assets/site.js" defer></script>
+</head>
+<body>
+<a class="skip-link" href="#overview">Skip to content</a>
+<header class="site-header">
+  <a class="wordmark" href="#overview">jevcompat</a>
+  <nav aria-label="Documentation">
+    <a href="#overview">Overview</a>
+    <a href="https://github.com/mandu5/jevcompat/blob/main/SPEC.md">Specification ↗</a>
+    <a href="#runs">Recorded runs</a>
+    <a href="#confidence">Confidence</a>
+    <a href="#proxy">Proxy</a>
+    <a href="#quick-start">Quick start</a>
+  </nav>
+  <button type="button" class="theme-toggle" aria-label="Switch to light theme">Light</button>
+</header>
+<main>
+  <section class="hero" id="overview" aria-labelledby="hero-title">
+    <div class="hero-copy">
+      <h1 id="hero-title">“Compatible”<br>needs a contract.</h1>
+      <p class="intro">Eight open servers. Forty-eight requirements.<br> Inspect what the wire actually promises.</p>
+      <div class="hero-stat"><strong>2<span>/8</span></strong><p>servers passed every applicable MUST<br> in the recorded 24 Sep 2026 runs.</p></div>
+      <a class="button primary" href="https://github.com/mandu5/jevcompat/blob/main/SPEC.md">Read the specification <span aria-hidden="true">↗</span></a>
+    </div>
+    <div class="weave-section">
+      <div class="weave-scroll" tabindex="0" role="region" aria-label="Conformance matrix. Scroll horizontally to see all eight servers.">
+        <div class="weave-headers" id="server-headers"></div>
+        <div id="matrix" class="weave-body" role="grid" aria-label="48 requirements by 8 servers. Use arrow keys to move; Enter to inspect." aria-rowcount="48" aria-colcount="8"></div>
+      </div>
+      <div class="legend" aria-label="Matrix legend"><span><i class="pass"></i>Pass</span><span><i class="fail"></i>Fail</span><span><i class="skip"></i>Not tested</span></div>
+      <p class="scroll-hint">Scroll to compare all eight servers. Use arrow keys on the matrix to move between requirements.</p>
+    </div>
+    <div class="readout-bar"><p class="matrix-readout" id="matrix-readout" role="status">Select a mark to inspect the server, requirement and recorded finding.</p><button type="button" id="browse-requirements">Browse requirements</button></div>
+    <p class="scope-note">Recorded conformance results · 2026-09-24 · checks assess the wire contract, not model intelligence.</p>
+    <p id="data-error" role="alert" hidden>Recorded reports could not be loaded. <button type="button" id="retry">Retry loading reports</button> or <a href="https://github.com/mandu5/jevcompat/tree/main/results">read the source reports</a>.</p>
+    <noscript><p>JavaScript is needed for the interactive matrix. All eight reports are available in the <a href="https://github.com/mandu5/jevcompat/tree/main/results">recorded results</a>.</p></noscript>
+  </section>
+
+  <section class="reading-section" id="runs">
+    <div class="section-heading"><h2>Read the runs.<br>Keep the evidence.</h2><p>Measured on an M1 Pro (16 GB), with each server at a pinned commit and pinned weights. Reports preserve the exact requests and responses.</p></div>
+    <div class="run-list" id="run-list"></div>
+    <p class="source-line">Every failure was checked by hand against its recorded exchange. <a href="https://github.com/mandu5/jevcompat/blob/main/results/REVIEW.md">Read the review ↗</a></p>
+  </section>
+
+  <section class="reading-section" id="confidence">
+    <div class="section-heading"><h2>Same answers.<br>Different confidence.</h2><p>A threshold tuned for one server changes its automation rate on another. The spec recommends one formula; the proxy recomputes it.</p></div>
+    <figure class="confidence-figure"><img src="confidence.png" width="720" alt="Same 204 recorded answers at a 0.9 threshold: 58% auto-accepted under TypeSafe's formula, 63% under top probability, 57% under top-two margin, and 30% under one minus normalized entropy."><figcaption>Original confidence study · 204 recorded answers · threshold 0.9. <a href="https://github.com/mandu5/jevcompat/blob/main/docs/confidence_study.py">Read the computation ↗</a></figcaption></figure>
+    <p>TypeSafe’s formula auto-accepts 58% of these answers. Laya’s definition accepts 30%, rejecting 56 of the 118 answers TypeSafe’s formula accepts. Decider’s definition accepts 10 answers that TypeSafe’s formula would send for review.</p>
+    <p><code>confidence.formula</code> is a SHOULD, not a MUST: TypeSafe lets clients use other definitions. Passing the wire checks does not establish model accuracy or calibration.</p>
+  </section>
+
+  <section class="reading-section" id="quick-start">
+    <div class="section-heading"><h2>Check a server.</h2><p>A numbered specification, a conformance suite, and the bytes behind each result.</p></div>
+    <pre><code>uvx jevcompat test http://localhost:8000
+jevcompat test URL --key-env MY_KEY
+jevcompat test URL --json r.json --markdown r.md --badge</code></pre>
+    <p>The verdict distinguishes <b>conformant</b>, <b>not conformant</b>, <b>not tested</b> and <b>incomplete</b>. A timeout is never counted as a server failure.</p>
+    <div class="text-links"><a href="https://github.com/mandu5/jevcompat#use">Full CLI guide ↗</a><a href="https://github.com/mandu5/jevcompat#test-your-server-in-ci">Use in CI ↗</a><a href="https://github.com/mandu5/jevcompat#use-the-mock-in-your-applications-tests">Use the reference mock ↗</a></div>
+  </section>
+
+  <section class="reading-section" id="proxy">
+    <div class="section-heading"><h2>Put the contract<br>in front.</h2><p>Repair contract differences that can be repaired. Refuse unsupported responses explicitly.</p></div>
+    <pre><code>jevcompat proxy http://localhost:8000 --port 8788
+jevcompat proxy URL --upstream-model laya --split</code></pre>
+    <p>The proxy recomputes choice, score, legend and confidence from the probabilities. It validates requests and lists its changes in <code>x-jevcompat-fixes</code>. Missing or ambiguous options and invalid distributions are refused with <code>502 upstream_error</code>.</p>
+    <a href="https://github.com/mandu5/jevcompat#put-a-proxy-in-front-of-a-server">Read proxy behavior and limits ↗</a>
+  </section>
+  <footer><p>Unofficial specification from TypeSafe’s public docs and SDK source. No endorsement by TypeSafe.</p><div><a href="https://github.com/mandu5/jevcompat">Source and documentation ↗</a><a href="https://github.com/mandu5/jevcompat/issues">Report a spec issue ↗</a><a href="https://github.com/mandu5/jevcompat/blob/main/LICENSE">MIT license ↗</a></div></footer>
+</main>
+
+<dialog id="inspection" aria-labelledby="inspection-title">
+  <div class="dialog-heading"><p id="inspection-meta"></p><button type="button" id="close-inspection">Close <span aria-hidden="true">×</span></button></div>
+  <h2 id="inspection-title"></h2>
+  <p id="inspection-status"></p>
+  <div class="server-picker" id="server-picker" role="group" aria-label="Inspect a server"></div>
+  <div class="inspection-navigation"><button type="button" id="previous-requirement">← Previous requirement</button><button type="button" id="next-requirement">Next requirement →</button></div>
+  <details><summary>Read the specification excerpt</summary><pre id="spec-excerpt"></pre></details>
+  <div class="text-links"><a id="spec-link">Open requirement in SPEC.md ↗</a><a id="report-link">Open original report ↗</a><a id="run-link">Pinned run and weights ↗</a></div>
+  <section class="finding-section"><h3>Recorded findings</h3><p id="finding-summary"></p><div id="finding-list"></div></section>
+  <section id="exchange"><h3 id="exchange-title"></h3><div class="exchange-columns"><div><h4>Request</h4><pre id="request-body"></pre></div><div><h4>Recorded response</h4><pre id="response-body"></pre></div></div></section>
+</dialog>
+</body>
+</html>

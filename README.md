@@ -202,6 +202,21 @@ only if the number does, so the spec recommends the formula TypeSafe documents a
 **My server fails a requirement I think is wrong.** Open an issue quoting the requirement id.
 The spec is a draft; disagreements with evidence are how it gets better.
 
+## Explore the recorded reports
+
+The interactive documentation entry is [`docs/index.html`](docs/index.html).
+It shows all 48 requirements across the eight recorded runs and opens each
+requirement, finding, request and original response. Serve it locally:
+
+```bash
+python3 docs/build_site.py --check
+python3 -m http.server 19305 --bind 127.0.0.1 --directory docs
+# Open http://127.0.0.1:19305/
+```
+
+The page reads a snapshot of the committed reports; it does not call a model
+server or run a new benchmark. [Site maintenance and provenance](docs/SITE.md).
+
 ## Development
 
 ```
