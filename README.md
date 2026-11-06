@@ -204,7 +204,8 @@ The spec is a draft; disagreements with evidence are how it gets better.
 
 ## Explore the recorded reports
 
-The interactive documentation entry is [`docs/index.html`](docs/index.html).
+The [interactive documentation](https://mandu5.github.io/jevcompat/) is built
+from [`docs/index.html`](docs/index.html).
 It shows all 48 requirements across the eight recorded runs and opens each
 requirement, finding, request and original response. Serve it locally:
 

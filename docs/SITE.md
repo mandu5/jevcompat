@@ -1,9 +1,9 @@
 # Recorded conformance explorer
 
-`docs/index.html` is a native static documentation entry. This repository did
-not previously have a separately verified hosted site. No hosting or deployment
-configuration is added by this change. README, SPEC, CLI, proxy and all existing
-report paths remain canonical.
+`docs/index.html` is the native static documentation entry, published at
+<https://mandu5.github.io/jevcompat/> from the `main` branch's `docs/` directory
+using GitHub Pages. `.nojekyll` preserves the static files without processing.
+README, SPEC, CLI, proxy and all existing report paths remain canonical.
 
 ## Serve and refresh
 
